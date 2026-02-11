@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>muTau-Inventions - {% block title %}AI to FPGA Toolchain{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <div class="logo" onclick="window.location='/'">muTau-Inventions</div>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('research') }}">Forschung</a></li>
+                <li><a href="{{ url_for('products') }}">Products</a></li>
+                <li><a href="{{ url_for('docs') }}">Docs</a></li>
+                <li><a href="{{ url_for('about') }}">Über uns</a></li>
+                <li><a href="{{ url_for('contact') }}">Kontakt</a></li>
+                {% if session.user %}
+                <li><a href="{{ url_for('logout') }}">Logout ({{ session.user_name }})</a></li>
+                {% else %}
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                {% endif %}
+                <li>
+                    <div class="cart-icon" onclick="window.location='{{ url_for('cart') }}'">
+                        🛒
+                        <span class="cart-badge" id="cart-count">{{ session.get('cart', [])|sum(attribute='quantity') }}</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}" style="padding:1rem; margin:1rem auto; max-width:1400px; border-radius:8px;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 muTau-Inventions GmbH. Alle Rechte vorbehalten.</p>
+            <p style="margin-top: 0.5rem;">
+                <a href="{{ url_for('datenschutz') }}" style="color: #64748b; text-decoration: none; margin: 0 1rem;">Datenschutz</a>
+                <a href="{{ url_for('impressum') }}" style="color: #64748b; text-decoration: none; margin: 0 1rem;">Impressum</a>
+                <a href="{{ url_for('agb') }}" style="color: #64748b; text-decoration: none; margin: 0 1rem;">AGB</a>
+            </p>
+        </div>
+    </footer>
+
+    <canvas id="particleCanvas" class="particles"></canvas>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

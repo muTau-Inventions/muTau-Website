@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Warenkorb{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="section-header">
+        <h2>Warenkorb</h2>
+    </div>
+
+    <div id="cart-items">
+        {% if cart_items %}
+            {% for item in cart_items %}
+            <div class="cart-item">
+                <div class="cart-item-image">{{ item.icon }}</div>
+                <div>
+                    <h3 style="color: var(--primary); margin-bottom: 0.5rem;">{{ item.name }}</h3>
+                    <p style="color: #94a3b8;">Einzelpreis: €{{ "{:,}".format(item.price) }}</p>
+                </div>
+                <div style="text-align: right;">
+                    <div class="quantity-control" style="margin-bottom: 1rem;">
+                        <button onclick="updateQuantity('{{ item.name }}', -1)">-</button>
+                        <span style="color: var(--light);">{{ item.quantity }}</span>
+                        <button onclick="updateQuantity('{{ item.name }}', 1)">+</button>
+                    </div>
+                    <p style="color: var(--primary); font-size: 1.2rem; font-weight: bold;">€{{ "{:,}".format(item.price * item.quantity) }}</p>
+                    <form action="{{ url_for('remove_from_cart') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="name" value="{{ item.name }}">
+                        <button type="submit" class="btn btn-secondary" style="margin-top: 0.5rem; padding: 0.5rem 1rem; font-size: 0.9rem;">Entfernen</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center; color: #94a3b8; padding: 3rem;">Ihr Warenkorb ist leer</p>
+        {% endif %}
+    </div>
+
+    <div class="cart-summary">
+        <h3 style="color: var(--primary); margin-bottom: 1rem;">Zusammenfassung</h3>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <span>Zwischensumme:</span>
+            <span>€{{ "{:.2f}".format(subtotal) }}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <span>MwSt (19%):</span>
+            <span>€{{ "{:.2f}".format(tax) }}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: bold; color: var(--primary); padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+            <span>Gesamt:</span>
+            <span>€{{ "{:.2f}".format(total) }}</span>
+        </div>
+        {% if cart_items %}
+        <a href="{{ url_for('checkout') }}" class="btn" style="width: 100%; margin-top: 2rem; text-align: center;">Zur Kasse</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
