@@ -393,17 +393,6 @@ def datenschutz():
 def agb():
     return render_template('agb.html')
 
-# ---------- CLI-BEFEHL: DOKUMENTATION BAUEN ----------
-@app.cli.command('build-docs')
-def build_docs():
-    """Führt MkDocs Build aus, um statische Dokumentation zu generieren."""
-    import subprocess
-    try:
-        subprocess.run(['mkdocs', 'build', '-f', 'docs_source/mkdocs.yml', '-d', '../docs_build'],
-                       cwd='docs_source', check=True)
-        print('✅ Dokumentation erfolgreich in docs_build/ generiert.')
-    except subprocess.CalledProcessError as e:
-        print(f'❌ Fehler beim Generieren der Dokumentation: {e}')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=80)
