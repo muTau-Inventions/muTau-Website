@@ -1,23 +1,42 @@
-IMAGE_NAME := my-python-app
-CONTAINER_NAME := my-python-app-container
-PORT := 80
+PROJECT_NAME := mutau-website
+COMPOSE := docker compose
 
-.PHONY: build run stop rm logs bash
+.PHONY: help
+help:
+	@echo ""
+	@echo "Available commands:"
+	@echo ""
+	@echo "make build        Build all containers"
+	@echo "make up           Start containers"
+	@echo "make down         Stop containers"
+	@echo "make restart      Restart services"
+	@echo "make logs         Show logs"
+	@echo "make shell        Open web container shell"
+	@echo "make dbshell      Open PostgreSQL shell"
+	@echo "make clean        Remove everything"
+	@echo ""
 
 build:
-	docker build -t $(IMAGE_NAME) .
+	$(COMPOSE) build
 
-run:
-	docker run --name $(CONTAINER_NAME) -p $(PORT):80 --rm $(IMAGE_NAME)
+up:
+	$(COMPOSE) up -d
 
-stop:
-	docker stop $(CONTAINER_NAME) || true
+down:
+	$(COMPOSE) down
 
-rm:
-	docker rm $(CONTAINER_NAME) || true
+restart:
+	$(COMPOSE) down
+	$(COMPOSE) up -d
 
 logs:
-	docker logs -f $(CONTAINER_NAME)
+	$(COMPOSE) logs -f
 
-bash:
-	docker exec -it $(CONTAINER_NAME) /bin/bash
+shell:
+	$(COMPOSE) exec web /bin/bash
+
+dbshell:
+	$(COMPOSE) exec db psql -U mutau -d mutau_db
+
+clean:
+	$(COMPOSE) down -v --rmi all

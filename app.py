@@ -1,197 +1,177 @@
 import os
 import json
 import markdown
-from flask import (
-    Flask, render_template, session, redirect, url_for,
-    request, flash, jsonify, send_from_directory
-)
 from functools import wraps
-from werkzeug.security import generate_password_hash, check_password_hash
+
+from flask import (
+    Flask, render_template, session, redirect,
+    url_for, request, flash, jsonify, send_from_directory
+)
+
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import (
+    LoginManager, UserMixin,
+    login_user, login_required,
+    logout_user, current_user
+)
+
+from flask_bcrypt import Bcrypt
+
+
+# ---------------- APP SETUP ----------------
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey_fuer_mutau_demo'  # In Produktion ändern!
+
+app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL not set")
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
 
 DOCS_FOLDER = "docs"
 
-# ---------- MOCK-DATENBANK ----------
-mock_users = {
-    'admin@mutau.com': {
-        'password': generate_password_hash('admin123'),
-        'name': 'Admin User'
-    }
-}
-mock_orders = []
+# ---------------- LOGIN MANAGER ----------------
 
-# ---------- LOGIN-DEKORATOR ----------
-def login_required(f):
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
+
+
+# ---------------- USER MODEL ----------------
+
+class User(UserMixin, db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    email = db.Column(db.String(120), unique=True, nullable=False)
+
+    password_hash = db.Column(db.String(255), nullable=False)
+
+    name = db.Column(db.String(120))
+
+    def set_password(self, password):
+        self.password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+
+    def check_password(self, password):
+        return bcrypt.check_password_hash(self.password_hash, password)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+# ---------------- DB CREATE ----------------
+with app.app_context():
+    db.create_all()
+
+
+
+# ---------------- LOGIN REQUIRED DECORATOR ----------------
+
+def login_required_custom(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'user' not in session:
-            flash('Bitte melde dich an, um diese Seite zu sehen.', 'warning')
+        if not current_user.is_authenticated:
+            flash('Bitte melde dich an.', 'warning')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
 
+
 # ---------- RESEARCH-PAPIER-LADER ----------
+
 def get_research_papers():
     papers = []
     base_dir = 'research'
     if not os.path.exists(base_dir):
         return papers
+
     for folder in os.listdir(base_dir):
+
         folder_path = os.path.join(base_dir, folder)
+
         info_path = os.path.join(folder_path, 'information.json')
         pdf_path = os.path.join(folder_path, 'paper.pdf')
+
         if os.path.isdir(folder_path) and os.path.exists(info_path) and os.path.exists(pdf_path):
+
             try:
+
                 with open(info_path, 'r', encoding='utf-8') as f:
                     info = json.load(f)
+
                 info['folder'] = folder
                 info['pdf'] = url_for('research_pdf', filename=f'{folder}/paper.pdf')
+
                 papers.append(info)
+
             except:
                 continue
+
     return sorted(papers, key=lambda x: x.get('date', ''), reverse=True)
 
+
 # ---------- ROUTEN ----------
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/research')
 def research():
     papers = get_research_papers()
     return render_template('research.html', papers=papers)
 
+
 @app.route('/research_pdf/<path:filename>')
 def research_pdf(filename):
     return send_from_directory('research', filename)
 
-# Produktdatenbank (hartcodiert für Demo)
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+
+
+# ---------- PRODUKTE ----------
+
 PRODUCTS = {
-    'converter': {
-        'id': 'converter',
-        'name': 'muTau Converter',
-        'price': 2499,
-        'icon': '🔄',
-        'description': 'Konvertiert KI-Modelle in optimierten HLS-Code.',
-        'features': [
-            'Multi-Framework Support: TensorFlow, PyTorch, ONNX, Keras',
-            'Automatische Optimierung: Intelligente Layer-Fusion und Pipeline-Optimierung',
-            'Quantisierung: INT8, INT16, Fixed-Point mit adaptiven Strategien',
-            'Batch Processing: Konvertieren Sie mehrere Modelle parallel',
-            'CLI & Python API: Flexible Integration in Ihren Workflow',
-            'Custom Layer Support: Erweitern Sie mit eigenen Layer-Definitionen'
-        ],
-        'specs': [
-            'Unterstützte FPGAs: Xilinx Zynq, UltraScale+, Versal; Intel Stratix, Arria',
-            'HLS Versionen: Vivado HLS 2020.1+, Vitis HLS 2021.1+',
-            'Modell-Größe: Bis zu 500M Parameter',
-            'Genauigkeit: 99%+ Original-Genauigkeit nach Konvertierung',
-            'Performance: 2-5x schneller als manuelle Konvertierung',
-            'Lizenz: Pro-User-Lizenz, unbegrenzte Projekte'
-        ],
-        'support': [
-            'Dokumentation: Umfassende Online-Dokumentation und Tutorials',
-            'Email Support: 24/7 Email-Support mit 24h Response-Zeit',
-            'Updates: Kostenlose Updates für 12 Monate',
-            'Community: Zugang zu unserem Developer-Forum',
-            'Training: Online-Training-Sessions verfügbar'
-        ]
-    },
-    'soc-builder': {
-        'id': 'soc-builder',
-        'name': 'muTau SoC Builder',
-        'price': 3999,
-        'icon': '⚙️',
-        'description': 'Automatische Integration in SoC-Designs.',
-        'features': [
-            'AXI/Avalon Interfaces: Automatische Bus-Interface-Generierung',
-            'DMA Integration: High-Performance DMA-Controller',
-            'Memory Management: Optimierte DDR-Anbindung',
-            'Interrupt Controller: Automatische Interrupt-Verwaltung',
-            'Clock Domain Crossing: Automatische Synchronisation',
-            'Power Management: Optimierte Stromsparmodi'
-        ],
-        'specs': [
-            'Platforms: Xilinx Vivado, Intel Quartus Prime',
-            'Lizenz: Enterprise-Lizenz',
-            'Support für Zynq, Versal, Stratix 10',
-            'Inkludiert 12 Monate Updates'
-        ],
-        'support': [
-            'Priority Email Support: 12h Antwortzeit',
-            'Telefon-Support während Geschäftszeiten',
-            'Persönlicher Solutions Engineer'
-        ]
-    },
-    'profiler': {
-        'id': 'profiler',
-        'name': 'muTau Profiler',
-        'price': 1999,
-        'icon': '📊',
-        'description': 'Performance-Analyse und Optimierung.',
-        'features': [
-            'Detaillierte Latenz- und Durchsatzanalyse',
-            'Ressourcenverbrauchs-Visualisierung',
-            'Engpass-Identifikation',
-            'Automatische Optimierungsvorschläge',
-            'Export als HTML/PDF Reports',
-            'Live-Monitoring während der Simulation'
-        ],
-        'specs': [
-            'Integration in Vivado/Vitis und Quartus',
-            'Unterstützt alle gängigen Xilinx/Intel FPGAs',
-            'Lizenz: Node-Locked oder Floating',
-            'Datenbank-Backend für historische Analysen'
-        ],
-        'support': [
-            'Email Support',
-            'Zugang zur Profiler-Community',
-            '6 Monate Updates'
-        ]
-    },
-    'optimizer': {
-        'id': 'optimizer',
-        'name': 'muTau Optimizer',
-        'price': 2799,
-        'icon': '🎯',
-        'description': 'KI-gestützte Design-Optimierung.',
-        'features': [
-            'Automatische Quantisierung mit minimalem Genauigkeitsverlust',
-            'Pruning von überflüssigen Verbindungen',
-            'Architektur-Suche (NAS) für FPGAs',
-            'Trade-off-Analyse: Latenz vs. Ressourcen',
-            'Compiler-optimierte Scheduling-Strategien',
-            'Integration in den Converter-Workflow'
-        ],
-        'specs': [
-            'Lernverfahren: Reinforcement Learning + genetische Algorithmen',
-            'Optimierungsziele: Latenz, Durchsatz, Power, Ressourcen',
-            'Export als optimiertes HLS-Modell',
-            'Lizenz: Pro-User'
-        ],
-        'support': [
-            'Email Support',
-            'Zugang zu Optimizer-Modellen',
-            '12 Monate Updates'
-        ]
-    }
+    'converter': {'id': 'converter','name': 'muTau Converter','price': 2499,'icon': '🔄','description': 'Konvertiert KI-Modelle.'},
+    'soc-builder': {'id': 'soc-builder','name': 'muTau SoC Builder','price': 3999,'icon': '⚙️','description': 'Automatische Integration.'},
+    'profiler': {'id': 'profiler','name': 'muTau Profiler','price': 1999,'icon': '📊','description': 'Performance Analyse.'},
+    'optimizer': {'id': 'optimizer','name': 'muTau Optimizer','price': 2799,'icon': '🎯','description': 'KI Optimierung.'}
 }
+
 
 @app.route('/products')
 def products():
     return render_template('products.html', products=PRODUCTS)
 
+
 @app.route('/product/<product_id>')
 def product_detail(product_id):
+
     product = PRODUCTS.get(product_id)
+
     if not product:
         flash('Produkt nicht gefunden.', 'danger')
         return redirect(url_for('products'))
+
     return render_template('product_detail.html', product=product)
 
-# ---------- DOKUMENTATION ----------
+
+# ---------- DOCS ----------
+
 @app.route("/docs")
 def docs():
 
@@ -208,15 +188,7 @@ def docs():
             with open(filepath, "r", encoding="utf-8") as f:
                 md_content = f.read()
 
-            html_content = markdown.markdown(
-                md_content,
-                extensions=[
-                    "extra",
-                    "fenced_code",
-                    "codehilite",
-                    "toc"
-                ]
-            )
+            html_content = markdown.markdown(md_content, extensions=["extra","fenced_code","codehilite","toc"])
 
             docs_list.append({
                 "id": file_id,
@@ -226,14 +198,139 @@ def docs():
 
     return render_template("docs.html", docs=docs_list)
 
-@app.route('/docs_build/<path:filename>')
-def docs_build(filename):
-    return send_from_directory('docs_build', filename)
 
-# ---------- STATISCHE SEITEN ----------
-@app.route('/about')
-def about():
-    return render_template('about.html')
+# ---------- CART ----------
+
+@app.route('/cart')
+def cart():
+
+    cart_items = session.get('cart', [])
+
+    subtotal = sum(item['price'] * item['quantity'] for item in cart_items)
+    tax = subtotal * 0.19
+    total = subtotal + tax
+
+    return render_template('cart.html', cart_items=cart_items,
+                           subtotal=subtotal, tax=tax, total=total)
+
+
+@app.route('/add_to_cart', methods=['POST'])
+def add_to_cart():
+
+    name = request.form.get('name')
+    price = float(request.form.get('price'))
+    icon = request.form.get('icon')
+
+    cart = session.get('cart', [])
+
+    found = False
+
+    for item in cart:
+
+        if item['name'] == name:
+            item['quantity'] += 1
+            found = True
+            break
+
+    if not found:
+        cart.append({'name': name,'price': price,'icon': icon,'quantity': 1})
+
+    session['cart'] = cart
+
+    flash(f'{name} wurde in den Warenkorb gelegt.', 'success')
+
+    return redirect(request.referrer or url_for('products'))
+
+
+# ---------- AUTH ----------
+@app.route('/register', methods=['GET','POST'])
+def register():
+    print("🔍 === REGISTER DEBUG START ===")
+    
+    if request.method == 'POST':
+        print(f"📋 FORM DATA: {dict(request.form)}")
+        
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm = request.form.get('confirm_password')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        agb = request.form.get('agb') 
+
+        print(f"✅ AGB: '{agb}' (should be 'on')")
+        print(f"🔐 Passwords match: {password == confirm}")
+        print(f"📧 Email exists: {User.query.filter_by(email=email).first()}")
+        
+        if not agb:
+            print("❌ AGB missing!")
+            flash("Bitte akzeptiere die AGB.", "danger")
+            return redirect(url_for('register'))
+
+        if password != confirm:
+            print("❌ Passwords don't match!")
+            flash("Die Passwörter stimmen nicht überein.", "danger")
+            return redirect(url_for('register'))
+
+        if User.query.filter_by(email=email).first():
+            print("❌ Email exists!")
+            flash("Diese Email existiert bereits", "danger")
+            return redirect(url_for('register'))
+
+        print("✅ Creating user...")
+        try:
+            user = User(email=email, name=f"{first_name} {last_name}")
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            print("✅ User created successfully!")
+            flash("Registrierung erfolgreich", "success")
+            return redirect(url_for('login'))
+        except Exception as e:
+            print(f"💥 DB ERROR: {e}")
+            db.session.rollback()
+            flash("Datenbankfehler. Bitte versuche es erneut.", "danger")
+            return redirect(url_for('register'))
+
+    print("🌐 GET request - showing form")
+    return render_template('register.html')
+
+
+
+
+@app.route('/login', methods=['GET','POST'])
+def login():
+
+    if request.method == 'POST':
+
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        user = User.query.filter_by(email=email).first()
+
+        if user and user.check_password(password):
+
+            login_user(user)
+
+            flash("Login erfolgreich", "success")
+
+            return redirect(url_for('index'))
+
+        flash("Login fehlgeschlagen", "danger")
+
+    return render_template('login.html')
+
+
+@app.route('/logout')
+@login_required
+def logout():
+
+    logout_user()
+
+    session.pop('cart', None)
+
+    flash("Du wurdest ausgeloggt", "info")
+
+    return redirect(url_for('index'))
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
@@ -243,40 +340,11 @@ def contact():
         return redirect(url_for('contact'))
     return render_template('contact.html')
 
-# ---------- WARENKORB ----------
-@app.route('/cart')
-def cart():
-    cart_items = session.get('cart', [])
-    subtotal = sum(item['price'] * item['quantity'] for item in cart_items)
-    tax = subtotal * 0.19
-    total = subtotal + tax
-    return render_template('cart.html', cart_items=cart_items,
-                           subtotal=subtotal, tax=tax, total=total)
-
 @app.route('/cart_count')
 def cart_count():
     cart = session.get('cart', [])
     count = sum(item['quantity'] for item in cart)
     return jsonify({'count': count})
-
-@app.route('/add_to_cart', methods=['POST'])
-def add_to_cart():
-    name = request.form.get('name')
-    price = float(request.form.get('price'))
-    icon = request.form.get('icon')
-    
-    cart = session.get('cart', [])
-    found = False
-    for item in cart:
-        if item['name'] == name:
-            item['quantity'] += 1
-            found = True
-            break
-    if not found:
-        cart.append({'name': name, 'price': price, 'icon': icon, 'quantity': 1})
-    session['cart'] = cart
-    flash(f'{name} wurde in den Warenkorb gelegt.', 'success')
-    return redirect(request.referrer or url_for('products'))
 
 @app.route('/update_cart', methods=['POST'])
 def update_cart():
@@ -292,13 +360,6 @@ def update_cart():
     session['cart'] = cart
     return redirect(url_for('cart'))
 
-@app.route('/remove_from_cart', methods=['POST'])
-def remove_from_cart():
-    name = request.form.get('name')
-    cart = session.get('cart', [])
-    session['cart'] = [item for item in cart if item['name'] != name]
-    return redirect(url_for('cart'))
-
 # ---------- CHECKOUT (MOCK) ----------
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
@@ -311,74 +372,13 @@ def checkout():
     tax = subtotal * 0.19
     total = subtotal + tax
 
-    if request.method == 'POST':
-        # Mock-Zahlung
-        flash('Zahlung erfolgreich! Vielen Dank für Ihre Bestellung. (Mock)', 'success')
-        session['cart'] = []
-        return redirect(url_for('index'))
-    
-    return render_template('checkout.html', cart_items=cart_items,
-                           subtotal=subtotal, tax=tax, total=total)
+@app.route('/remove_from_cart', methods=['POST'])
+def remove_from_cart():
+    name = request.form.get('name')
+    cart = session.get('cart', [])
+    session['cart'] = [item for item in cart if item['name'] != name]
+    return redirect(url_for('cart'))
 
-# ---------- AUTHENTIFIZIERUNG ----------
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        user = mock_users.get(email)
-        if user and check_password_hash(user['password'], password):
-            session['user'] = email
-            session['user_name'] = user['name']
-            flash('Erfolgreich eingeloggt!', 'success')
-            return redirect(url_for('index'))
-        else:
-            flash('Ungültige E-Mail oder Passwort.', 'danger')
-    return render_template('login.html')
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        confirm = request.form.get('confirm_password')
-        first_name = request.form.get('first_name')
-        last_name = request.form.get('last_name')
-        agb = request.form.get('agb')
-        
-        if not agb:
-            flash('Bitte akzeptieren Sie die AGB.', 'danger')
-        elif email in mock_users:
-            flash('Diese E-Mail-Adresse ist bereits registriert.', 'danger')
-        elif password != confirm:
-            flash('Die Passwörter stimmen nicht überein.', 'danger')
-        elif len(password) < 6:
-            flash('Das Passwort muss mindestens 6 Zeichen lang sein.', 'danger')
-        else:
-            mock_users[email] = {
-                'password': generate_password_hash(password),
-                'name': f'{first_name} {last_name}'
-            }
-            flash('Registrierung erfolgreich! Du kannst dich jetzt einloggen.', 'success')
-            return redirect(url_for('login'))
-    return render_template('register.html')
-
-@app.route('/logout')
-def logout():
-    session.pop('user', None)
-    session.pop('user_name', None)
-    session.pop('cart', None)  # Optional: Warenkorb leeren beim Logout
-    flash('Du wurdest ausgeloggt.', 'info')
-    return redirect(url_for('index'))
-
-@app.route('/forgot_password', methods=['GET', 'POST'])
-def forgot_password():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        # Mock: E-Mail senden
-        flash(f'Ein Link zum Zurücksetzen wurde an {email} gesendet (Mock).', 'info')
-        return redirect(url_for('login'))
-    return render_template('forgot_password.html')
 
 # ---------- RECHTLICHES ----------
 @app.route('/impressum')
@@ -393,6 +393,16 @@ def datenschutz():
 def agb():
     return render_template('agb.html')
 
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        # Mock: E-Mail senden
+        flash(f'Ein Link zum Zurücksetzen wurde an {email} gesendet (Mock).', 'info')
+        return redirect(url_for('login'))
+    return render_template('forgot_password.html')
+
+# ---------- START ----------
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
