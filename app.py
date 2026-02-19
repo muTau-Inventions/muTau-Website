@@ -257,41 +257,41 @@ def register():
         last_name = request.form.get('last_name')
         agb = request.form.get('agb') 
 
-        print(f"✅ AGB: '{agb}' (should be 'on')")
-        print(f"🔐 Passwords match: {password == confirm}")
-        print(f"📧 Email exists: {User.query.filter_by(email=email).first()}")
+        print(f"AGB: '{agb}' (should be 'on')")
+        print(f"Passwords match: {password == confirm}")
+        print(f"Email exists: {User.query.filter_by(email=email).first()}")
         
         if not agb:
-            print("❌ AGB missing!")
+            print("AGB missing!")
             flash("Bitte akzeptiere die AGB.", "danger")
             return redirect(url_for('register'))
 
         if password != confirm:
-            print("❌ Passwords don't match!")
+            print("Passwords don't match!")
             flash("Die Passwörter stimmen nicht überein.", "danger")
             return redirect(url_for('register'))
 
         if User.query.filter_by(email=email).first():
-            print("❌ Email exists!")
+            print("Email exists!")
             flash("Diese Email existiert bereits", "danger")
             return redirect(url_for('register'))
 
-        print("✅ Creating user...")
+        print("Creating user...")
         try:
             user = User(email=email, name=f"{first_name} {last_name}")
             user.set_password(password)
             db.session.add(user)
             db.session.commit()
-            print("✅ User created successfully!")
+            print("User created successfully!")
             flash("Registrierung erfolgreich", "success")
             return redirect(url_for('login'))
         except Exception as e:
-            print(f"💥 DB ERROR: {e}")
+            print(f"DB ERROR: {e}")
             db.session.rollback()
             flash("Datenbankfehler. Bitte versuche es erneut.", "danger")
             return redirect(url_for('register'))
 
-    print("🌐 GET request - showing form")
+    print("GET request - showing form")
     return render_template('register.html')
 
 
