@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Registrieren{% endblock %}
+{% block content %}
+<div class="login-container">
+    <!-- FLASH MESSAGES - FEHLERMELDUNGEN WERDEN HIER ANGEZEIGT -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'danger' else category }} alert-dismissible fade show" 
+                     role="alert" style="margin-bottom: 1rem;">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="login-box">
+        <h2>Registrieren</h2>
+        <form method="POST" action="{{ url_for('register') }}">
+            <div class="form-group">
+                <label>Vorname</label>
+                <input type="text" name="first_name" required placeholder="Max" value="{{ request.form.first_name if request.method == 'POST' else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Nachname</label>
+                <input type="text" name="last_name" required placeholder="Mustermann" value="{{ request.form.last_name if request.method == 'POST' else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" required placeholder="max@example.com" value="{{ request.form.email if request.method == 'POST' else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Passwort</label>
+                <input type="password" name="password" required placeholder="••••••••">
+            </div>
+            <div class="form-group">
+                <label>Passwort bestätigen</label>
+                <input type="password" name="confirm_password" required placeholder="••••••••">
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; color: #94a3b8; cursor: pointer;">
+                    <input type="checkbox" name="agb" required style="margin-right: 0.5rem; width: 18px; height: 18px;">
+                    Ich akzeptiere die <a href="{{ url_for('agb') }}" style="color: var(--primary); text-decoration: none; margin-left: 0.3rem;">AGB</a> und 
+                    <a href="{{ url_for('datenschutz') }}" style="color: var(--primary); text-decoration: none; margin-left: 0.3rem;">Datenschutzerklärung</a>
+                </label>
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">Account erstellen</button>
+            <p style="text-align: center; margin-top: 1.5rem; color: #94a3b8;">
+                Schon registriert? <a href="{{ url_for('login') }}" style="color: var(--primary); text-decoration: none;">Anmelden</a>
+            </p>
+        </form>
+    </div>
+</div>
+{% endblock %}

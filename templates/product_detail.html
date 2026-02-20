@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div id="product-{{ product.id }}" class="container">
+    <button class="btn btn-secondary" onclick="window.history.back()" style="margin-bottom: 2rem;">← Zurück zu Produkten</button>
+    
+    <div class="product-detail-hero">
+        <div class="product-detail-image">{{ product.icon }}</div>
+        <div class="product-detail-info">
+            <h1 style="background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">{{ product.name }}</h1>
+            <p style="color: #94a3b8; font-size: 1.2rem; margin: 1rem 0;">{{ product.description }}</p>
+            <div class="price">€{{ "{:,}".format(product.price) }}</div>
+            <form action="{{ url_for('add_to_cart') }}" method="POST">
+                <input type="hidden" name="name" value="{{ product.name }}">
+                <input type="hidden" name="price" value="{{ product.price }}">
+                <input type="hidden" name="icon" value="{{ product.icon }}">
+                <button type="submit" class="btn" style="margin-top: 1rem;">In den Warenkorb</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('{{ product.id }}', 'features')">Features</div>
+        <div class="tab" onclick="showTab('{{ product.id }}', 'specs')">Spezifikationen</div>
+        <div class="tab" onclick="showTab('{{ product.id }}', 'support')">Support</div>
+    </div>
+
+    <div id="{{ product.id }}-features" class="tab-content active">
+        <ul class="feature-list">
+            {% for feature in product.features %}
+            <li>{{ feature }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div id="{{ product.id }}-specs" class="tab-content">
+        <ul class="feature-list">
+            {% for spec in product.specs %}
+            <li>{{ spec }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div id="{{ product.id }}-support" class="tab-content">
+        <ul class="feature-list">
+            {% for support in product.support %}
+            <li>{{ support }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

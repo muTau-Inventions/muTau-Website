@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Dokumentation{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="section-header">
+        <h2>Dokumentation</h2>
+        <p style="color:#94a3b8;">Alles was Sie brauchen, um mit muTau zu starten</p>
+    </div>
+
+    <div class="docs-container">
+
+        <!-- SIDEBAR AUTO -->
+        <div class="docs-sidebar">
+            <ul>
+                {% for doc in docs %}
+                <li>
+                    <a href="#"
+                       onclick="showDocsSection(event, '{{ doc.id }}')">
+                        {{ doc.title }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- CONTENT AUTO -->
+        <div class="docs-content">
+
+            {% for doc in docs %}
+            <div id="{{ doc.id }}-section"
+                 class="docs-section"
+                 {% if not loop.first %}style="display:none;"{% endif %}>
+
+                {{ doc.content | safe }}
+
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- EXACT SAME LOOK STYLING -->
+<style>
+
+.docs-content h2 {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.docs-content h3 {
+    color: white;
+    margin-top: 1.5rem;
+}
+
+.docs-content p {
+    color: #94a3b8;
+    line-height: 1.6;
+}
+
+.docs-content ul {
+    color: #94a3b8;
+    margin-left: 2rem;
+    line-height: 2;
+}
+
+.docs-content pre {
+    background: #020617;
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.docs-content code {
+    font-family: monospace;
+    color: #e2e8f0;
+}
+
+</style>
+
+{% endblock %}

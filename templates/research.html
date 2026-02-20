@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Forschungspapiere{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="section-header">
+        <h2>Forschung & Publikationen</h2>
+        <p style="color: #94a3b8;">Neueste Forschungsergebnisse und wissenschaftliche Veröffentlichungen</p>
+    </div>
+
+    {% for paper in papers %}
+    <div class="paper">
+        <h3>{{ paper.title }}</h3>
+        <div class="meta">
+            Veröffentlicht: {{ paper.date }} | Autoren: {{ paper.authors }}
+        </div>
+        <p>{{ paper.description }}</p>
+        <a href="{{ paper.pdf }}" class="btn" style="margin-top: 1rem;" target="_blank">Paper lesen (PDF)</a>
+    </div>
+    {% else %}
+    <p style="text-align:center; color:#94a3b8;">Aktuell liegen keine Forschungspapiere vor.</p>
+    {% endfor %}
+</div>
+{% endblock %}
