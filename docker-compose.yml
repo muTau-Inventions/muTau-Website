@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: mutau
       POSTGRES_PASSWORD: strongpassword123
-      POSTGRES_DB: mutau_db
+      POSTGRES_DB: mutau
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -25,7 +25,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://mutau:strongpassword123@db:5432/mutau_db
+      DATABASE_URL: postgresql://mutau:strongpassword123@db:5432/mutau
       SECRET_KEY: supersecret_dev_key
 
 volumes:
