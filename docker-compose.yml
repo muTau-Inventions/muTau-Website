@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: mutau
       POSTGRES_PASSWORD: strongpassword123
-      POSTGRES_DB: mutau_db
+      POSTGRES_DB: mutau
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
