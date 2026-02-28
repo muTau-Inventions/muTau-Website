@@ -17,7 +17,7 @@ help:
 	@echo ""
 
 build:
-	$(COMPOSE) build
+	$(COMPOSE) build --no-cache
 
 up:
 	$(COMPOSE) up -d
