@@ -2,6 +2,13 @@
 Our company website
 
 # How to use
+## Deploy
+``` bash
+git clone  https://github.com/muTau-Inventions/muTau-Website.git
+cd muTau-Website
+make build
+make up
+```
 ## docs
 For documentation, create a docs directory where you put your entire documentation in the form of .md files. The .md files will be automatically rendered on the website.
 ## research

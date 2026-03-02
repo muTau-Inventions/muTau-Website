@@ -201,49 +201,6 @@ def docs():
     return render_template("docs.html", docs=docs_list)
 
 
-# ---------- CART ----------
-
-@app.route('/cart')
-def cart():
-
-    cart_items = session.get('cart', [])
-
-    subtotal = sum(item['price'] * item['quantity'] for item in cart_items)
-    tax = subtotal * 0.19
-    total = subtotal + tax
-
-    return render_template('cart.html', cart_items=cart_items,
-                           subtotal=subtotal, tax=tax, total=total)
-
-
-@app.route('/add_to_cart', methods=['POST'])
-def add_to_cart():
-
-    name = request.form.get('name')
-    price = float(request.form.get('price'))
-    icon = request.form.get('icon')
-
-    cart = session.get('cart', [])
-
-    found = False
-
-    for item in cart:
-
-        if item['name'] == name:
-            item['quantity'] += 1
-            found = True
-            break
-
-    if not found:
-        cart.append({'name': name,'price': price,'icon': icon,'quantity': 1})
-
-    session['cart'] = cart
-
-    flash(f'{name} wurde in den Warenkorb gelegt.', 'success')
-
-    return redirect(request.referrer or url_for('products'))
-
-
 # ---------- AUTH ----------
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -328,7 +285,7 @@ def logout():
 
     logout_user()
 
-    session.pop('cart', None)
+    #session.pop('cart', None)
 
     flash("Du wurdest ausgeloggt", "info")
 
@@ -341,46 +298,6 @@ def contact():
         flash('Vielen Dank! Wir werden uns schnellstmöglich bei Ihnen melden.', 'success')
         return redirect(url_for('contact'))
     return render_template('contact.html')
-
-@app.route('/cart_count')
-def cart_count():
-    cart = session.get('cart', [])
-    count = sum(item['quantity'] for item in cart)
-    return jsonify({'count': count})
-
-@app.route('/update_cart', methods=['POST'])
-def update_cart():
-    name = request.form.get('name')
-    change = int(request.form.get('change', 0))
-    cart = session.get('cart', [])
-    for item in cart:
-        if item['name'] == name:
-            item['quantity'] += change
-            if item['quantity'] <= 0:
-                cart.remove(item)
-            break
-    session['cart'] = cart
-    return redirect(url_for('cart'))
-
-# ---------- CHECKOUT (MOCK) ----------
-@app.route('/checkout', methods=['GET', 'POST'])
-def checkout():
-    cart_items = session.get('cart', [])
-    if not cart_items:
-        flash('Ihr Warenkorb ist leer.', 'info')
-        return redirect(url_for('cart'))
-    
-    subtotal = sum(item['price'] * item['quantity'] for item in cart_items)
-    tax = subtotal * 0.19
-    total = subtotal + tax
-
-@app.route('/remove_from_cart', methods=['POST'])
-def remove_from_cart():
-    name = request.form.get('name')
-    cart = session.get('cart', [])
-    session['cart'] = [item for item in cart if item['name'] != name]
-    return redirect(url_for('cart'))
-
 
 # ---------- RECHTLICHES ----------
 @app.route('/impressum')

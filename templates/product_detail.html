@@ -10,11 +10,8 @@
             <h1 style="background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">{{ product.name }}</h1>
             <p style="color: #94a3b8; font-size: 1.2rem; margin: 1rem 0;">{{ product.description }}</p>
             <div class="price">€{{ "{:,}".format(product.price) }}</div>
-            <form action="{{ url_for('add_to_cart') }}" method="POST">
-                <input type="hidden" name="name" value="{{ product.name }}">
-                <input type="hidden" name="price" value="{{ product.price }}">
-                <input type="hidden" name="icon" value="{{ product.icon }}">
-                <button type="submit" class="btn" style="margin-top: 1rem;">In den Warenkorb</button>
+            <form action="#">
+                
             </form>
         </div>
     </div>
