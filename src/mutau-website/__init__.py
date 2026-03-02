@@ -20,7 +20,9 @@ from flask_bcrypt import Bcrypt
 
 # ---------------- APP SETUP ----------------
 
-app = Flask(__name__)
+app = Flask(__name__,
+           template_folder='/app/templates',
+           static_folder='/app/static')
 
 app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
 
