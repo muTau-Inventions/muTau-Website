@@ -5,13 +5,13 @@ services:
     environment:
       POSTGRES_USER: mutau
       POSTGRES_PASSWORD: strongpassword123
-      POSTGRES_DB: mutau
+      POSTGRES_DB: mutau  # Hier war es konsistent
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mutau -d mutau_db"]
+      test: ["CMD-SHELL", "pg_isready -U mutau -d mutau"]  # ← War mutau_db, jetzt mutau
       interval: 5s
       timeout: 5s
       retries: 5
@@ -24,7 +24,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://mutau:strongpassword123@db:5432/mutau
+      DATABASE_URL: postgresql://mutau:strongpassword123@db:5432/mutau  # Bereits korrekt
       SECRET_KEY: supersecret_dev_key
       PYTHONPATH: /app
     volumes:
