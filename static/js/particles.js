@@ -1,13 +1,18 @@
-/* particles.js — floating particle animation on the background canvas */
+/* particles.js — floating particle animation on the background canvas
+   Positions are saved to sessionStorage so particles appear continuous
+   across server-rendered page navigations. */
 
 (function () {
     'use strict';
 
+    var STORAGE_KEY = 'mt_particles';
+    var COUNT = 80;
+
     function initParticles() {
-        const canvas = document.getElementById('particleCanvas');
+        var canvas = document.getElementById('particleCanvas');
         if (!canvas) return;
 
-        const ctx = canvas.getContext('2d');
+        var ctx = canvas.getContext('2d');
 
         function resize() {
             canvas.width  = window.innerWidth;
@@ -16,54 +21,94 @@
 
         resize();
 
-        const COUNT = 80;
-        const particles = [];
+        var particles = [];
 
-        function Particle() {
-            this.reset = function () {
-                this.x       = Math.random() * canvas.width;
-                this.y       = canvas.height + Math.random() * 120;
-                this.size    = Math.random() * 2.5 + 0.5;
-                this.speedY  = Math.random() * 0.8 + 0.3;
-                this.speedX  = Math.random() * 0.4 - 0.2;
-                this.opacity = Math.random() * 0.4 + 0.1;
-            };
-            this.reset();
+        function makeParticle(data) {
+            var p = {};
+            if (data) {
+                p.x       = data.x;
+                p.y       = data.y;
+                p.size    = data.size;
+                p.speedY  = data.speedY;
+                p.speedX  = data.speedX;
+                p.opacity = data.opacity;
+            } else {
+                p.x       = Math.random() * canvas.width;
+                p.y       = Math.random() * canvas.height;  // spread on fresh load
+                p.size    = Math.random() * 2.5 + 0.5;
+                p.speedY  = Math.random() * 0.8 + 0.3;
+                p.speedX  = Math.random() * 0.4 - 0.2;
+                p.opacity = Math.random() * 0.4 + 0.1;
+            }
+            return p;
         }
 
-        Particle.prototype.update = function () {
-            this.y -= this.speedY;
-            this.x += this.speedX;
-            if (this.y < -10) this.reset();
-        };
+        // Restore from sessionStorage if available
+        var restored = false;
+        try {
+            var saved = sessionStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                var data = JSON.parse(saved);
+                if (Array.isArray(data) && data.length === COUNT) {
+                    for (var i = 0; i < COUNT; i++) {
+                        particles.push(makeParticle(data[i]));
+                    }
+                    restored = true;
+                }
+            }
+        } catch (e) {}
 
-        Particle.prototype.draw = function () {
-            ctx.fillStyle = `rgba(99,102,241,${this.opacity})`;
+        if (!restored) {
+            for (var j = 0; j < COUNT; j++) {
+                particles.push(makeParticle(null));
+            }
+        }
+
+        function updateParticle(p) {
+            p.y -= p.speedY;
+            p.x += p.speedX;
+
+            // Reset when off top
+            if (p.y < -10) {
+                p.x       = Math.random() * canvas.width;
+                p.y       = canvas.height + Math.random() * 50;
+                p.size    = Math.random() * 2.5 + 0.5;
+                p.speedY  = Math.random() * 0.8 + 0.3;
+                p.speedX  = Math.random() * 0.4 - 0.2;
+                p.opacity = Math.random() * 0.4 + 0.1;
+            }
+
+            // Wrap horizontally so particles don't drift off forever
+            if (p.x < -10)                  p.x = canvas.width  + 10;
+            if (p.x > canvas.width  + 10)   p.x = -10;
+        }
+
+        function drawParticle(p) {
+            ctx.fillStyle = 'rgba(99,102,241,' + p.opacity + ')';
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
             ctx.fill();
-        };
-
-        for (let i = 0; i < COUNT; i++) {
-            const p = new Particle();
-            p.y = Math.random() * canvas.height; // spread on load
-            particles.push(p);
         }
-
-        let raf;
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
+            for (var i = 0; i < particles.length; i++) {
+                updateParticle(particles[i]);
+                drawParticle(particles[i]);
             }
-            raf = requestAnimationFrame(animate);
+            requestAnimationFrame(animate);
         }
 
         animate();
 
-        let resizeTimer;
+        // Save state before navigating away so the next page can restore it
+        window.addEventListener('pagehide', function () {
+            try {
+                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(particles));
+            } catch (e) {}
+        });
+
+        var resizeTimer;
         window.addEventListener('resize', function () {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(resize, 120);

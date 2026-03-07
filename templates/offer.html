@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Angebot anfragen{% endblock %}
+{% block content %}
+
+<div class="container">
+    <div class="section-header">
+        <h2>Angebot anfragen</h2>
+        <p>Beschreiben Sie Ihr Projekt — wir melden uns innerhalb von 24 Stunden</p>
+    </div>
+
+    <div style="max-width:680px;margin:0 auto;padding-bottom:4rem">
+        <div style="background:var(--surface);border-radius:var(--radius-lg);padding:2.5rem;border:1px solid var(--border)">
+            <form method="POST" action="{{ url_for('main.offer') }}">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" name="name" required placeholder="Max Mustermann"
+                               value="{{ request.form.get('name','') }}">
+                    </div>
+                    <div class="form-group">
+                        <label>E-Mail *</label>
+                        <input type="email" name="email" required placeholder="max@example.com"
+                               value="{{ request.form.get('email','') }}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Unternehmen</label>
+                    <input type="text" name="company" placeholder="Ihr Unternehmen (optional)"
+                           value="{{ request.form.get('company','') }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Produkt / Interesse</label>
+                    <select name="product_interest">
+                        <option value="">— Kein spezifisches Produkt —</option>
+                        {% for product in products %}
+                        <option value="{{ product.slug }}"
+                            {% if preselected == product.slug or request.form.get('product_interest') == product.slug %}
+                                selected
+                            {% endif %}>
+                            {{ product.name }}
+                        </option>
+                        {% endfor %}
+                        <option value="other"
+                            {% if request.form.get('product_interest') == 'other' %}selected{% endif %}>
+                            Sonstiges / Noch unklar
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Nachricht *</label>
+                    <textarea name="message" rows="7" required
+                              placeholder="Beschreiben Sie Ihr Projekt, Ihre Anforderungen und den geplanten Einsatz...">{{ request.form.get('message','') }}</textarea>
+                </div>
+
+                <button type="submit" class="btn" style="width:100%">Anfrage senden</button>
+
+                <p style="text-align:center;color:var(--text-muted);font-size:0.8rem;margin-top:1rem">
+                    Wir behandeln Ihre Angaben vertraulich. Weitere Informationen in der
+                    <a href="{{ url_for('legal.datenschutz') }}" style="color:var(--primary)">Datenschutzerklärung</a>.
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

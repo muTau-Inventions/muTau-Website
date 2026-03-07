@@ -2,7 +2,7 @@ from flask import Blueprint, render_template
 from flask_login import login_required
 
 from ..extensions import admin_required
-from ..models import User, Product, Paper
+from ..models import User, Product, Paper, Offer
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -12,9 +12,12 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 @admin_required
 def dashboard():
     stats = {
-        "users":    User.query.filter(User.deleted_at.is_(None)).count(),
-        "products": Product.query.filter_by(is_active=True).count(),
-        "papers":   Paper.query.count(),
+        "users":      User.query.filter(User.deleted_at.is_(None)).count(),
+        "products":   Product.query.filter_by(is_active=True).count(),
+        "papers":     Paper.query.count(),
+        "newsletter": User.query.filter_by(newsletter=True).filter(User.deleted_at.is_(None)).count(),
+        "offers":     Offer.query.count(),
+        "new_offers": Offer.query.filter_by(status="new").count(),
     }
     return render_template("admin/dashboard.html", stats=stats)
 
@@ -39,7 +42,20 @@ def papers():
 @login_required
 @admin_required
 def offers():
-    return render_template("admin/offers.html")
+    all_offers = Offer.query.order_by(Offer.created_at.desc()).all()
+    return render_template("admin/offers.html", offers=all_offers)
+
+
+@admin_bp.route("/offers/<int:offer_id>/mark-read", methods=["POST"])
+@login_required
+@admin_required
+def mark_offer_read(offer_id):
+    from flask import redirect, url_for
+    from ..extensions import db
+    o = Offer.query.get_or_404(offer_id)
+    o.status = "read"
+    db.session.commit()
+    return redirect(url_for("admin.offers"))
 
 
 @admin_bp.route("/users")

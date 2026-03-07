@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>muTau-Inventions — {% block title %}AI to FPGA Toolchain{% endblock %}</title>
+    <title>muTau-Inventions | {% block title %}AI to FPGA Toolchain{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}">
@@ -17,12 +18,12 @@
     <div class="nav-inner">
         <a href="{{ url_for('main.index') }}" class="logo">muTau</a>
         <ul>
-            <li><a href="{{ url_for('main.index') }}"       {% if request.endpoint == 'main.index'       %}class="active"{% endif %}>Home</a></li>
-            <li><a href="{{ url_for('content.research') }}" {% if request.endpoint == 'content.research' %}class="active"{% endif %}>Forschung</a></li>
-            <li><a href="{{ url_for('content.docs') }}"     {% if request.endpoint == 'content.docs'     %}class="active"{% endif %}>Docs</a></li>
-            <li><a href="{{ url_for('products.products') }}" {% if request.endpoint == 'products.products' or request.endpoint == 'products.product_detail' %}class="active"{% endif %}>Produkte</a></li>
-            <li><a href="{{ url_for('main.about') }}"       {% if request.endpoint == 'main.about'       %}class="active"{% endif %}>Über uns</a></li>
-            <li><a href="{{ url_for('main.contact') }}"     {% if request.endpoint == 'main.contact'     %}class="active"{% endif %}>Kontakt</a></li>
+            <li><a href="{{ url_for('main.index') }}"          {% if request.endpoint == 'main.index'            %}class="active"{% endif %}>Home</a></li>
+            <li><a href="{{ url_for('content.research') }}"    {% if request.endpoint == 'content.research'      %}class="active"{% endif %}>Forschung</a></li>
+            <li><a href="{{ url_for('content.docs') }}"        {% if request.endpoint == 'content.docs'          %}class="active"{% endif %}>Docs</a></li>
+            <li><a href="{{ url_for('products.products') }}"   {% if request.endpoint in ['products.products','products.product_detail'] %}class="active"{% endif %}>Produkte</a></li>
+            <li><a href="{{ url_for('main.about') }}"          {% if request.endpoint == 'main.about'            %}class="active"{% endif %}>Über uns</a></li>
+            <li><a href="{{ url_for('main.contact') }}"        {% if request.endpoint == 'main.contact'          %}class="active"{% endif %}>Kontakt</a></li>
         </ul>
         <div class="nav-auth">
             {% if current_user.is_authenticated %}

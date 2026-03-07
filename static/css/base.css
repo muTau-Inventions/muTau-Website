@@ -2,7 +2,7 @@
    BASE — reset · variables · body · nav · footer · flash
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
 *, *::before, *::after {
     margin: 0;
@@ -11,7 +11,6 @@
 }
 
 :root {
-    /* Palette */
     --primary:      #6366f1;
     --primary-dim:  rgba(99, 102, 241, 0.15);
     --secondary:    #8b5cf6;
@@ -24,31 +23,28 @@
     --text-muted:   #64748b;
     --text-soft:    #94a3b8;
 
-    /* Gradients */
     --gradient:     linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --gradient-alt: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
 
-    /* Typography */
     --font-display: 'Syne', sans-serif;
+    --font-body:    'Outfit', sans-serif;
     --font-mono:    'Space Mono', monospace;
 
-    /* Spacing */
     --nav-height:   70px;
     --max-width:    1400px;
     --radius:       12px;
     --radius-lg:    20px;
 }
 
-html {
-    scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
-    font-family: var(--font-mono);
+    font-family: var(--font-body);
     background: var(--dark);
     color: var(--text);
     overflow-x: hidden;
     line-height: 1.6;
+    font-size: 15px;
 }
 
 /* ── Scrollbar ────────────────────────────────────────────── */
@@ -82,6 +78,7 @@ nav .nav-inner {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
 }
 
 .logo {
@@ -95,42 +92,41 @@ nav .nav-inner {
     cursor: pointer;
     letter-spacing: -0.02em;
     text-decoration: none;
+    flex-shrink: 0;
 }
 
 nav ul {
     display: flex;
     list-style: none;
-    gap: 0.25rem;
+    gap: 0.1rem;
     align-items: center;
+    flex-wrap: nowrap;   /* prevent wrapping of nav items */
 }
 
 nav a {
     color: var(--text-soft);
     text-decoration: none;
-    font-size: 0.8rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    padding: 0.5rem 0.85rem;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    padding: 0.5rem 0.75rem;
     border-radius: 8px;
     transition: color 0.2s, background 0.2s;
+    white-space: nowrap;   /* ← prevents "Über\nuns" wrapping */
 }
 
-nav a:hover {
-    color: var(--text);
-    background: var(--primary-dim);
-}
-
-nav a.active {
-    color: var(--primary);
-}
+nav a:hover { color: var(--text); background: var(--primary-dim); }
+nav a.active { color: var(--primary); }
 
 .nav-auth {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-left: 1rem;
+    margin-left: 0.5rem;
     padding-left: 1rem;
     border-left: 1px solid var(--border);
+    flex-shrink: 0;
 }
 
 /* ── Flash Messages ───────────────────────────────────────── */
@@ -150,7 +146,8 @@ nav a.active {
 .flash {
     padding: 0.9rem 1.25rem;
     border-radius: var(--radius);
-    font-size: 0.82rem;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
     border: 1px solid;
     pointer-events: auto;
     animation: slideIn 0.3s ease;
@@ -161,10 +158,10 @@ nav a.active {
     to   { opacity: 1; transform: translateX(0); }
 }
 
-.flash-success { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #6ee7b7; }
-.flash-danger  { background: rgba(239, 68, 68, 0.12);  border-color: rgba(239, 68, 68, 0.3);  color: #fca5a5; }
-.flash-warning { background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.3); color: #fcd34d; }
-.flash-info    { background: rgba(99, 102, 241, 0.12); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc; }
+.flash-success { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.3); color: #6ee7b7; }
+.flash-danger  { background: rgba(239,68,68,0.12);  border-color: rgba(239,68,68,0.3);  color: #fca5a5; }
+.flash-warning { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: #fcd34d; }
+.flash-info    { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.3); color: #a5b4fc; }
 
 /* ── Footer ───────────────────────────────────────────────── */
 
@@ -174,7 +171,7 @@ footer {
     margin-top: 6rem;
     border-top: 1px solid var(--border);
     color: var(--text-muted);
-    font-size: 0.8rem;
+    font-size: 0.82rem;
 }
 
 footer .footer-links {
@@ -184,24 +181,15 @@ footer .footer-links {
     margin-top: 0.75rem;
 }
 
-footer a {
-    color: var(--text-muted);
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-footer a:hover {
-    color: var(--primary);
-}
+footer a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+footer a:hover { color: var(--primary); }
 
 /* ── Particle Canvas ──────────────────────────────────────── */
 
 #particleCanvas {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     pointer-events: none;
     z-index: 0;
 }
@@ -240,10 +228,11 @@ main {
     margin-bottom: 0.75rem;
 }
 
-.section-header p {
-    color: var(--text-soft);
-    font-size: 0.9rem;
-}
+.section-header p { color: var(--text-soft); font-size: 0.9rem; }
+
+/* ── Code / mono ──────────────────────────────────────────── */
+
+code, pre, .mono { font-family: var(--font-mono); }
 
 /* ── Error Pages ──────────────────────────────────────────── */
 
@@ -268,8 +257,4 @@ main {
     line-height: 1;
 }
 
-.error-page p {
-    color: var(--text-soft);
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-}
+.error-page p { color: var(--text-soft); font-size: 0.9rem; margin-bottom: 1rem; }

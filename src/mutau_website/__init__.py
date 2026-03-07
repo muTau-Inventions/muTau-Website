@@ -65,7 +65,7 @@ def init_db():
     """Create tables and seed data. Called once from entrypoint.sh before gunicorn starts."""
     app = create_app()
     with app.app_context():
-        from .models import PasswordResetToken, Product, Paper  # noqa: F401
+        from .models import PasswordResetToken, Product, Paper, Offer  # noqa: F401
         db.create_all()
         from .seed import seed_products
         seed_products()

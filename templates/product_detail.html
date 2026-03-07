@@ -13,7 +13,9 @@
         <div class="product-detail-info">
             <h1>{{ product.name }}</h1>
             <p>{{ product.description }}</p>
-            <a href="{{ url_for('main.contact') }}" class="btn">Angebot anfragen</a>
+            <a href="{{ url_for('main.offer') }}?product={{ product.slug }}" class="btn">
+                Angebot anfragen
+            </a>
         </div>
     </div>
 

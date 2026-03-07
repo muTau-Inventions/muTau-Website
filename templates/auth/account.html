@@ -53,14 +53,15 @@
         <!-- Danger Zone -->
         <div class="account-section" style="border-color:rgba(239,68,68,0.25)">
             <h3 style="color:#f87171">Account löschen</h3>
-            <p style="color:var(--text-soft);font-size:0.83rem;margin-bottom:1.25rem;line-height:1.6">
+            <p style="color:var(--text-soft);font-size:0.88rem;margin-bottom:1.25rem;line-height:1.6">
                 Diese Aktion ist unwiderruflich. Dein Account und alle zugehörigen Daten werden anonymisiert.
             </p>
             <form method="POST" action="{{ url_for('auth.delete_account') }}"
                   onsubmit="return confirm('Bist du sicher? Diese Aktion kann nicht rückgängig gemacht werden.')">
                 <div class="form-group">
                     <label>Gib <strong>LÖSCHEN</strong> ein zur Bestätigung</label>
-                    <input type="text" name="confirm" required placeholder="LÖSCHEN" autocomplete="off">
+                    <!-- No required attribute — validation is done server-side -->
+                    <input type="text" name="confirm" placeholder="LÖSCHEN" autocomplete="off">
                 </div>
                 <button type="submit" class="btn btn-danger btn-sm">Account unwiderruflich löschen</button>
             </form>
