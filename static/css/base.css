@@ -1,7 +1,3 @@
-/* ============================================================
-   BASE — reset · variables · body · nav · footer · flash
-   ============================================================ */
-
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
 *, *::before, *::after {
@@ -47,15 +43,13 @@ body {
     font-size: 15px;
 }
 
-/* ── Scrollbar ────────────────────────────────────────────── */
-
+/* Scrollbar */
 ::-webkit-scrollbar              { width: 6px; }
 ::-webkit-scrollbar-track        { background: var(--dark); }
 ::-webkit-scrollbar-thumb        { background: var(--primary); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover  { background: var(--secondary); }
 
-/* ── Navigation ───────────────────────────────────────────── */
-
+/* Navigation */
 nav {
     position: fixed;
     top: 0;
@@ -100,7 +94,7 @@ nav ul {
     list-style: none;
     gap: 0.1rem;
     align-items: center;
-    flex-wrap: nowrap;   /* prevent wrapping of nav items */
+    flex-wrap: nowrap;
 }
 
 nav a {
@@ -113,7 +107,7 @@ nav a {
     padding: 0.5rem 0.75rem;
     border-radius: 8px;
     transition: color 0.2s, background 0.2s;
-    white-space: nowrap;   /* ← prevents "Über\nuns" wrapping */
+    white-space: nowrap;
 }
 
 nav a:hover { color: var(--text); background: var(--primary-dim); }
@@ -129,8 +123,7 @@ nav a.active { color: var(--primary); }
     flex-shrink: 0;
 }
 
-/* ── Flash Messages ───────────────────────────────────────── */
-
+/* Flash Messages */
 .flash-container {
     position: fixed;
     top: calc(var(--nav-height) + 1rem);
@@ -163,8 +156,7 @@ nav a.active { color: var(--primary); }
 .flash-warning { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: #fcd34d; }
 .flash-info    { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.3); color: #a5b4fc; }
 
-/* ── Footer ───────────────────────────────────────────────── */
-
+/* Footer */
 footer {
     text-align: center;
     padding: 3rem 0 2rem;
@@ -184,8 +176,7 @@ footer .footer-links {
 footer a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
 footer a:hover { color: var(--primary); }
 
-/* ── Particle Canvas ──────────────────────────────────────── */
-
+/* Particle Canvas */
 #particleCanvas {
     position: fixed;
     top: 0; left: 0;
@@ -194,8 +185,7 @@ footer a:hover { color: var(--primary); }
     z-index: 0;
 }
 
-/* ── Main ─────────────────────────────────────────────────── */
-
+/* Main */
 main {
     position: relative;
     z-index: 1;
@@ -203,8 +193,7 @@ main {
     min-height: calc(100vh - var(--nav-height));
 }
 
-/* ── Utility ──────────────────────────────────────────────── */
-
+/* Utility */
 .container {
     max-width: var(--max-width);
     margin: 0 auto;
@@ -230,12 +219,10 @@ main {
 
 .section-header p { color: var(--text-soft); font-size: 0.9rem; }
 
-/* ── Code / mono ──────────────────────────────────────────── */
-
+/* Code / mono  */
 code, pre, .mono { font-family: var(--font-mono); }
 
-/* ── Error Pages ──────────────────────────────────────────── */
-
+/* Error Pages */
 .error-page {
     display: flex;
     flex-direction: column;

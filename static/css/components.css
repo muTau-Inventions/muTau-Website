@@ -1,9 +1,4 @@
-/* ============================================================
-   COMPONENTS — buttons · cards · forms · tabs · docs · team
-   ============================================================ */
-
-/* ── Buttons ──────────────────────────────────────────────── */
-
+/* Buttons */
 .btn {
     display: inline-block;
     padding: 0.75rem 1.75rem;
@@ -36,8 +31,7 @@
 
 .btn-sm { padding: 0.45rem 1rem; font-size: 0.78rem; }
 
-/* ── Cards ────────────────────────────────────────────────── */
-
+/* Cards */
 .card {
     background: var(--surface);
     border-radius: var(--radius-lg);
@@ -62,8 +56,7 @@
 
 .card p { color: var(--text-soft); font-size: 0.88rem; line-height: 1.7; }
 
-/* ── Forms ────────────────────────────────────────────────── */
-
+/* Forms */
 .form-group { margin-bottom: 1.25rem; }
 
 .form-group label {
@@ -84,7 +77,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     color: var(--text);
-    font-family: var(--font-body);   /* readable sans-serif in inputs */
+    font-family: var(--font-body);
     font-size: 0.92rem;
     font-weight: 400;
     transition: border-color 0.2s, background 0.2s;
@@ -127,8 +120,7 @@
 .form-check a { color: var(--primary); text-decoration: none; }
 .form-check a:hover { text-decoration: underline; }
 
-/* ── Auth Box ─────────────────────────────────────────────── */
-
+/* Auth Box */
 .auth-container {
     display: flex;
     align-items: center;
@@ -176,8 +168,7 @@
 }
 .auth-row a { color: var(--primary); text-decoration: none; font-size: 0.8rem; }
 
-/* ── Research Paper ───────────────────────────────────────── */
-
+/* Research Paper */
 .paper {
     background: var(--surface);
     border-radius: var(--radius);
@@ -200,8 +191,7 @@
 .paper .meta { color: var(--text-muted); font-size: 0.78rem; margin-bottom: 0.75rem; }
 .paper p { color: var(--text-soft); font-size: 0.88rem; line-height: 1.7; margin-bottom: 1rem; }
 
-/* ── Product Cards ────────────────────────────────────────── */
-
+/* Product Cards */
 .product-card {
     background: var(--surface);
     border-radius: var(--radius-lg);
@@ -244,8 +234,7 @@
 
 .product-body p { color: var(--text-soft); font-size: 0.88rem; line-height: 1.6; flex: 1; }
 
-/* ── Feature List ─────────────────────────────────────────── */
-
+/* Feature List */
 .feature-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
 
 .feature-list li {
@@ -258,8 +247,7 @@
     line-height: 1.5;
 }
 
-/* ── Tabs ─────────────────────────────────────────────────── */
-
+/* Tabs */
 .tabs {
     display: flex;
     border-bottom: 1px solid var(--border);
@@ -288,8 +276,7 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Docs ─────────────────────────────────────────────────── */
-
+/* Docs */
 .docs-layout {
     display: grid;
     grid-template-columns: 240px 1fr;
@@ -359,8 +346,7 @@
 }
 .docs-content pre code { background: none; padding: 0; color: #e2e8f0; }
 
-/* ── Team ─────────────────────────────────────────────────── */
-
+/* Team */
 .team-card {
     text-align: center;
     padding: 2rem 1.5rem;
@@ -392,8 +378,7 @@
 .team-card .role { color: var(--primary); font-size: 0.78rem; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.5rem; }
 .team-card p { color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; }
 
-/* ── Legal Content ────────────────────────────────────────── */
-
+/* Legal Content */
 .legal-content {
     max-width: 860px;
     margin: 0 auto 4rem;
@@ -416,8 +401,7 @@
 .legal-content p { color: var(--text-soft); font-size: 0.88rem; line-height: 1.8; margin-bottom: 0.75rem; }
 .legal-content ul { color: var(--text-soft); font-size: 0.88rem; line-height: 2; margin: 0.5rem 0 1rem 1.5rem; }
 
-/* ── Account / Settings ───────────────────────────────────── */
-
+/* Account / Settings */
 .account-layout { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; padding-bottom: 4rem; }
 
 .account-section {
@@ -447,8 +431,7 @@
 .account-row span:first-child { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
 .account-row span:last-child  { color: var(--text); }
 
-/* ── Admin ────────────────────────────────────────────────── */
-
+/* Admin */
 .admin-layout {
     display: grid;
     grid-template-columns: 220px 1fr;
@@ -499,7 +482,7 @@
     letter-spacing: -0.02em;
 }
 
-/* Stats grid — fixed-size cards so they don't stretch */
+/* Stats grid */
 .stats-grid {
     display: flex;
     flex-wrap: wrap;

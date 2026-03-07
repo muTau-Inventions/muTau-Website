@@ -107,7 +107,6 @@ INITIAL_PRODUCTS = [
 
 
 def seed_products():
-    """Insert initial products if the table is empty."""
     if Product.query.count() == 0:
         for data in INITIAL_PRODUCTS:
             product = Product(**data)

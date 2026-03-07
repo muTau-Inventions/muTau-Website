@@ -1,15 +1,11 @@
-/* docs.js — documentation sidebar navigation with deep-link support */
-
 (function () {
     'use strict';
 
     function showSection(sectionId, updateHash) {
-        // Hide all sections
         document.querySelectorAll('.docs-section').forEach(function (s) {
             s.style.display = 'none';
         });
 
-        // Deactivate all sidebar links
         document.querySelectorAll('.docs-sidebar a').forEach(function (a) {
             a.classList.remove('active');
         });

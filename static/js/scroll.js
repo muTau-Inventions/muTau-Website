@@ -1,5 +1,3 @@
-/* scroll.js — reveal elements as they enter the viewport */
-
 (function () {
     'use strict';
 

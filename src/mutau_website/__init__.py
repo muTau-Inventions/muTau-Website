@@ -11,22 +11,19 @@ def create_app():
         static_folder=os.path.join(os.path.dirname(__file__), "..", "..", "static"),
     )
 
-    # ── Config ────────────────────────────────────────────────────────────────
     app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
 
     database_url = os.environ.get("DATABASE_URL")
     if not database_url:
         raise RuntimeError("DATABASE_URL environment variable is not set.")
 
-    app.config["SQLALCHEMY_DATABASE_URI"]        = database_url
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    # ── Extensions ────────────────────────────────────────────────────────────
     db.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
 
-    # ── Blueprints ────────────────────────────────────────────────────────────
     from .routes import main_bp, auth_bp, content_bp, products_bp, legal_bp, admin_bp
 
     app.register_blueprint(main_bp)
@@ -36,16 +33,9 @@ def create_app():
     app.register_blueprint(legal_bp)
     app.register_blueprint(admin_bp)
 
-    # ── Model imports (so SQLAlchemy metadata is populated) ───────────────────
     with app.app_context():
-        from .models import PasswordResetToken, Product, Paper  # noqa: F401
+        from .models import PasswordResetToken, Product, Paper
 
-    # ── DB init is handled by entrypoint.sh before gunicorn starts ────────────
-    # Do NOT call db.create_all() here — gunicorn workers run create_app()
-    # in parallel and will race on table creation. entrypoint.sh calls
-    # init_db() once before workers are spawned.
-
-    # ── Error Handlers ────────────────────────────────────────────────────────
     @app.errorhandler(403)
     def forbidden(e):
         return render_template("errors/403.html"), 403
@@ -62,7 +52,6 @@ def create_app():
 
 
 def init_db():
-    """Create tables and seed data. Called once from entrypoint.sh before gunicorn starts."""
     app = create_app()
     with app.app_context():
         from .models import PasswordResetToken, Product, Paper, Offer  # noqa: F401

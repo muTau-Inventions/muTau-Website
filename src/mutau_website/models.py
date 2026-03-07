@@ -3,8 +3,6 @@ from flask_login import UserMixin
 from .extensions import db, bcrypt, login_manager
 
 
-# ── User ──────────────────────────────────────────────────────────────────────
-
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
@@ -37,8 +35,6 @@ def load_user(user_id):
     return user
 
 
-# ── Password Reset Token ──────────────────────────────────────────────────────
-
 class PasswordResetToken(db.Model):
     __tablename__ = "password_reset_tokens"
 
@@ -50,8 +46,6 @@ class PasswordResetToken(db.Model):
 
     user = db.relationship("User", backref="reset_tokens")
 
-
-# ── Product ───────────────────────────────────────────────────────────────────
 
 class Product(db.Model):
     __tablename__ = "products"
@@ -88,8 +82,6 @@ class Product(db.Model):
             return []
 
 
-# ── Research Paper ────────────────────────────────────────────────────────────
-
 class Paper(db.Model):
     __tablename__ = "papers"
 
@@ -102,8 +94,6 @@ class Paper(db.Model):
     notified    = db.Column(db.Boolean, default=False, nullable=False)
     created_at  = db.Column(db.DateTime, default=datetime.utcnow)
 
-
-# ── Offer Request ─────────────────────────────────────────────────────────────
 
 class Offer(db.Model):
     __tablename__ = "offers"

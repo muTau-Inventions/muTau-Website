@@ -1,5 +1,3 @@
-/* tabs.js — product detail tab switching */
-
 (function () {
     'use strict';
 

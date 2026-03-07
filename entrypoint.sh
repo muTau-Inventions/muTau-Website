@@ -11,4 +11,4 @@ print('DB init complete.')
 "
 
 echo "Starting gunicorn..."
-exec gunicorn --bind 0.0.0.0:5000 --workers 2 "mutau_website:create_app()"
+exec gunicorn --bind 0.0.0.0:5000 --workers 4 "mutau_website:create_app()"

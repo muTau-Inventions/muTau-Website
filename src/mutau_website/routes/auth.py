@@ -11,8 +11,6 @@ from ..mail import send_verification_email, send_password_reset_email
 auth_bp = Blueprint("auth", __name__)
 
 
-# ── Register ──────────────────────────────────────────────────────────────────
-
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
@@ -46,7 +44,7 @@ def register():
         user = User(
             email=email,
             name=f"{first_name} {last_name}".strip(),
-            is_verified=True,   # set to False once email verification is wired up
+            is_verified=True, # FIXME: Set to False when verification code is in place
             newsletter=newsletter,
         )
         user.set_password(password)
@@ -54,7 +52,7 @@ def register():
         try:
             db.session.add(user)
             db.session.commit()
-            # send_verification_email(user)  # uncomment when SMTP is ready
+            # send_verification_email(user) # FIXME: Send Email to verify EMAIL Adress
             flash("Registrierung erfolgreich. Du kannst dich jetzt anmelden.", "success")
             return redirect(url_for("auth.login"))
         except Exception:
@@ -63,8 +61,6 @@ def register():
 
     return render_template("auth/register.html")
 
-
-# ── Login ─────────────────────────────────────────────────────────────────────
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -86,7 +82,6 @@ def login():
             flash("Dieser Account wurde gelöscht.", "danger")
             return render_template("auth/login.html")
 
-        # Ready for email verification: just flip is_verified default to False in models.py
         if not user.is_verified:
             flash("Bitte bestätige zuerst deine E-Mail-Adresse.", "warning")
             return render_template("auth/login.html")
@@ -97,9 +92,6 @@ def login():
 
     return render_template("auth/login.html")
 
-
-# ── Logout ────────────────────────────────────────────────────────────────────
-
 @auth_bp.route("/logout")
 @login_required
 def logout():
@@ -108,15 +100,12 @@ def logout():
     return redirect(url_for("main.index"))
 
 
-# ── Forgot Password ───────────────────────────────────────────────────────────
-
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         user  = User.query.filter_by(email=email).first()
 
-        # Always show the same message to avoid email enumeration
         flash("Falls diese E-Mail registriert ist, wurde ein Reset-Link gesendet.", "info")
 
         if user and user.deleted_at is None:
@@ -128,14 +117,11 @@ def forgot_password():
             )
             db.session.add(token)
             db.session.commit()
-            # send_password_reset_email(user, token_str)  # uncomment when SMTP is ready
+            # send_password_reset_email(user, token_str)  # FIXME: Uncomment when reset mechanic is implemented
 
         return redirect(url_for("auth.login"))
 
     return render_template("auth/forgot_password.html")
-
-
-# ── Account ───────────────────────────────────────────────────────────────────
 
 @auth_bp.route("/account")
 @login_required
@@ -152,8 +138,6 @@ def toggle_newsletter():
     flash(f"Newsletter {state}.", "success")
     return redirect(url_for("auth.account"))
 
-
-# ── Delete Account ────────────────────────────────────────────────────────────
 
 @auth_bp.route("/account/delete", methods=["POST"])
 @login_required

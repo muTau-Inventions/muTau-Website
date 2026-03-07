@@ -1,7 +1,3 @@
-/* particles.js — floating particle animation on the background canvas
-   Positions are saved to sessionStorage so particles appear continuous
-   across server-rendered page navigations. */
-
 (function () {
     'use strict';
 
@@ -34,7 +30,7 @@
                 p.opacity = data.opacity;
             } else {
                 p.x       = Math.random() * canvas.width;
-                p.y       = Math.random() * canvas.height;  // spread on fresh load
+                p.y       = Math.random() * canvas.height;
                 p.size    = Math.random() * 2.5 + 0.5;
                 p.speedY  = Math.random() * 0.8 + 0.3;
                 p.speedX  = Math.random() * 0.4 - 0.2;

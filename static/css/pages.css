@@ -1,9 +1,4 @@
-/* ============================================================
-   PAGES — hero · features · product detail · contact
-   ============================================================ */
-
-/* ── Hero ─────────────────────────────────────────────────── */
-
+/* Hero */
 .hero {
     height: calc(100vh - var(--nav-height));
     display: flex;
@@ -91,8 +86,7 @@
     flex-wrap: wrap;
 }
 
-/* ── Features Grid ────────────────────────────────────────── */
-
+/* Features Grid */
 .features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -100,8 +94,7 @@
     margin-bottom: 4rem;
 }
 
-/* ── Products Grid ────────────────────────────────────────── */
-
+/* Products Grid */
 .products-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -109,8 +102,7 @@
     margin-bottom: 4rem;
 }
 
-/* ── Product Detail ───────────────────────────────────────── */
-
+/* Product Detail */
 .product-detail-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -150,8 +142,7 @@
     margin-bottom: 2rem;
 }
 
-/* ── Team Grid ────────────────────────────────────────────── */
-
+/* Team Grid */
 .team-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -159,8 +150,7 @@
     margin-bottom: 4rem;
 }
 
-/* ── Contact Grid ─────────────────────────────────────────── */
-
+/* Contact Grid */
 .contact-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -208,8 +198,7 @@
     line-height: 1.6;
 }
 
-/* ── About ────────────────────────────────────────────────── */
-
+/* About */
 .about-intro {
     max-width: 720px;
     margin: 0 auto 4rem;
@@ -222,8 +211,7 @@
     line-height: 1.9;
 }
 
-/* ── Responsive ───────────────────────────────────────────── */
-
+/* Responsive */
 @media (max-width: 900px) {
     .product-detail-grid { grid-template-columns: 1fr; }
     .contact-grid         { grid-template-columns: 1fr; }
