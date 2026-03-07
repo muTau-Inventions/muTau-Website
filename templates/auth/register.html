@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Registrieren{% endblock %}
+{% block content %}
+
+<div class="auth-container">
+    <div class="auth-box" style="max-width:520px">
+        <h2>Account erstellen</h2>
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                <div class="form-group">
+                    <label>Vorname</label>
+                    <input type="text" name="first_name" required placeholder="Max"
+                           value="{{ request.form.get('first_name', '') }}">
+                </div>
+                <div class="form-group">
+                    <label>Nachname</label>
+                    <input type="text" name="last_name" required placeholder="Mustermann"
+                           value="{{ request.form.get('last_name', '') }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>E-Mail</label>
+                <input type="email" name="email" required placeholder="max@example.com"
+                       value="{{ request.form.get('email', '') }}" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label>Passwort <span style="color:var(--text-muted);font-size:0.72rem">(min. 8 Zeichen)</span></label>
+                <input type="password" name="password" required placeholder="••••••••" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label>Passwort bestätigen</label>
+                <input type="password" name="confirm_password" required placeholder="••••••••" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label class="form-check">
+                    <input type="checkbox" name="newsletter">
+                    <span>Neuigkeiten zu Forschungspapieren per E-Mail erhalten</span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="form-check">
+                    <input type="checkbox" name="agb" required>
+                    <span>
+                        Ich akzeptiere die
+                        <a href="{{ url_for('legal.agb') }}">AGB</a> und
+                        <a href="{{ url_for('legal.datenschutz') }}">Datenschutzerklärung</a>
+                    </span>
+                </label>
+            </div>
+            <button type="submit" class="btn" style="width:100%">Account erstellen</button>
+        </form>
+        <p class="auth-footer">
+            Schon registriert? <a href="{{ url_for('auth.login') }}">Anmelden</a>
+        </p>
+    </div>
+</div>
+
+{% endblock %}

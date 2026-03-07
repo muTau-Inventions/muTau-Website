@@ -1,42 +1,37 @@
-PROJECT_NAME := mutau-website
-COMPOSE := docker compose
-
-.PHONY: help
-help:
-	@echo ""
-	@echo "Available commands:"
-	@echo ""
-	@echo "make build        Build all containers"
-	@echo "make up           Start containers"
-	@echo "make down         Stop containers"
-	@echo "make restart      Restart services"
-	@echo "make logs         Show logs"
-	@echo "make shell        Open web container shell"
-	@echo "make dbshell      Open PostgreSQL shell"
-	@echo "make clean        Remove everything"
-	@echo ""
+.PHONY: build up down logs shell restart
 
 build:
-	$(COMPOSE) build --no-cache
+	docker compose build
 
 up:
-	$(COMPOSE) up -d
+	docker compose up -d
 
 down:
-	$(COMPOSE) down
-
-restart:
-	$(COMPOSE) down
-	$(COMPOSE) up -d
+	docker compose down
 
 logs:
-	$(COMPOSE) logs -f
+	docker compose logs -f web
 
 shell:
-	$(COMPOSE) exec web /bin/bash
+	docker compose exec web bash
 
-dbshell:
-	$(COMPOSE) exec db psql -U mutau -d mutau_db
+restart:
+	docker compose restart web
 
-clean:
-	$(COMPOSE) down -v --rmi all
+# Usage: make create-admin EMAIL=admin@example.com NAME="Admin" PASSWORD=secret
+create-admin:
+	docker compose exec web python -c "\
+import os, sys; sys.path.insert(0, '/app/src'); \
+from mutau_website import create_app; \
+from mutau_website.extensions import db; \
+from mutau_website.models import User; \
+app = create_app(); \
+app.app_context().push(); \
+email = '$(EMAIL)'; \
+name = '$(NAME)'; \
+pw = '$(PASSWORD)'; \
+u = User(email=email, name=name, is_admin=True, is_verified=True); \
+u.set_password(pw); \
+db.session.add(u); \
+db.session.commit(); \
+print('Admin created:', email)"

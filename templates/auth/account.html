@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Mein Account{% endblock %}
+{% block content %}
+
+<div class="container">
+    <div class="section-header">
+        <h2>Mein Account</h2>
+    </div>
+
+    <div class="account-layout">
+
+        <!-- Info -->
+        <div class="account-section">
+            <h3>Profil</h3>
+            <div class="account-row">
+                <span>Name</span>
+                <span>{{ current_user.name }}</span>
+            </div>
+            <div class="account-row">
+                <span>E-Mail</span>
+                <span>{{ current_user.email }}</span>
+            </div>
+            <div class="account-row">
+                <span>Registriert am</span>
+                <span>{{ current_user.created_at.strftime('%d.%m.%Y') }}</span>
+            </div>
+            <div class="account-row">
+                <span>Rolle</span>
+                <span>{{ 'Administrator' if current_user.is_admin else 'Nutzer' }}</span>
+            </div>
+        </div>
+
+        <!-- Newsletter -->
+        <div class="account-section">
+            <h3>Newsletter</h3>
+            <div class="account-row">
+                <span>Status</span>
+                <span>
+                    {% if current_user.newsletter %}
+                        <span class="badge badge-green">Aktiv</span>
+                    {% else %}
+                        <span class="badge badge-gray">Inaktiv</span>
+                    {% endif %}
+                </span>
+            </div>
+            <form method="POST" action="{{ url_for('auth.toggle_newsletter') }}" style="margin-top:1rem">
+                <button type="submit" class="btn btn-outline btn-sm">
+                    Newsletter {{ 'deaktivieren' if current_user.newsletter else 'aktivieren' }}
+                </button>
+            </form>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="account-section" style="border-color:rgba(239,68,68,0.25)">
+            <h3 style="color:#f87171">Account löschen</h3>
+            <p style="color:var(--text-soft);font-size:0.83rem;margin-bottom:1.25rem;line-height:1.6">
+                Diese Aktion ist unwiderruflich. Dein Account und alle zugehörigen Daten werden anonymisiert.
+            </p>
+            <form method="POST" action="{{ url_for('auth.delete_account') }}"
+                  onsubmit="return confirm('Bist du sicher? Diese Aktion kann nicht rückgängig gemacht werden.')">
+                <div class="form-group">
+                    <label>Gib <strong>LÖSCHEN</strong> ein zur Bestätigung</label>
+                    <input type="text" name="confirm" required placeholder="LÖSCHEN" autocomplete="off">
+                </div>
+                <button type="submit" class="btn btn-danger btn-sm">Account unwiderruflich löschen</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

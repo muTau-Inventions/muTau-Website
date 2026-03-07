@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <h4>Admin</h4>
+            <ul>
+                <li><a href="{{ url_for('admin.dashboard') }}"  {% if request.endpoint == 'admin.dashboard'  %}class="active"{% endif %}>Dashboard</a></li>
+                <li><a href="{{ url_for('admin.products') }}"   {% if request.endpoint == 'admin.products'   %}class="active"{% endif %}>Produkte</a></li>
+                <li><a href="{{ url_for('admin.papers') }}"     {% if request.endpoint == 'admin.papers'     %}class="active"{% endif %}>Forschung</a></li>
+                <li><a href="{{ url_for('admin.offers') }}"     {% if request.endpoint == 'admin.offers'     %}class="active"{% endif %}>Angebote</a></li>
+                <li><a href="{{ url_for('admin.users') }}"      {% if request.endpoint == 'admin.users'      %}class="active"{% endif %}>Nutzer</a></li>
+            </ul>
+        </aside>
+        <div class="admin-content">
+            {% block admin_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

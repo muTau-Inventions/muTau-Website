@@ -1,88 +1,40 @@
 {% extends "base.html" %}
-
 {% block title %}Dokumentation{% endblock %}
-
 {% block content %}
 
 <div class="container">
-
     <div class="section-header">
         <h2>Dokumentation</h2>
-        <p style="color:#94a3b8;">Alles was Sie brauchen, um mit muTau zu starten</p>
+        <p>Alles was Sie brauchen, um mit muTau zu starten</p>
     </div>
 
-    <div class="docs-container">
-
-        <!-- SIDEBAR AUTO -->
-        <div class="docs-sidebar">
+    {% if docs %}
+    <div class="docs-layout">
+        <nav class="docs-sidebar">
             <ul>
                 {% for doc in docs %}
                 <li>
-                    <a href="#"
-                       onclick="showDocsSection(event, '{{ doc.id }}')">
-                        {{ doc.title }}
-                    </a>
+                    <a href="#{{ doc.id }}" data-section="{{ doc.id }}">{{ doc.title }}</a>
                 </li>
                 {% endfor %}
             </ul>
-        </div>
+        </nav>
 
-        <!-- CONTENT AUTO -->
         <div class="docs-content">
-
             {% for doc in docs %}
             <div id="{{ doc.id }}-section"
                  class="docs-section"
-                 {% if not loop.first %}style="display:none;"{% endif %}>
-
+                 {% if not loop.first %}style="display:none"{% endif %}>
                 {{ doc.content | safe }}
-
             </div>
             {% endfor %}
-
         </div>
-
     </div>
-
+    {% else %}
+    <p style="text-align:center; color:var(--text-muted); padding:4rem 0;">
+        Noch keine Dokumentation vorhanden. Erstelle <code>.md</code>-Dateien im <code>docs/</code>-Verzeichnis.
+    </p>
+    {% endif %}
 </div>
-
-<!-- EXACT SAME LOOK STYLING -->
-<style>
-
-.docs-content h2 {
-    color: white;
-    margin-bottom: 1rem;
-}
-
-.docs-content h3 {
-    color: white;
-    margin-top: 1.5rem;
-}
-
-.docs-content p {
-    color: #94a3b8;
-    line-height: 1.6;
-}
-
-.docs-content ul {
-    color: #94a3b8;
-    margin-left: 2rem;
-    line-height: 2;
-}
-
-.docs-content pre {
-    background: #020617;
-    padding: 1rem;
-    border-radius: 8px;
-    overflow-x: auto;
-    margin-top: 1rem;
-}
-
-.docs-content code {
-    font-family: monospace;
-    color: #e2e8f0;
-}
-
-</style>
 
 {% endblock %}

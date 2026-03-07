@@ -1,0 +1,275 @@
+/* ============================================================
+   BASE — reset · variables · body · nav · footer · flash
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap');
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Palette */
+    --primary:      #6366f1;
+    --primary-dim:  rgba(99, 102, 241, 0.15);
+    --secondary:    #8b5cf6;
+    --accent:       #ec4899;
+    --dark:         #0a0f1e;
+    --surface:      #0f172a;
+    --surface-2:    #1e293b;
+    --border:       rgba(255, 255, 255, 0.08);
+    --text:         #f1f5f9;
+    --text-muted:   #64748b;
+    --text-soft:    #94a3b8;
+
+    /* Gradients */
+    --gradient:     linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-alt: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+
+    /* Typography */
+    --font-display: 'Syne', sans-serif;
+    --font-mono:    'Space Mono', monospace;
+
+    /* Spacing */
+    --nav-height:   70px;
+    --max-width:    1400px;
+    --radius:       12px;
+    --radius-lg:    20px;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-mono);
+    background: var(--dark);
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+
+::-webkit-scrollbar              { width: 6px; }
+::-webkit-scrollbar-track        { background: var(--dark); }
+::-webkit-scrollbar-thumb        { background: var(--primary); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover  { background: var(--secondary); }
+
+/* ── Navigation ───────────────────────────────────────────── */
+
+nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: var(--nav-height);
+    background: rgba(10, 15, 30, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+}
+
+nav .nav-inner {
+    max-width: var(--max-width);
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.4rem;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    cursor: pointer;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 0.25rem;
+    align-items: center;
+}
+
+nav a {
+    color: var(--text-soft);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.5rem 0.85rem;
+    border-radius: 8px;
+    transition: color 0.2s, background 0.2s;
+}
+
+nav a:hover {
+    color: var(--text);
+    background: var(--primary-dim);
+}
+
+nav a.active {
+    color: var(--primary);
+}
+
+.nav-auth {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 1rem;
+    padding-left: 1rem;
+    border-left: 1px solid var(--border);
+}
+
+/* ── Flash Messages ───────────────────────────────────────── */
+
+.flash-container {
+    position: fixed;
+    top: calc(var(--nav-height) + 1rem);
+    right: 1.5rem;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 380px;
+    pointer-events: none;
+}
+
+.flash {
+    padding: 0.9rem 1.25rem;
+    border-radius: var(--radius);
+    font-size: 0.82rem;
+    border: 1px solid;
+    pointer-events: auto;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.flash-success { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #6ee7b7; }
+.flash-danger  { background: rgba(239, 68, 68, 0.12);  border-color: rgba(239, 68, 68, 0.3);  color: #fca5a5; }
+.flash-warning { background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.3); color: #fcd34d; }
+.flash-info    { background: rgba(99, 102, 241, 0.12); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc; }
+
+/* ── Footer ───────────────────────────────────────────────── */
+
+footer {
+    text-align: center;
+    padding: 3rem 0 2rem;
+    margin-top: 6rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+footer .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 0.75rem;
+}
+
+footer a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+footer a:hover {
+    color: var(--primary);
+}
+
+/* ── Particle Canvas ──────────────────────────────────────── */
+
+#particleCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── Main ─────────────────────────────────────────────────── */
+
+main {
+    position: relative;
+    z-index: 1;
+    padding-top: var(--nav-height);
+    min-height: calc(100vh - var(--nav-height));
+}
+
+/* ── Utility ──────────────────────────────────────────────── */
+
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.section-header {
+    text-align: center;
+    padding: 4rem 0 3rem;
+}
+
+.section-header h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+}
+
+.section-header p {
+    color: var(--text-soft);
+    font-size: 0.9rem;
+}
+
+/* ── Error Pages ──────────────────────────────────────────── */
+
+.error-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    gap: 1rem;
+}
+
+.error-page .error-code {
+    font-family: var(--font-display);
+    font-size: 6rem;
+    font-weight: 800;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+}
+
+.error-page p {
+    color: var(--text-soft);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}

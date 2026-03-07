@@ -3,56 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>muTau-Inventions - {% block title %}AI to FPGA Toolchain{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>muTau-Inventions — {% block title %}AI to FPGA Toolchain{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}">
+    {% block head %}{% endblock %}
 </head>
 <body>
-    <nav>
-        <div class="container">
-            <div class="logo" onclick="window.location='/'">muTau-Inventions</div>
-            <ul>
-                <li><a href="{{ url_for('index') }}">Home</a></li>
-                <li><a href="{{ url_for('research') }}">Forschung</a></li>
-                <!--<li><a href="{{ url_for('products') }}">Products</a></li> -->
-                <li><a href="{{ url_for('docs') }}">Docs</a></li>
-                <li><a href="{{ url_for('about') }}">Über uns</a></li>
-                <li><a href="{{ url_for('contact') }}">Kontakt</a></li>
-                <li><a href="{{ url_for('products')}}">Products</a></li>
-                {% if session.user %}
-                <li><a href="{{ url_for('logout') }}">Logout ({{ session.user_name }})</a></li>
-                {% else %}
-                <li><a href="{{ url_for('login') }}">Login</a></li>
+
+<canvas id="particleCanvas"></canvas>
+
+<nav>
+    <div class="nav-inner">
+        <a href="{{ url_for('main.index') }}" class="logo">muTau</a>
+        <ul>
+            <li><a href="{{ url_for('main.index') }}"       {% if request.endpoint == 'main.index'       %}class="active"{% endif %}>Home</a></li>
+            <li><a href="{{ url_for('content.research') }}" {% if request.endpoint == 'content.research' %}class="active"{% endif %}>Forschung</a></li>
+            <li><a href="{{ url_for('content.docs') }}"     {% if request.endpoint == 'content.docs'     %}class="active"{% endif %}>Docs</a></li>
+            <li><a href="{{ url_for('products.products') }}" {% if request.endpoint == 'products.products' or request.endpoint == 'products.product_detail' %}class="active"{% endif %}>Produkte</a></li>
+            <li><a href="{{ url_for('main.about') }}"       {% if request.endpoint == 'main.about'       %}class="active"{% endif %}>Über uns</a></li>
+            <li><a href="{{ url_for('main.contact') }}"     {% if request.endpoint == 'main.contact'     %}class="active"{% endif %}>Kontakt</a></li>
+        </ul>
+        <div class="nav-auth">
+            {% if current_user.is_authenticated %}
+                {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline">Admin</a>
                 {% endif %}
-            </ul>
+                <a href="{{ url_for('auth.account') }}" class="btn btn-sm btn-outline">{{ current_user.name }}</a>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-sm">Logout</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline">Login</a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-sm">Registrieren</a>
+            {% endif %}
         </div>
-    </nav>
+    </div>
+</nav>
 
+<div class="flash-container">
     {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash flash-{{ category }}" style="padding:1rem; margin:1rem auto; max-width:1400px; border-radius:8px;">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
+        {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
     {% endwith %}
+</div>
 
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+<main>
+    {% block content %}{% endblock %}
+</main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 muTau-Inventions GmbH. Alle Rechte vorbehalten.</p>
-            <p style="margin-top: 0.5rem;">
-                <a href="{{ url_for('datenschutz') }}" style="color: #64748b; text-decoration: none; margin: 0 1rem;">Datenschutz</a>
-                <a href="{{ url_for('impressum') }}" style="color: #64748b; text-decoration: none; margin: 0 1rem;">Impressum</a>
-                <a href="{{ url_for('agb') }}" style="color: #64748b; text-decoration: none; margin: 0 1rem;">AGB</a>
-            </p>
+<footer>
+    <div class="container">
+        <p>&copy; 2026 muTau-Inventions GmbH. Alle Rechte vorbehalten.</p>
+        <div class="footer-links">
+            <a href="{{ url_for('legal.datenschutz') }}">Datenschutz</a>
+            <a href="{{ url_for('legal.impressum') }}">Impressum</a>
+            <a href="{{ url_for('legal.agb') }}">AGB</a>
         </div>
-    </footer>
+    </div>
+</footer>
 
-    <canvas id="particleCanvas" class="particles"></canvas>
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+<script src="{{ url_for('static', filename='js/scroll.js') }}"></script>
+<script src="{{ url_for('static', filename='js/docs.js') }}"></script>
+<script src="{{ url_for('static', filename='js/tabs.js') }}"></script>
+{% block scripts %}{% endblock %}
 </body>
 </html>

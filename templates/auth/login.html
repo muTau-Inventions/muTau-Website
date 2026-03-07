@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+
+<div class="auth-container">
+    <div class="auth-box">
+        <h2>Anmelden</h2>
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <div class="form-group">
+                <label>E-Mail</label>
+                <input type="email" name="email" required placeholder="you@example.com" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label>Passwort</label>
+                <input type="password" name="password" required placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <div class="auth-row">
+                <label class="form-check" style="margin:0">
+                    <input type="checkbox" name="remember">
+                    <span>Angemeldet bleiben</span>
+                </label>
+                <a href="{{ url_for('auth.forgot_password') }}">Passwort vergessen?</a>
+            </div>
+            <button type="submit" class="btn" style="width:100%">Anmelden</button>
+        </form>
+        <p class="auth-footer">
+            Noch kein Account? <a href="{{ url_for('auth.register') }}">Registrieren</a>
+        </p>
+    </div>
+</div>
+
+{% endblock %}
