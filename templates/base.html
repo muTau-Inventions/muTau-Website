@@ -18,12 +18,12 @@
     <div class="nav-inner">
         <a href="{{ url_for('main.index') }}" class="logo">muTau</a>
         <ul>
-            <li><a href="{{ url_for('main.index') }}"          {% if request.endpoint == 'main.index'            %}class="active"{% endif %}>Home</a></li>
-            <li><a href="{{ url_for('content.research') }}"    {% if request.endpoint == 'content.research'      %}class="active"{% endif %}>Forschung</a></li>
-            <li><a href="{{ url_for('content.docs') }}"        {% if request.endpoint == 'content.docs'          %}class="active"{% endif %}>Docs</a></li>
-            <li><a href="{{ url_for('products.products') }}"   {% if request.endpoint in ['products.products','products.product_detail'] %}class="active"{% endif %}>Produkte</a></li>
-            <li><a href="{{ url_for('main.about') }}"          {% if request.endpoint == 'main.about'            %}class="active"{% endif %}>Über uns</a></li>
-            <li><a href="{{ url_for('main.contact') }}"        {% if request.endpoint == 'main.contact'          %}class="active"{% endif %}>Kontakt</a></li>
+            <li><a href="{{ url_for('main.index') }}"         {% if request.endpoint == 'main.index'                                         %}class="active"{% endif %}>Home</a></li>
+            <li><a href="{{ url_for('content.research') }}"   {% if request.endpoint == 'content.research'                                   %}class="active"{% endif %}>Forschung</a></li>
+            <li><a href="{{ url_for('content.docs') }}"       {% if request.endpoint == 'content.docs'                                       %}class="active"{% endif %}>Docs</a></li>
+            <li><a href="{{ url_for('products.products') }}"  {% if request.endpoint in ['products.products','products.product_detail']       %}class="active"{% endif %}>Produkte</a></li>
+            <li><a href="{{ url_for('main.about') }}"         {% if request.endpoint == 'main.about'                                         %}class="active"{% endif %}>Über uns</a></li>
+            <li><a href="{{ url_for('main.contact') }}"       {% if request.endpoint == 'main.contact'                                       %}class="active"{% endif %}>Kontakt</a></li>
         </ul>
         <div class="nav-auth">
             {% if current_user.is_authenticated %}
@@ -65,8 +65,6 @@
 
 <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
 <script src="{{ url_for('static', filename='js/scroll.js') }}"></script>
-<script src="{{ url_for('static', filename='js/docs.js') }}"></script>
-<script src="{{ url_for('static', filename='js/tabs.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

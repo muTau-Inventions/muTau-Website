@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ product.name }}{% endblock %}
-{% block content %}
 
+{% block content %}
 <div id="product-{{ product.slug }}" class="container">
-    <a href="{{ url_for('products.products') }}" class="btn btn-outline btn-sm" style="margin-bottom:2rem;display:inline-block;">
+    <a href="{{ url_for('products.products') }}" class="btn btn-outline btn-sm"
+       style="margin-bottom:2rem; display:inline-block;">
         ← Zurück zu Produkten
     </a>
 
@@ -20,9 +21,9 @@
     </div>
 
     <div class="tabs">
-        <div class="tab active"  data-tab="features" onclick="showTab('{{ product.slug }}', 'features')">Features</div>
-        <div class="tab"         data-tab="specs"    onclick="showTab('{{ product.slug }}', 'specs')">Spezifikationen</div>
-        <div class="tab"         data-tab="support"  onclick="showTab('{{ product.slug }}', 'support')">Support</div>
+        <div class="tab active" data-tab="features" onclick="showTab('{{ product.slug }}', 'features')">Features</div>
+        <div class="tab"        data-tab="specs"    onclick="showTab('{{ product.slug }}', 'specs')">Spezifikationen</div>
+        <div class="tab"        data-tab="support"  onclick="showTab('{{ product.slug }}', 'support')">Support</div>
     </div>
 
     <div id="{{ product.slug }}-features" class="tab-content active">
@@ -55,5 +56,8 @@
         </ul>
     </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/tabs.js') }}"></script>
 {% endblock %}

@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Dokumentation{% endblock %}
-{% block content %}
 
+{% block content %}
 <div class="container">
     <div class="section-header">
         <h2>Dokumentation</h2>
-        <p>Alles was Sie brauchen, um mit muTau zu starten</p>
+        <p>Alles, was Sie brauchen, um mit muTau zu starten</p>
     </div>
 
     {% if docs %}
@@ -36,5 +36,8 @@
     </p>
     {% endif %}
 </div>
+{% endblock %}
 
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/docs.js') }}"></script>
 {% endblock %}

@@ -27,7 +27,7 @@
     --font-mono:    'Space Mono', monospace;
 
     --nav-height:   70px;
-    --max-width:    1400px;
+    --max-width:    1200px;
     --radius:       12px;
     --radius-lg:    20px;
 }
@@ -41,6 +41,17 @@ body {
     overflow-x: hidden;
     line-height: 1.6;
     font-size: 15px;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 15% 40%, rgba(99,102,241,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 15%, rgba(139,92,246,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 /* Scrollbar */
@@ -75,6 +86,7 @@ nav .nav-inner {
     gap: 1rem;
 }
 
+/* Logo */
 .logo {
     font-family: var(--font-display);
     font-weight: 800;
@@ -87,6 +99,15 @@ nav .nav-inner {
     letter-spacing: -0.02em;
     text-decoration: none;
     flex-shrink: 0;
+    transition: filter 0.2s;
+}
+
+.logo:hover {
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: brightness(1.15);
 }
 
 nav ul {
@@ -110,8 +131,9 @@ nav a {
     white-space: nowrap;
 }
 
-nav a:hover { color: var(--text); background: var(--primary-dim); }
-nav a.active { color: var(--primary); }
+/* Exclude .logo from the generic hover rule */
+nav a:not(.logo):hover { color: var(--text); background: var(--primary-dim); }
+nav a.active            { color: var(--primary); }
 
 .nav-auth {
     display: flex;
@@ -193,7 +215,7 @@ main {
     min-height: calc(100vh - var(--nav-height));
 }
 
-/* Utility */
+/* Utilities */
 .container {
     max-width: var(--max-width);
     margin: 0 auto;
@@ -207,7 +229,7 @@ main {
 
 .section-header h2 {
     font-family: var(--font-display);
-    font-size: clamp(2rem, 4vw, 3rem);
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
     font-weight: 800;
     background: var(--gradient);
     -webkit-background-clip: text;
@@ -219,7 +241,7 @@ main {
 
 .section-header p { color: var(--text-soft); font-size: 0.9rem; }
 
-/* Code / mono  */
+/* Code / mono */
 code, pre, .mono { font-family: var(--font-mono); }
 
 /* Error Pages */
