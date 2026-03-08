@@ -9,34 +9,74 @@
         if (!canvas) return;
 
         var ctx = canvas.getContext('2d');
+        var oldWidth = 0;
+        var oldHeight = 0;
 
         function resize() {
+            oldWidth = canvas.width;
+            oldHeight = canvas.height;
+            
             canvas.width  = window.innerWidth;
             canvas.height = window.innerHeight;
+            
+            // Deleting out of screen particles
+            for (var i = 0; i < particles.length; i++) {
+                var p = particles[i];
+                if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            
+            // Spawning new particles
+            if ((canvas.width > oldWidth || canvas.height > oldHeight) && particles.length < COUNT) {
+                var toAdd = Math.min(COUNT - particles.length, 20);
+                for (var j = 0; j < toAdd; j++) {
+                    var newX, newY;
+                    if (canvas.width > oldWidth) {
+                        newX = oldWidth + Math.random() * (canvas.width - oldWidth);
+                    } else {
+                        newX = Math.random() * canvas.width;
+                    }
+                    
+                    if (canvas.height > oldHeight) {
+                        newY = oldHeight + Math.random() * (canvas.height - oldHeight);
+                    } else {
+                        newY = Math.random() * canvas.height;
+                    }
+                    
+                    particles.push({
+                        x: newX,
+                        y: newY,
+                        size: Math.random() * 2.5 + 0.5,
+                        speedY: Math.random() * 0.8 + 0.3,
+                        speedX: Math.random() * 0.4 - 0.2,
+                        opacity: Math.random() * 0.4 + 0.1
+                    });
+                }
+            }
         }
 
-        resize();
+        function getInitialDimensions() {
+            canvas.width  = window.innerWidth;
+            canvas.height = window.innerHeight;
+            oldWidth = canvas.width;
+            oldHeight = canvas.height;
+        }
+
+        getInitialDimensions();
 
         var particles = [];
 
-        function makeParticle(data) {
-            var p = {};
-            if (data) {
-                p.x       = data.x;
-                p.y       = data.y;
-                p.size    = data.size;
-                p.speedY  = data.speedY;
-                p.speedX  = data.speedX;
-                p.opacity = data.opacity;
-            } else {
-                p.x       = Math.random() * canvas.width;
-                p.y       = Math.random() * canvas.height;
-                p.size    = Math.random() * 2.5 + 0.5;
-                p.speedY  = Math.random() * 0.8 + 0.3;
-                p.speedX  = Math.random() * 0.4 - 0.2;
-                p.opacity = Math.random() * 0.4 + 0.1;
-            }
-            return p;
+        function makeParticle(x, y) {
+            return {
+                x: x,
+                y: y,
+                size: Math.random() * 2.5 + 0.5,
+                speedY: Math.random() * 0.8 + 0.3,
+                speedX: Math.random() * 0.4 - 0.2,
+                opacity: Math.random() * 0.4 + 0.1
+            };
         }
 
         // Restore from sessionStorage if available
@@ -45,18 +85,21 @@
             var saved = sessionStorage.getItem(STORAGE_KEY);
             if (saved) {
                 var data = JSON.parse(saved);
-                if (Array.isArray(data) && data.length === COUNT) {
-                    for (var i = 0; i < COUNT; i++) {
-                        particles.push(makeParticle(data[i]));
+                if (Array.isArray(data) && data.length > 0) {
+                    for (var i = 0; i < data.length; i++) {
+                        particles.push(makeParticle(data[i].x, data[i].y));
                     }
                     restored = true;
                 }
             }
         } catch (e) {}
 
-        if (!restored) {
+        if (!restored || particles.length === 0) {
             for (var j = 0; j < COUNT; j++) {
-                particles.push(makeParticle(null));
+                particles.push(makeParticle(
+                    Math.random() * canvas.width,
+                    Math.random() * canvas.height
+                ));
             }
         }
 
@@ -97,7 +140,7 @@
 
         animate();
 
-        // Save state before navigating away so the next page can restore it
+        // Save state before navigating away
         window.addEventListener('pagehide', function () {
             try {
                 sessionStorage.setItem(STORAGE_KEY, JSON.stringify(particles));
@@ -112,4 +155,4 @@
     }
 
     document.addEventListener('DOMContentLoaded', initParticles);
-}());
+})();
