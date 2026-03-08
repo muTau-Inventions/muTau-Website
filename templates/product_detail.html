@@ -1,10 +1,14 @@
 {% extends "base.html" %}
 {% block title %}{{ product.name }}{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/products.css') }}">
+{% endblock %}
+
 {% block content %}
 <div id="product-{{ product.slug }}" class="container">
     <a href="{{ url_for('products.products') }}" class="btn btn-outline btn-sm"
-       style="margin-bottom:2rem; display:inline-block;">
+       style="margin-bottom:1.75rem; display:inline-flex;">
         ← Zurück zu Produkten
     </a>
 

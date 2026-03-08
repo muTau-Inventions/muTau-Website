@@ -12,7 +12,7 @@
                 if (entry.isIntersecting) {
                     entry.target.style.opacity   = '1';
                     entry.target.style.transform = 'translateY(0)';
-                    observer.unobserve(entry.target); // only animate once
+                    observer.unobserve(entry.target);
                 }
             });
         }, { threshold: 0.08 });

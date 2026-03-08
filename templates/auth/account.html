@@ -8,8 +8,6 @@
     </div>
 
     <div class="account-layout">
-
-        <!-- Info -->
         <div class="account-section">
             <h3>Profil</h3>
             <div class="account-row">
@@ -30,7 +28,6 @@
             </div>
         </div>
 
-        <!-- Newsletter -->
         <div class="account-section">
             <h3>Newsletter</h3>
             <div class="account-row">
@@ -50,7 +47,6 @@
             </form>
         </div>
 
-        <!-- Danger Zone -->
         <div class="account-section" style="border-color:rgba(239,68,68,0.25)">
             <h3 style="color:#f87171">Account löschen</h3>
             <p style="color:var(--text-soft);font-size:0.88rem;margin-bottom:1.25rem;line-height:1.6">
@@ -60,7 +56,6 @@
                   onsubmit="return confirm('Bist du sicher? Diese Aktion kann nicht rückgängig gemacht werden.')">
                 <div class="form-group">
                     <label>Gib <strong>LÖSCHEN</strong> ein zur Bestätigung</label>
-                    <!-- No required attribute — validation is done server-side -->
                     <input type="text" name="confirm" placeholder="LÖSCHEN" autocomplete="off">
                 </div>
                 <button type="submit" class="btn btn-danger btn-sm">Account unwiderruflich löschen</button>
@@ -69,5 +64,4 @@
 
     </div>
 </div>
-
 {% endblock %}

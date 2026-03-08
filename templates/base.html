@@ -1,10 +1,22 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>muTau-Inventions | {% block title %}AI to FPGA Toolchain{% endblock %}</title>
+    <!-- Anti-FOUC: apply saved theme before any CSS renders -->
+    <script>
+      (function(){
+        try {
+          var t = localStorage.getItem('mt_theme');
+          if (t === 'light' || t === 'dark') {
+            document.documentElement.setAttribute('data-theme', t);
+          }
+        } catch(e){}
+      }());
+    </script>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}">
@@ -14,31 +26,64 @@
 
 <canvas id="particleCanvas"></canvas>
 
-<nav>
+<nav class="site-nav">
     <div class="nav-inner">
         <a href="{{ url_for('main.index') }}" class="logo">muTau</a>
-        <ul>
-            <li><a href="{{ url_for('main.index') }}"         {% if request.endpoint == 'main.index'                                         %}class="active"{% endif %}>Home</a></li>
-            <li><a href="{{ url_for('content.research') }}"   {% if request.endpoint == 'content.research'                                   %}class="active"{% endif %}>Forschung</a></li>
-            <li><a href="{{ url_for('content.docs') }}"       {% if request.endpoint == 'content.docs'                                       %}class="active"{% endif %}>Docs</a></li>
-            <li><a href="{{ url_for('products.products') }}"  {% if request.endpoint in ['products.products','products.product_detail']       %}class="active"{% endif %}>Produkte</a></li>
-            <li><a href="{{ url_for('main.about') }}"         {% if request.endpoint == 'main.about'                                         %}class="active"{% endif %}>Über uns</a></li>
-            <li><a href="{{ url_for('main.contact') }}"       {% if request.endpoint == 'main.contact'                                       %}class="active"{% endif %}>Kontakt</a></li>
+
+        <!-- Desktop links -->
+        <ul id="navLinks">
+            <li><a href="{{ url_for('main.index') }}"        {% if request.endpoint == 'main.index'                                   %}class="active"{% endif %}>Home</a></li>
+            <li><a href="{{ url_for('content.research') }}"  {% if request.endpoint == 'content.research'                             %}class="active"{% endif %}>Forschung</a></li>
+            <li><a href="{{ url_for('content.docs') }}"      {% if request.endpoint == 'content.docs'                                 %}class="active"{% endif %}>Docs</a></li>
+            <li><a href="{{ url_for('products.products') }}" {% if request.endpoint in ['products.products','products.product_detail'] %}class="active"{% endif %}>Produkte</a></li>
+            <li><a href="{{ url_for('main.about') }}"        {% if request.endpoint == 'main.about'                                   %}class="active"{% endif %}>Über uns</a></li>
+            <li><a href="{{ url_for('main.contact') }}"      {% if request.endpoint == 'main.contact'                                 %}class="active"{% endif %}>Kontakt</a></li>
         </ul>
+
+        <!-- Desktop auth + theme toggle -->
         <div class="nav-auth">
+            <button class="theme-toggle" id="themeToggle" title="Theme wechseln" aria-label="Theme wechseln">🌙</button>
             {% if current_user.is_authenticated %}
                 {% if current_user.is_admin %}
                     <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline">Admin</a>
                 {% endif %}
                 <a href="{{ url_for('auth.account') }}" class="btn btn-sm btn-outline">{{ current_user.name }}</a>
-                <a href="{{ url_for('auth.logout') }}" class="btn btn-sm">Logout</a>
+                <a href="{{ url_for('auth.logout') }}"  class="btn btn-sm">Logout</a>
             {% else %}
-                <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline">Login</a>
+                <a href="{{ url_for('auth.login') }}"    class="btn btn-sm btn-outline">Login</a>
                 <a href="{{ url_for('auth.register') }}" class="btn btn-sm">Registrieren</a>
             {% endif %}
         </div>
+
+        <!-- Mobile hamburger -->
+        <button class="nav-hamburger" id="navHamburger" aria-label="Menü" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
     </div>
 </nav>
+
+<!-- Mobile drawer -->
+<div class="nav-drawer" id="navDrawer" role="navigation" aria-label="Mobile Navigation">
+    <a href="{{ url_for('main.index') }}"        {% if request.endpoint == 'main.index'                                   %}class="active"{% endif %}>Home</a>
+    <a href="{{ url_for('content.research') }}"  {% if request.endpoint == 'content.research'                             %}class="active"{% endif %}>Forschung</a>
+    <a href="{{ url_for('content.docs') }}"      {% if request.endpoint == 'content.docs'                                 %}class="active"{% endif %}>Docs</a>
+    <a href="{{ url_for('products.products') }}" {% if request.endpoint in ['products.products','products.product_detail'] %}class="active"{% endif %}>Produkte</a>
+    <a href="{{ url_for('main.about') }}"        {% if request.endpoint == 'main.about'                                   %}class="active"{% endif %}>Über uns</a>
+    <a href="{{ url_for('main.contact') }}"      {% if request.endpoint == 'main.contact'                                 %}class="active"{% endif %}>Kontakt</a>
+    <div class="drawer-auth">
+        {% if current_user.is_authenticated %}
+            {% if current_user.is_admin %}
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline">Admin</a>
+            {% endif %}
+            <a href="{{ url_for('auth.account') }}" class="btn btn-sm btn-outline">{{ current_user.name }}</a>
+            <a href="{{ url_for('auth.logout') }}"  class="btn btn-sm">Logout</a>
+        {% else %}
+            <a href="{{ url_for('auth.login') }}"    class="btn btn-sm btn-outline">Login</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-sm">Registrieren</a>
+        {% endif %}
+        <button class="theme-toggle" id="themeToggleMobile" title="Theme wechseln">🌙</button>
+    </div>
+</div>
 
 <div class="flash-container">
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -65,6 +110,8 @@
 
 <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
 <script src="{{ url_for('static', filename='js/scroll.js') }}"></script>
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+<script src="{{ url_for('static', filename='js/nav.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

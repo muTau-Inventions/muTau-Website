@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Forschung{% endblock %}
-{% block content %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/research.css') }}">
+{% endblock %}
+
+{% block content %}
 <div class="container">
     <div class="section-header">
         <h2>Forschung &amp; Publikationen</h2>
@@ -21,7 +25,9 @@
         <a href="{{ url_for('content.research_pdf', filename=paper.pdf_path) }}"
            class="btn btn-sm"
            target="_blank"
-           rel="noopener">Paper lesen (PDF)</a>
+           rel="noopener">
+            Paper lesen (PDF)
+        </a>
     </div>
     {% else %}
     <p style="text-align:center; color:var(--text-muted); padding:4rem 0;">
@@ -29,5 +35,4 @@
     </p>
     {% endfor %}
 </div>
-
 {% endblock %}

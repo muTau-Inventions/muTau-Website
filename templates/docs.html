@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Dokumentation{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/docs.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="container">
     <div class="section-header">
@@ -10,15 +14,17 @@
 
     {% if docs %}
     <div class="docs-layout">
-        <nav class="docs-sidebar">
+        <div class="docs-sidebar">
             <ul>
                 {% for doc in docs %}
                 <li>
-                    <a href="#{{ doc.id }}" data-section="{{ doc.id }}">{{ doc.title }}</a>
+                    <a href="#{{ doc.id }}" data-section="{{ doc.id }}" title="{{ doc.title }}">
+                        {{ doc.title }}
+                    </a>
                 </li>
                 {% endfor %}
             </ul>
-        </nav>
+        </div>
 
         <div class="docs-content">
             {% for doc in docs %}

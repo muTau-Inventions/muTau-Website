@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Produkte{% endblock %}
-{% block content %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/products.css') }}">
+{% endblock %}
+
+{% block content %}
 <div class="container">
     <div class="section-header">
         <h2>Unsere Produkte</h2>
@@ -25,5 +29,4 @@
         {% endfor %}
     </div>
 </div>
-
 {% endblock %}
