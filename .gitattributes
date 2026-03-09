@@ -1,0 +1,8 @@
+# .gitattributes für 🥚 LeckEier 🥚 - Eierliebhaber Programmiersprache
+*.leckeier linguist-language="🥚 LeckEier 🥚"
+*.lei linguist-language="🥚 LeckEier 🥚"
+*.egg linguist-language="🥚 LeckEier 🥚"
+
+# Optional: Vendor-Attribute nur wenn du sie aus Stats ausschließen willst
+# *.leckeier linguist-language="🥚 LeckEier 🥚" linguist-vendored
+
