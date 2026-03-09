@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}AGB{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="section-header"><h2>Allgemeine Geschäftsbedingungen</h2></div>
+    <div class="legal-content">
+        <h3>§ 1 Geltungsbereich</h3>
+        <p>Diese AGB gelten für alle Verträge zwischen der muTau-Inventions GmbH (nachfolgend „Anbieter") und den Kunden über die Bereitstellung von Software-Lizenzen und Dienstleistungen.</p>
+
+        <h3>§ 2 Vertragsschluss</h3>
+        <p>Produkte und Dienstleistungen werden auf Anfragebasis angeboten. Eine Anfrage über das Kontaktformular oder die Angebotsfunktion stellt kein bindendes Angebot dar. Der Vertrag kommt erst durch eine schriftliche Auftragsbestätigung des Anbieters zustande.</p>
+
+        <h3>§ 3 Preise und Zahlungsbedingungen</h3>
+        <p>Preise werden individuell auf Basis der Kundenanforderungen kalkuliert und im Angebot ausgewiesen. Alle Preise verstehen sich zuzüglich der gesetzlichen Mehrwertsteuer. Zahlungsbedingungen werden im jeweiligen Angebot festgelegt.</p>
+
+        <h3>§ 4 Lizenzbereitstellung</h3>
+        <p>Die Bereitstellung von Software-Lizenzen erfolgt elektronisch nach Zahlungseingang. Details werden in der Auftragsbestätigung festgelegt.</p>
+
+        <h3>§ 5 Nutzungsrechte</h3>
+        <p>Mit Erwerb einer Lizenz erhält der Kunde ein nicht-exklusives, nicht übertragbares Nutzungsrecht an der Software für die vereinbarte Anzahl von Arbeitsplätzen. Eine Weitergabe an Dritte ist untersagt.</p>
+
+        <h3>§ 6 Gewährleistung</h3>
+        <p>Es gelten die gesetzlichen Gewährleistungsrechte. Bei Software-Produkten erfolgt die Gewährleistung durch Bereitstellung von Updates und Patches.</p>
+
+        <h3>§ 7 Support und Wartung</h3>
+        <p>Der Anbieter stellt E-Mail-Support und Online-Dokumentation zur Verfügung. Die Standard-Reaktionszeit beträgt 24 Stunden an Werktagen.</p>
+
+        <h3>§ 8 Haftungsbeschränkung</h3>
+        <p>Die Haftung des Anbieters ist auf Vorsatz und grobe Fahrlässigkeit beschränkt. Bei leichter Fahrlässigkeit haftet der Anbieter nur bei Verletzung wesentlicher Vertragspflichten.</p>
+
+        <h3>§ 9 Datenschutz</h3>
+        <p>Der Anbieter verarbeitet personenbezogene Daten gemäß DSGVO. Weitere Informationen finden Sie in der <a href="{{ url_for('legal.datenschutz') }}" style="color:var(--primary)">Datenschutzerklärung</a>.</p>
+
+        <h3>§ 10 Schlussbestimmungen</h3>
+        <p>Es gilt das Recht der Bundesrepublik Deutschland. Gerichtsstand ist Leipzig. Sollten einzelne Bestimmungen unwirksam sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt.</p>
+
+        <p style="margin-top:2rem;font-style:italic;color:var(--text-muted)">Stand: Januar 2026</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Admin — Angebotsanfragen{% endblock %}
+{% block admin_content %}
+
+<h2>Angebotsanfragen</h2>
+
+{% if offers %}
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>E-Mail</th>
+            <th>Unternehmen</th>
+            <th>Produkt</th>
+            <th>Datum</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for offer in offers %}
+        <tr>
+            <td style="color:var(--text-muted);font-size:0.78rem">{{ offer.id }}</td>
+            <td>{{ offer.name }}</td>
+            <td style="color:var(--text-muted)">{{ offer.email }}</td>
+            <td style="color:var(--text-muted)">{{ offer.company or '—' }}</td>
+            <td>
+                {% if offer.product_interest %}
+                    <span class="badge badge-purple">{{ offer.product_interest }}</span>
+                {% else %}
+                    <span style="color:var(--text-muted)">—</span>
+                {% endif %}
+            </td>
+            <td style="color:var(--text-muted);font-size:0.8rem;white-space:nowrap">
+                {{ offer.created_at.strftime('%d.%m.%Y %H:%M') }}
+            </td>
+            <td>
+                {% if offer.status == 'new' %}
+                    <span class="badge badge-yellow">Neu</span>
+                {% elif offer.status == 'read' %}
+                    <span class="badge badge-gray">Gelesen</span>
+                {% else %}
+                    <span class="badge badge-green">Beantwortet</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if offer.status == 'new' %}
+                <form method="POST" action="{{ url_for('admin.mark_offer_read', offer_id=offer.id) }}">
+                    <button type="submit" class="btn btn-sm btn-outline">Als gelesen markieren</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        <!-- Expandable message row -->
+        <tr>
+            <td colspan="8" style="padding: 0 1rem 1rem 3rem; color:var(--text-soft); font-size:0.85rem; border-bottom: 1px solid var(--border); line-height:1.7">
+                <em>{{ offer.message }}</em>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="coming-soon">
+    <p style="font-size:1.5rem">📋</p>
+    <p>Noch keine Angebotsanfragen eingegangen.</p>
+</div>
+{% endif %}
+
+{% endblock %}

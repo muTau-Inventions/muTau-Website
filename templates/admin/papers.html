@@ -1,0 +1,42 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Admin — Forschung{% endblock %}
+{% block admin_content %}
+
+<h2>Forschungspapiere</h2>
+
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>Titel</th>
+            <th>Autoren</th>
+            <th>Datum</th>
+            <th>Newsletter</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for paper in papers %}
+        <tr>
+            <td>{{ paper.title }}</td>
+            <td style="color:var(--text-muted)">{{ paper.authors }}</td>
+            <td style="color:var(--text-muted);font-size:0.78rem">
+                {{ paper.date.strftime('%d.%m.%Y') if paper.date else '—' }}
+            </td>
+            <td>
+                {% if paper.notified %}
+                    <span class="badge badge-green">Gesendet</span>
+                {% else %}
+                    <span class="badge badge-gray">Ausstehend</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" style="color:var(--text-muted);text-align:center;padding:2rem">Keine Papiere.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="coming-soon" style="margin-top:2rem">
+    <p>Upload und Verwaltung von Papieren wird in einem zukünftigen Release implementiert.</p>
+</div>
+
+{% endblock %}

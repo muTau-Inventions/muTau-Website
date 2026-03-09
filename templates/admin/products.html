@@ -1,0 +1,38 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Admin — Produkte{% endblock %}
+{% block admin_content %}
+
+<h2>Produkte</h2>
+
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>Slug</th>
+            <th>Name</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted)">{{ product.slug }}</td>
+            <td>{{ product.name }}</td>
+            <td>
+                {% if product.is_active %}
+                    <span class="badge badge-green">Aktiv</span>
+                {% else %}
+                    <span class="badge badge-gray">Inaktiv</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" style="color:var(--text-muted);text-align:center;padding:2rem">Keine Produkte.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="coming-soon" style="margin-top:2rem">
+    <p>Bearbeitung von Produkten wird in einem zukünftigen Release implementiert.</p>
+</div>
+
+{% endblock %}

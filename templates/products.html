@@ -1,23 +1,31 @@
 {% extends "base.html" %}
 {% block title %}Produkte{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/products.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="container">
     <div class="section-header">
         <h2>Unsere Produkte</h2>
-        <p style="color: #94a3b8;">Leistungsstarke Tools für FPGA-basierte KI-Beschleunigung</p>
+        <p>Leistungsstarke Tools für FPGA-basierte KI-Beschleunigung</p>
     </div>
 
-    <div class="product-grid">
-        {% for pid, product in products.items() %}
-        <div class="product">
-            <div class="product-image">{{ product.icon }}</div>
-            <div class="product-content">
+    <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card">
+            <div class="product-icon">{{ product.icon }}</div>
+            <div class="product-body">
                 <h3>{{ product.name }}</h3>
                 <p>{{ product.description }}</p>
-                <div class="price">€{{ "{:,}".format(product.price) }}</div>
-                <button class="btn" onclick="window.location='{{ url_for('product_detail', product_id=pid) }}'">Mehr erfahren</button>
+                <a href="{{ url_for('products.product_detail', slug=product.slug) }}" class="btn btn-sm">
+                    Mehr erfahren
+                </a>
             </div>
         </div>
+        {% else %}
+        <p style="color:var(--text-muted)">Keine Produkte gefunden.</p>
         {% endfor %}
     </div>
 </div>

@@ -1,0 +1,40 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block admin_content %}
+
+<h2>Dashboard</h2>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.users }}</div>
+        <div class="stat-label">Nutzer</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.newsletter }}</div>
+        <div class="stat-label">Newsletter</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.products }}</div>
+        <div class="stat-label">Produkte</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.papers }}</div>
+        <div class="stat-label">Publikationen</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.offers }}</div>
+        <div class="stat-label">Anfragen</div>
+    </div>
+    {% if stats.new_offers > 0 %}
+    <div class="stat-card" style="border-color:rgba(245,158,11,0.3)">
+        <div class="stat-value" style="color:#fbbf24">{{ stats.new_offers }}</div>
+        <div class="stat-label">Neu / Ungelesen</div>
+    </div>
+    {% endif %}
+</div>
+
+<p style="color:var(--text-muted);font-size:0.85rem">
+    Weitere Admin-Funktionen werden in einem zukünftigen Release implementiert.
+</p>
+
+{% endblock %}

@@ -1,0 +1,100 @@
+/* Docs Layout */
+.docs-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 2rem;
+    align-items: start;
+    margin-bottom: 4rem;
+}
+
+/* Sidebar */
+.docs-sidebar {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1rem;
+    border: 1px solid var(--border);
+    position: sticky;
+    top: calc(var(--nav-height) + 1.25rem);
+    z-index: 10;
+}
+
+.docs-sidebar ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    width: 100%;
+}
+
+.docs-sidebar a {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    color: var(--text-soft);
+    text-decoration: none;
+    font-size: 0.83rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color var(--transition), background var(--transition);
+}
+.docs-sidebar a:hover,
+.docs-sidebar a.active { color: var(--primary); background: var(--primary-dim); }
+
+/* Content Area */
+.docs-content {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 2.25rem;
+    border: 1px solid var(--border);
+    min-width: 0;
+}
+
+.docs-content h1 {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+    margin-top: 0;
+}
+.docs-content h2 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 1.5rem 0 0.6rem;
+    letter-spacing: -0.02em;
+}
+.docs-content h3 { color: var(--primary); font-size: 0.95rem; margin: 1.1rem 0 0.45rem; font-weight: 600; }
+
+.docs-content p  { color: var(--text-soft); font-size: 0.88rem; line-height: 1.8; margin-bottom: 0.9rem; }
+.docs-content ul,
+.docs-content ol { color: var(--text-soft); font-size: 0.88rem; line-height: 1.9; margin: 0.65rem 0 0.65rem 1.25rem; }
+
+.docs-content code {
+    background: rgba(0,0,0,0.3);
+    padding: 0.12rem 0.4rem;
+    border-radius: 4px;
+    color: #a5b4fc;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+}
+
+.docs-content pre {
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    padding: 1.1rem 1.25rem;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    margin: 0.9rem 0;
+    border-left: 3px solid var(--primary);
+}
+.docs-content pre code { background: none; padding: 0; color: #e2e8f0; }
+
+/* Responsive */
+@media (max-width: 700px) {
+    .docs-layout { grid-template-columns: 1fr; }
+    .docs-sidebar { position: static; }
+    .docs-content { padding: 1.5rem; }
+}

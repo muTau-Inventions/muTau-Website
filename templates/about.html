@@ -1,49 +1,51 @@
 {% extends "base.html" %}
 {% block title %}Über uns{% endblock %}
 {% block content %}
+
 <div class="container">
     <div class="section-header">
         <h2>Über uns</h2>
-        <p style="color: #94a3b8;">Innovation trifft auf Hardware-Beschleunigung</p>
+        <p>Innovation trifft auf Hardware-Beschleunigung</p>
     </div>
 
-    <div style="max-width: 800px; margin: 0 auto; text-align: center;">
-        <p style="font-size: 1.2rem; line-height: 1.8; color: #94a3b8; margin-bottom: 3rem;">
-            muTau-Inventions wurde mit der Vision gegründet, die Lücke zwischen KI-Entwicklung und 
-            Hardware-Implementierung zu schließen. Unsere Toolchain ermöglicht es Entwicklern und 
-            Forschern, ihre KI-Modelle mit minimalem Aufwand auf FPGAs zu deployen und dabei 
+    <div class="about-intro">
+        <p>
+            muTau-Inventions wurde mit der Vision gegründet, die Lücke zwischen KI-Entwicklung und
+            Hardware-Implementierung zu schließen. Unsere Toolchain ermöglicht es Entwicklern und
+            Forschern, ihre KI-Modelle mit minimalem Aufwand auf FPGAs zu deployen und dabei
             maximale Performance zu erreichen.
         </p>
     </div>
 
     <div class="section-header">
         <h2>Unser Team</h2>
+        <p>Die Menschen hinter muTau</p>
     </div>
 
     <div class="team-grid">
-        <div class="team-member">
-            <div class="avatar">👨‍💻</div>
+        <div class="team-card">
+            <div class="team-avatar">👨‍💻</div>
             <h3>Dr. Max Mueller</h3>
-            <p style="color: var(--primary);">CEO & Founder</p>
-            <p style="color: #94a3b8; margin-top: 1rem;">Expert in FPGA Architecture & AI Acceleration</p>
+            <p class="role">CEO &amp; Founder</p>
+            <p>Expert in FPGA Architecture &amp; AI Acceleration</p>
         </div>
-        <div class="team-member">
-            <div class="avatar">👩‍💻</div>
+        <div class="team-card">
+            <div class="team-avatar">👩‍💻</div>
             <h3>Sarah Schmidt</h3>
-            <p style="color: var(--primary);">CTO</p>
-            <p style="color: #94a3b8; margin-top: 1rem;">Deep Learning & Hardware Optimization Specialist</p>
+            <p class="role">CTO</p>
+            <p>Deep Learning &amp; Hardware Optimization Specialist</p>
         </div>
-        <div class="team-member">
-            <div class="avatar">👨‍🔬</div>
+        <div class="team-card">
+            <div class="team-avatar">👨‍🔬</div>
             <h3>Prof. Thomas Weber</h3>
-            <p style="color: var(--primary);">Lead Researcher</p>
-            <p style="color: #94a3b8; margin-top: 1rem;">Published 20+ papers on FPGA-based AI</p>
+            <p class="role">Lead Researcher</p>
+            <p>20+ veröffentlichte Paper zu FPGA-basierter KI</p>
         </div>
-        <div class="team-member">
-            <div class="avatar">👩‍🔬</div>
+        <div class="team-card">
+            <div class="team-avatar">👩‍🔬</div>
             <h3>Lisa Hoffmann</h3>
-            <p style="color: var(--primary);">Head of Engineering</p>
-            <p style="color: #94a3b8; margin-top: 1rem;">15+ years experience in HLS development</p>
+            <p class="role">Head of Engineering</p>
+            <p>15+ Jahre Erfahrung in HLS-Entwicklung</p>
         </div>
     </div>
 </div>

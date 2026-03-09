@@ -1,23 +1,25 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-<div class="hero">
-    <div class="hero-bg"></div>
-    <canvas id="particleCanvas" class="particles"></canvas>
+<section class="hero">
     <div class="hero-content">
+        <span class="hero-eyebrow">Alpha — in aktiver Entwicklung</span>
         <h1>muTau-Inventions</h1>
-        <p>AI Models to FPGA - Made Simple</p>
-        <button class="btn" onclick="window.location='{{ url_for('docs') }}'">Get Started</button>
+        <p>AI Models to FPGA — Made Simple.<br>Konvertieren Sie neuronale Netzwerke in hochoptimierte Hardware-Beschleuniger.</p>
+        <div class="hero-actions">
+            <a href="{{ url_for('content.docs') }}" class="btn">Dokumentation</a>
+            <a href="{{ url_for('products.products') }}" class="btn btn-outline">Produkte ansehen</a>
+        </div>
     </div>
-</div>
+</section>
 
 <div class="container">
     <div class="section-header">
         <h2>Unsere Toolchain</h2>
-        <p style="color: #94a3b8;">Transformieren Sie KI-Modelle in hochoptimierte Hardware-Beschleuniger</p>
+        <p>Transformieren Sie KI-Modelle in hochoptimierte Hardware-Beschleuniger</p>
     </div>
 
-    <div class="features">
+    <div class="features-grid">
         <div class="card">
             <h3>🚀 AI to HLS</h3>
             <p>Konvertieren Sie neuronale Netzwerke direkt in High-Level Synthesis Code für maximale Performance.</p>
@@ -31,16 +33,16 @@
             <p>Intuitive CLI-Tools und umfassende Dokumentation für schnellen Einstieg.</p>
         </div>
         <div class="card">
-            <h3>📊 Optimierung</h3>
-            <p>Automatische Quantisierung und Hardware-Optimierung für beste Ressourcennutzung.</p>
+            <h3>📊 Ressourcen-Analyse</h3>
+            <p>Abschätzung von LUT, DSP und BRAM vor der Synthese — spart stundenlange Build-Zyklen.</p>
         </div>
         <div class="card">
-            <h3>🔄 Modell-Support</h3>
+            <h3>🔄 Framework-Support</h3>
             <p>Unterstützung für TensorFlow, PyTorch, ONNX und weitere gängige Frameworks.</p>
         </div>
         <div class="card">
-            <h3>🛠️ Vollständiger Workflow</h3>
-            <p>Von der Modell-Konvertierung bis zum fertigen FPGA-Bitstream - alles aus einer Hand.</p>
+            <h3>🎯 Automatische Optimierung</h3>
+            <p>Quantisierung und Pruning für minimalen Ressourcenverbrauch bei maximaler Genauigkeit.</p>
         </div>
     </div>
 </div>
