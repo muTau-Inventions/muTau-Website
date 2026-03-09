@@ -49,16 +49,20 @@
 
         <div class="account-section" style="border-color:rgba(239,68,68,0.25)">
             <h3 style="color:#f87171">Account löschen</h3>
-            <p style="color:var(--text-soft);font-size:0.88rem;margin-bottom:1.25rem;line-height:1.6">
-                Diese Aktion ist unwiderruflich. Dein Account und alle zugehörigen Daten werden anonymisiert.
+            <p style="color:var(--text-soft);font-size:0.88rem;margin-bottom:0.75rem;line-height:1.6">
+                Diese Aktion ist <strong>unwiderruflich</strong>. Dein Account und alle zugehörigen Daten werden
+                dauerhaft gelöscht — einschließlich aller Angebotsanfragen, die du gestellt hast.
             </p>
+            <div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.75rem 0.9rem;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius);margin-bottom:1.25rem;font-size:0.82rem;color:#fca5a5">
+                <span>Alle deine Angebotsanfragen werden ebenfalls unwiderruflich gelöscht.</span>
+            </div>
             <form method="POST" action="{{ url_for('auth.delete_account') }}"
-                  onsubmit="return confirm('Bist du sicher? Diese Aktion kann nicht rückgängig gemacht werden.')">
+                  onsubmit="return confirm('Bist du sicher? Dein Account und alle Angebotsanfragen werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.')">
                 <div class="form-group">
                     <label>Gib <strong>LÖSCHEN</strong> ein zur Bestätigung</label>
                     <input type="text" name="confirm" placeholder="LÖSCHEN" autocomplete="off">
                 </div>
-                <button type="submit" class="btn btn-danger btn-sm">Account unwiderruflich löschen</button>
+                <button type="submit" class="btn btn-danger btn-sm">Account dauerhaft löschen</button>
             </form>
         </div>
 

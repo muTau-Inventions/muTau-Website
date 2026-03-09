@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template
 from .extensions import db, bcrypt, login_manager
-from .models import User  # noqa: F401 — needed so db.create_all() sees the models
+from .models import User
 
 
 def create_app():
@@ -34,7 +34,7 @@ def create_app():
     app.register_blueprint(admin_bp)
 
     with app.app_context():
-        from .models import PasswordResetToken, Product, Paper
+        from .models import PasswordResetToken, Product, Paper, Offer
 
     @app.errorhandler(403)
     def forbidden(e):
@@ -54,7 +54,7 @@ def create_app():
 def init_db():
     app = create_app()
     with app.app_context():
-        from .models import PasswordResetToken, Product, Paper, Offer  # noqa: F401
+        from .models import PasswordResetToken, Product, Paper, Offer
         db.create_all()
         from .seed import seed_products
         seed_products()

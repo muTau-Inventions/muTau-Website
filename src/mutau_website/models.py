@@ -1,6 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_login import UserMixin
 from .extensions import db, bcrypt, login_manager
+
+
+def _now():
+    return datetime.now(timezone.utc)
 
 
 class User(UserMixin, db.Model):
@@ -13,8 +17,9 @@ class User(UserMixin, db.Model):
     is_admin      = db.Column(db.Boolean, default=False, nullable=False)
     is_verified   = db.Column(db.Boolean, default=True,  nullable=False)
     newsletter    = db.Column(db.Boolean, default=False, nullable=False)
-    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
-    deleted_at    = db.Column(db.DateTime, nullable=True)
+    created_at    = db.Column(db.DateTime(timezone=True), default=_now)
+
+    offers = db.relationship("Offer", backref="user", cascade="all, delete-orphan", passive_deletes=True)
 
     def set_password(self, password):
         self.password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
@@ -22,17 +27,10 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
 
-    @property
-    def is_active(self):
-        return self.deleted_at is None
-
 
 @login_manager.user_loader
 def load_user(user_id):
-    user = User.query.get(int(user_id))
-    if user and user.deleted_at is not None:
-        return None
-    return user
+    return User.query.get(int(user_id))
 
 
 class PasswordResetToken(db.Model):
@@ -40,8 +38,8 @@ class PasswordResetToken(db.Model):
 
     id         = db.Column(db.Integer, primary_key=True)
     token      = db.Column(db.String(100), unique=True, nullable=False)
-    user_id    = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    expires_at = db.Column(db.DateTime, nullable=False)
+    user_id    = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
     used       = db.Column(db.Boolean, default=False, nullable=False)
 
     user = db.relationship("User", backref="reset_tokens")
@@ -92,17 +90,18 @@ class Paper(db.Model):
     date        = db.Column(db.Date)
     description = db.Column(db.Text)
     notified    = db.Column(db.Boolean, default=False, nullable=False)
-    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at  = db.Column(db.DateTime(timezone=True), default=_now)
 
 
 class Offer(db.Model):
     __tablename__ = "offers"
 
     id               = db.Column(db.Integer, primary_key=True)
+    user_id          = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     name             = db.Column(db.String(120), nullable=False)
     email            = db.Column(db.String(120), nullable=False)
     company          = db.Column(db.String(120))
     product_interest = db.Column(db.String(120))
     message          = db.Column(db.Text, nullable=False)
-    created_at       = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at       = db.Column(db.DateTime(timezone=True), default=_now)
     status           = db.Column(db.String(20), default="new", nullable=False)

@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask_login import login_required, current_user
 
 from ..extensions import db
 from ..models import Product, Offer
@@ -21,29 +22,31 @@ def contact():
     if request.method == "POST":
         flash("Vielen Dank! Wir melden uns schnellstmöglich.", "success")
         return redirect(url_for("main.contact"))
-    return render_template("contact.html")
+
+    prefill_email = current_user.email if current_user.is_authenticated else ""
+    return render_template("contact.html", prefill_email=prefill_email)
 
 
 @main_bp.route("/offer", methods=["GET", "POST"])
+@login_required
 def offer():
-    products = Product.query.filter_by(is_active=True).all()
+    products   = Product.query.filter_by(is_active=True).all()
     preselected = request.args.get("product", "")
 
     if request.method == "POST":
-        name             = request.form.get("name", "").strip()
-        email            = request.form.get("email", "").strip()
         company          = request.form.get("company", "").strip()
         product_interest = request.form.get("product_interest", "").strip()
         message          = request.form.get("message", "").strip()
 
-        if not name or not email or not message:
+        if not message:
             flash("Bitte fülle alle Pflichtfelder aus.", "danger")
             return render_template("offer.html", products=products, preselected=preselected)
 
         try:
             o = Offer(
-                name=name,
-                email=email,
+                user_id=current_user.id,
+                name=current_user.name,
+                email=current_user.email,
                 company=company or None,
                 product_interest=product_interest or None,
                 message=message,

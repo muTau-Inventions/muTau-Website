@@ -13,11 +13,13 @@
             <form method="POST" action="{{ url_for('main.contact') }}">
                 <div class="form-group">
                     <label>Name</label>
-                    <input type="text" name="name" required placeholder="Ihr Name">
+                    <input type="text" name="name" required placeholder="Ihr Name"
+                           value="{{ current_user.name if current_user.is_authenticated else '' }}">
                 </div>
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="email" required placeholder="ihre.email@example.com">
+                    <input type="email" name="email" required placeholder="ihre.email@example.com"
+                           value="{{ prefill_email }}">
                 </div>
                 <div class="form-group">
                     <label>Betreff</label>

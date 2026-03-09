@@ -1,12 +1,12 @@
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_user, logout_user, login_required, current_user
 
 from ..extensions import db
 from ..models import User, PasswordResetToken
-from ..mail import send_verification_email, send_password_reset_email
+from ..mail import send_password_reset_email
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -44,7 +44,7 @@ def register():
         user = User(
             email=email,
             name=f"{first_name} {last_name}".strip(),
-            is_verified=True, # FIXME: Set to False when verification code is in place
+            is_verified=True,  # FIXME: Set to False when e-mail verification is implemented
             newsletter=newsletter,
         )
         user.set_password(password)
@@ -52,7 +52,7 @@ def register():
         try:
             db.session.add(user)
             db.session.commit()
-            # send_verification_email(user) # FIXME: Send Email to verify EMAIL Adress
+            # send_verification_email(user)  # FIXME: Uncomment when e-mail verification is implemented
             flash("Registrierung erfolgreich. Du kannst dich jetzt anmelden.", "success")
             return redirect(url_for("auth.login"))
         except Exception:
@@ -78,10 +78,6 @@ def login():
             flash("E-Mail oder Passwort ist falsch.", "danger")
             return render_template("auth/login.html")
 
-        if user.deleted_at is not None:
-            flash("Dieser Account wurde gelöscht.", "danger")
-            return render_template("auth/login.html")
-
         if not user.is_verified:
             flash("Bitte bestätige zuerst deine E-Mail-Adresse.", "warning")
             return render_template("auth/login.html")
@@ -91,6 +87,7 @@ def login():
         return redirect(next_page or url_for("main.index"))
 
     return render_template("auth/login.html")
+
 
 @auth_bp.route("/logout")
 @login_required
@@ -108,12 +105,12 @@ def forgot_password():
 
         flash("Falls diese E-Mail registriert ist, wurde ein Reset-Link gesendet.", "info")
 
-        if user and user.deleted_at is None:
+        if user:
             token_str = secrets.token_urlsafe(48)
             token = PasswordResetToken(
                 token=token_str,
                 user_id=user.id,
-                expires_at=datetime.utcnow() + timedelta(hours=1),
+                expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
             )
             db.session.add(token)
             db.session.commit()
@@ -122,6 +119,7 @@ def forgot_password():
         return redirect(url_for("auth.login"))
 
     return render_template("auth/forgot_password.html")
+
 
 @auth_bp.route("/account")
 @login_required
@@ -147,10 +145,8 @@ def delete_account():
         flash("Bitte gib LÖSCHEN ein, um deinen Account zu löschen.", "danger")
         return redirect(url_for("auth.account"))
 
-    current_user.deleted_at = datetime.utcnow()
-    current_user.email      = f"deleted_{current_user.id}@deleted"
-    current_user.name       = "Gelöschter Nutzer"
-    db.session.commit()
     logout_user()
+    db.session.delete(current_user._get_current_object())
+    db.session.commit()
     flash("Dein Account wurde gelöscht.", "info")
     return redirect(url_for("main.index"))

@@ -9,20 +9,12 @@
 
     <div style="max-width:680px;margin:0 auto;padding-bottom:4rem">
         <div style="background:var(--surface);border-radius:var(--radius-lg);padding:2.5rem;border:1px solid var(--border)">
-            <form method="POST" action="{{ url_for('main.offer') }}">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-                    <div class="form-group">
-                        <label>Name *</label>
-                        <input type="text" name="name" required placeholder="Max Mustermann"
-                               value="{{ request.form.get('name','') }}">
-                    </div>
-                    <div class="form-group">
-                        <label>E-Mail *</label>
-                        <input type="email" name="email" required placeholder="max@example.com"
-                               value="{{ request.form.get('email','') }}">
-                    </div>
-                </div>
+            <div style="display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;background:var(--primary-dim);border:1px solid rgba(99,102,241,0.2);border-radius:var(--radius);margin-bottom:1.75rem;font-size:0.83rem;color:var(--text-soft)">
+                <span style="font-size:1.1rem">👤</span>
+                <span>Anfrage wird gesendet als <strong style="color:var(--text)">{{ current_user.name }}</strong> ({{ current_user.email }})</span>
+            </div>
 
+            <form method="POST" action="{{ url_for('main.offer') }}">
                 <div class="form-group">
                     <label>Unternehmen</label>
                     <input type="text" name="company" placeholder="Ihr Unternehmen (optional)"

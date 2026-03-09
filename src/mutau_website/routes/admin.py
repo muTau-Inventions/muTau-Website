@@ -12,10 +12,10 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 @admin_required
 def dashboard():
     stats = {
-        "users":      User.query.filter(User.deleted_at.is_(None)).count(),
+        "users":      User.query.count(),
         "products":   Product.query.filter_by(is_active=True).count(),
         "papers":     Paper.query.count(),
-        "newsletter": User.query.filter_by(newsletter=True).filter(User.deleted_at.is_(None)).count(),
+        "newsletter": User.query.filter_by(newsletter=True).count(),
         "offers":     Offer.query.count(),
         "new_offers": Offer.query.filter_by(status="new").count(),
     }
@@ -62,5 +62,5 @@ def mark_offer_read(offer_id):
 @login_required
 @admin_required
 def users():
-    all_users = User.query.filter(User.deleted_at.is_(None)).order_by(User.created_at.desc()).all()
+    all_users = User.query.order_by(User.created_at.desc()).all()
     return render_template("admin/users.html", users=all_users)
