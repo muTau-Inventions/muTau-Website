@@ -1,59 +1,48 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Admin — Forschung{% endblock %}
+{% block title %}Publikationen{% endblock %}
 {% block admin_content %}
-
-<h2>Forschungspapiere</h2>
-
-<table class="admin-table">
-    <thead>
-        <tr>
-            <th>Titel</th>
-            <th>Autoren</th>
-            <th>Datum</th>
-            <th>Newsletter</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for paper in papers %}
-        <tr>
-            <td>
-                <div>{{ paper.title }}</div>
-                {% if paper.description %}
-                <div style="color:var(--text-muted);font-size:0.76rem;margin-top:0.15rem;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                    {{ paper.description }}
-                </div>
-                {% endif %}
-            </td>
-            <td style="color:var(--text-muted)">{{ paper.authors or '—' }}</td>
-            <td style="color:var(--text-muted);font-size:0.78rem;white-space:nowrap">
-                {{ paper.date.strftime('%d.%m.%Y') if paper.date else '—' }}
-            </td>
-            <td>
-                {% if paper.notified %}
-                    <span class="badge badge-green">Gesendet</span>
-                {% else %}
-                    <span class="badge badge-yellow">Ausstehend</span>
-                {% endif %}
-            </td>
-            <td>
-                {% if not paper.notified %}
-                <form method="POST"
-                      action="{{ url_for('admin.send_newsletter', paper_id=paper.id) }}"
-                      onsubmit="return confirm('Newsletter an alle Abonnenten senden für: {{ paper.title }}?')">
-                    <button type="submit" class="btn btn-sm">Newsletter senden</button>
-                </form>
-                {% endif %}
-            </td>
-        </tr>
-        {% else %}
-        <tr><td colspan="5" style="color:var(--text-muted);text-align:center;padding:2rem">Keine Papiere.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<div class="coming-soon" style="margin-top:2rem">
-    <p>Upload und Verwaltung von Papieren wird in einem zukünftigen Release implementiert.</p>
+<div class="admin-header">
+  <h1>Publikationen</h1>
+  <a href="{{ url_for('admin.new_paper') }}" class="btn">+ Neue Publikation</a>
 </div>
 
+<div class="admin-card" style="padding:0">
+  {% for p in papers %}
+  <div style="display:flex;align-items:flex-start;gap:16px;padding:18px 20px;border-bottom:1px solid var(--surface-3)">
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <strong>{{ p.title }}</strong>
+        {% if p.notified %}
+        <span class="badge badge-answered" style="font-size:0.68rem">Newsletter ✓</span>
+        {% else %}
+        <span class="badge badge-new" style="font-size:0.68rem">Newsletter ausstehend</span>
+        {% endif %}
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-top:3px">
+        {% if p.authors %}{{ p.authors }}{% endif %}
+        {% if p.date %} · {{ p.date.strftime('%d.%m.%Y') }}{% endif %}
+        · <code style="font-size:0.75rem">{{ p.pdf_path }}</code>
+      </div>
+      {% if p.description %}
+      <div style="font-size:0.83rem;color:var(--text-soft);margin-top:4px">{{ p.description[:100] }}{% if p.description|length > 100 %}…{% endif %}</div>
+      {% endif %}
+    </div>
+    <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
+      <a href="{{ url_for('admin.edit_paper', paper_id=p.id) }}" class="btn btn-ghost btn-sm">Bearbeiten</a>
+      {% if not p.notified %}
+      <form method="POST" action="{{ url_for('admin.send_newsletter', paper_id=p.id) }}" onsubmit="return confirm('Newsletter an alle Abonnenten senden?')">
+        <button class="btn btn-sm">Newsletter senden</button>
+      </form>
+      {% endif %}
+      <form method="POST" action="{{ url_for('admin.delete_paper', paper_id=p.id) }}" onsubmit="return confirm('Publikation und PDF wirklich löschen?')">
+        <button class="btn btn-danger btn-sm">Löschen</button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <div style="padding:48px;text-align:center;color:var(--text-muted)">
+    Keine Publikationen vorhanden. <a href="{{ url_for('admin.new_paper') }}">Erste hinzufügen →</a>
+  </div>
+  {% endfor %}
+</div>
 {% endblock %}

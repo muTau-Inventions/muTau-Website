@@ -1,0 +1,45 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Kontaktnachrichten{% endblock %}
+{% block admin_content %}
+<div class="admin-header">
+  <h1>Kontaktnachrichten</h1>
+  {% if show_all %}
+  <a href="{{ url_for('admin.contact_messages') }}" class="btn btn-ghost">Nur ungelesene</a>
+  {% else %}
+  <a href="{{ url_for('admin.contact_messages', all=1) }}" class="btn btn-ghost">Alle anzeigen</a>
+  {% endif %}
+</div>
+
+{% if messages %}
+<div class="admin-card" style="padding:0">
+  {% for msg in messages %}
+  <div style="padding:20px 24px;border-bottom:1px solid var(--surface-3);{% if not msg.read %}background:color-mix(in srgb,var(--primary) 4%,transparent){% endif %}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+      <div>
+        <strong>{{ msg.name }}</strong>
+        <a href="mailto:{{ msg.email }}" style="color:var(--primary);font-size:0.82rem;margin-left:8px">{{ msg.email }}</a>
+        {% if not msg.read %}<span style="background:var(--primary);color:#fff;font-size:0.68rem;padding:2px 7px;border-radius:999px;margin-left:6px;vertical-align:middle">NEU</span>{% endif %}
+      </div>
+      <span style="color:var(--text-muted);font-size:0.78rem;white-space:nowrap">{{ msg.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+    </div>
+    <p style="margin:10px 0 12px;color:var(--text-soft);font-size:0.88rem;line-height:1.6;white-space:pre-wrap">{{ msg.message }}</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="mailto:{{ msg.email }}?subject=Re: Ihre Nachricht an muTau-Inventions" class="btn btn-ghost btn-sm">Antworten</a>
+      {% if not msg.read %}
+      <form method="POST" action="{{ url_for('admin.mark_contact_read', msg_id=msg.id) }}">
+        <button class="btn btn-ghost btn-sm">Als gelesen markieren</button>
+      </form>
+      {% endif %}
+      <form method="POST" action="{{ url_for('admin.delete_contact', msg_id=msg.id) }}" onsubmit="return confirm('Nachricht löschen?')">
+        <button class="btn btn-danger btn-sm">Löschen</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="admin-card" style="text-align:center;color:var(--text-muted);padding:48px">
+  {% if show_all %}Keine Nachrichten vorhanden.{% else %}Keine ungelesenen Nachrichten.{% endif %}
+</div>
+{% endif %}
+{% endblock %}

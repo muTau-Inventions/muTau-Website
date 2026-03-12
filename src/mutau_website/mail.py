@@ -1,14 +1,14 @@
 """
 Mail helpers.
 URLs are passed in as parameters so this module stays free of Flask request context.
-SMTP settings and base_url come from config.yml.
+SMTP settings come from config.yml.
 """
 import logging
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from flask import render_template
+from flask import render_template, url_for
 
 from .config import get_mail_cfg
 
@@ -94,34 +94,29 @@ def send_password_reset_email(user, reset_url: str) -> None:
 def send_newsletter(users, paper, pdf_url: str, research_url: str) -> None:
     """
     Notify newsletter subscribers about a new research paper.
-    pdf_url:      absolute URL to the PDF.
-    research_url: absolute URL to the /research page.
+    Each recipient gets a personalised unsubscribe link via their token.
     """
-    from .config import get_base_url
-    account_url = get_base_url().rstrip("/") + "/account"
-    subject     = _subject("newsletter", title=paper.title)
+    subject = _subject("newsletter", title=paper.title)
+    failed  = 0
 
-    recipients = [u.email for u in users if u.email]
-    if not recipients:
-        logger.info("Newsletter: no recipients for paper '%s'", paper.title)
-        return
-
-    failed = 0
-    for recipient in recipients:
+    for user in users:
+        if not user.email:
+            continue
         try:
+            unsubscribe_url = url_for(
+                "auth.unsubscribe", token=user.unsubscribe_token, _external=True
+            )
             body = render_template(
                 "email/newsletter.html",
                 paper=paper,
                 pdf_url=pdf_url,
                 research_url=research_url,
-                account_url=account_url,
+                unsubscribe_url=unsubscribe_url,
             )
-            _send([recipient], subject, body)
+            _send([user.email], subject, body)
         except Exception:
-            logger.exception("Newsletter: failed to send to %s", recipient)
+            logger.exception("Newsletter: failed to send to %s", user.email)
             failed += 1
 
-    logger.info(
-        "Newsletter '%s': %d sent, %d failed",
-        paper.title, len(recipients) - failed, failed,
-    )
+    sent = len([u for u in users if u.email]) - failed
+    logger.info("Newsletter '%s': %d sent, %d failed", paper.title, sent, failed)

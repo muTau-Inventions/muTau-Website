@@ -3,7 +3,6 @@ import secrets
 from datetime import datetime, timezone, timedelta
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from ..config import get_base_url
 from flask_login import login_user, logout_user, login_required, current_user
 
 from ..extensions import db
@@ -64,7 +63,8 @@ def register():
             db.session.add(token)
             db.session.commit()
 
-            verify_url = get_base_url() + url_for("auth.verify_email", token=token_str)
+            # _external=True uses the actual request host — works behind proxies/Codespaces
+            verify_url = url_for("auth.verify_email", token=token_str, _external=True)
             send_verification_email(user, verify_url)
 
             flash("Registrierung erfolgreich. Bitte bestätige deine E-Mail-Adresse.", "success")
@@ -91,7 +91,7 @@ def verify_email(token):
         flash("Der Bestätigungslink ist abgelaufen. Bitte registriere dich erneut.", "danger")
         return redirect(url_for("auth.register"))
 
-    record.used          = True
+    record.used             = True
     record.user.is_verified = True
     db.session.commit()
 
@@ -151,7 +151,6 @@ def forgot_password():
         flash("Falls diese E-Mail registriert ist, wurde ein Reset-Link gesendet.", "info")
 
         if user:
-            # Invalidate any existing unused tokens for this user
             PasswordResetToken.query.filter_by(user_id=user.id, used=False).update({"used": True})
 
             token_str = secrets.token_urlsafe(48)
@@ -163,7 +162,8 @@ def forgot_password():
             db.session.add(token)
             db.session.commit()
 
-            reset_url = get_base_url() + url_for("auth.reset_password", token=token_str)
+            # _external=True uses the actual request host — works behind proxies/Codespaces
+            reset_url = url_for("auth.reset_password", token=token_str, _external=True)
             send_password_reset_email(user, reset_url)
 
         return redirect(url_for("auth.login"))
@@ -206,6 +206,25 @@ def reset_password(token):
         return redirect(url_for("auth.login"))
 
     return render_template("auth/reset_password.html", token=token)
+
+
+# ── Unsubscribe (no login required — token in email) ──────────────────────
+
+@auth_bp.route("/unsubscribe/<token>")
+def unsubscribe(token):
+    user = User.query.filter_by(unsubscribe_token=token).first()
+    if not user:
+        flash("Ungültiger Abmeldelink.", "danger")
+        return redirect(url_for("main.index"))
+
+    if not user.newsletter:
+        flash("Du bist bereits vom Newsletter abgemeldet.", "info")
+        return redirect(url_for("main.index"))
+
+    user.newsletter = False
+    db.session.commit()
+    logger.info("User %s unsubscribed from newsletter via token", user.email)
+    return render_template("auth/unsubscribed.html", user=user)
 
 
 # ── Account ────────────────────────────────────────────────────────────────

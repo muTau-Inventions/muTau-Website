@@ -78,7 +78,7 @@ def create_app() -> Flask:
 
     # ── DB init (safe with --preload: runs once in gunicorn master) ───────
     with app.app_context():
-        from .models import EmailVerificationToken, PasswordResetToken, Product, Paper, Offer  # noqa: F401
+        from .models import EmailVerificationToken, PasswordResetToken, Product, Paper, Offer, ContactMessage  # noqa: F401
         db.create_all()
         logger.info("Database tables verified / created.")
         from .seed import seed_products

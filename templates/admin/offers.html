@@ -1,97 +1,45 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Admin — Angebotsanfragen{% endblock %}
+{% block title %}Angebotsanfragen{% endblock %}
 {% block admin_content %}
+<div class="admin-header">
+  <h1>Angebotsanfragen</h1>
+</div>
 
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem;flex-wrap:wrap;gap:0.75rem">
-    <h2 style="margin:0">Angebotsanfragen</h2>
-    <div style="display:flex;gap:0.4rem">
-        <a href="{{ url_for('admin.offers') }}"
-           class="btn btn-sm {% if not status_filter %}btn-outline{% else %}btn-outline{% endif %}"
-           style="{% if not status_filter %}background:var(--primary-dim);{% endif %}">
-            Alle
-        </a>
-        <a href="{{ url_for('admin.offers', status='new') }}"
-           class="btn btn-sm btn-outline"
-           style="{% if status_filter == 'new' %}background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.4);color:#fcd34d;{% endif %}">
-            Neu
-        </a>
-        <a href="{{ url_for('admin.offers', status='read') }}"
-           class="btn btn-sm btn-outline"
-           style="{% if status_filter == 'read' %}background:var(--primary-dim);{% endif %}">
-            Gelesen
-        </a>
-        <a href="{{ url_for('admin.offers', status='answered') }}"
-           class="btn btn-sm btn-outline"
-           style="{% if status_filter == 'answered' %}background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:#6ee7b7;{% endif %}">
-            Beantwortet
-        </a>
+<div class="filter-tabs">
+  <a href="{{ url_for('admin.offers') }}" class="filter-tab {% if not status_filter %}active{% endif %}">Alle</a>
+  <a href="{{ url_for('admin.offers', status='new') }}" class="filter-tab {% if status_filter == 'new' %}active{% endif %}">Neu</a>
+  <a href="{{ url_for('admin.offers', status='read') }}" class="filter-tab {% if status_filter == 'read' %}active{% endif %}">Gelesen</a>
+  <a href="{{ url_for('admin.offers', status='answered') }}" class="filter-tab {% if status_filter == 'answered' %}active{% endif %}">Beantwortet</a>
+</div>
+
+<div class="admin-card" style="padding:0">
+  {% for o in offers %}
+  <div style="display:flex;align-items:flex-start;gap:16px;padding:16px 20px;border-bottom:1px solid var(--surface-3);{% if o.status == 'new' %}background:color-mix(in srgb,var(--primary) 4%,transparent){% endif %}">
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <strong>{{ o.name }}</strong>
+        {% if o.company %}<span style="color:var(--text-muted);font-size:0.82rem">{{ o.company }}</span>{% endif %}
+        <span class="badge badge-{{ o.status }}">{{ o.status }}</span>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px">
+        {{ o.created_at.strftime('%d.%m.%Y %H:%M') }} · {{ o.product_interest or '—' }}
+      </div>
+      <div style="font-size:0.85rem;color:var(--text-soft);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.message[:80] }}{% if o.message|length > 80 %}…{% endif %}</div>
     </div>
+    <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
+      <a href="{{ url_for('admin.offer_detail', offer_id=o.id) }}" class="btn btn-ghost btn-sm">Ansehen</a>
+      {% if o.status != 'answered' %}
+      <form method="POST" action="{{ url_for('admin.mark_offer_answered', offer_id=o.id) }}">
+        <button class="btn btn-ghost btn-sm">Beantwortet</button>
+      </form>
+      {% endif %}
+      <form method="POST" action="{{ url_for('admin.delete_offer', offer_id=o.id) }}" onsubmit="return confirm('Anfrage löschen?')">
+        <button class="btn btn-danger btn-sm">Löschen</button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <div style="padding:48px;text-align:center;color:var(--text-muted)">Keine Anfragen vorhanden.</div>
+  {% endfor %}
 </div>
-
-{% if offers %}
-<table class="admin-table">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Absender</th>
-            <th>Unternehmen</th>
-            <th>Produkt</th>
-            <th>Datum</th>
-            <th>Status</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for offer in offers %}
-        <tr>
-            <td style="color:var(--text-muted);font-size:0.78rem">{{ offer.id }}</td>
-            <td>
-                <div>{{ offer.name }}</div>
-                <div style="color:var(--text-muted);font-size:0.76rem">{{ offer.email }}</div>
-            </td>
-            <td style="color:var(--text-muted)">{{ offer.company or '—' }}</td>
-            <td>
-                {% if offer.product_interest %}
-                    <span class="badge badge-purple">{{ offer.product_interest }}</span>
-                {% else %}
-                    <span style="color:var(--text-muted)">—</span>
-                {% endif %}
-            </td>
-            <td style="color:var(--text-muted);font-size:0.8rem;white-space:nowrap">
-                {{ offer.created_at.strftime('%d.%m.%Y %H:%M') }}
-            </td>
-            <td>
-                {% if offer.status == 'new' %}<span class="badge badge-yellow">Neu</span>
-                {% elif offer.status == 'read' %}<span class="badge badge-gray">Gelesen</span>
-                {% else %}<span class="badge badge-green">Beantwortet</span>{% endif %}
-            </td>
-            <td style="display:flex;gap:0.4rem;flex-wrap:wrap">
-                {% if offer.status == 'new' %}
-                <form method="POST" action="{{ url_for('admin.mark_offer_read', offer_id=offer.id) }}">
-                    <button type="submit" class="btn btn-sm btn-outline">Gelesen</button>
-                </form>
-                {% endif %}
-                {% if offer.status != 'answered' %}
-                <form method="POST" action="{{ url_for('admin.mark_offer_answered', offer_id=offer.id) }}">
-                    <button type="submit" class="btn btn-sm">Beantwortet</button>
-                </form>
-                {% endif %}
-            </td>
-        </tr>
-        <!-- Message row -->
-        <tr>
-            <td colspan="7" style="padding:0 1rem 1rem 3rem;color:var(--text-soft);font-size:0.85rem;border-bottom:1px solid var(--border);line-height:1.7">
-                <em>{{ offer.message }}</em>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<div class="coming-soon">
-    <p style="font-size:1.5rem">📋</p>
-    <p>Keine Anfragen{% if status_filter %} mit Status „{{ status_filter }}"{% endif %}.</p>
-</div>
-{% endif %}
-
 {% endblock %}

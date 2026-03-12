@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block subject %}muTau-Inventions{% endblock %}</title>
+  <style>
+    body { margin:0; padding:0; background:#0d0d0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color:#e2e2e5; }
+    .wrapper { max-width:560px; margin:40px auto; background:#16161a; border:1px solid #2a2a30; border-radius:12px; overflow:hidden; }
+    .header { background:#111114; padding:28px 36px; border-bottom:1px solid #2a2a30; }
+    .header a { text-decoration:none; color:#e2e2e5; font-size:1.1rem; font-weight:600; letter-spacing:0.02em; }
+    .header span { color:#7c6af7; }
+    .body { padding:36px; }
+    .body h2 { margin:0 0 16px; font-size:1.25rem; color:#f0f0f2; }
+    .body p { margin:0 0 16px; line-height:1.65; color:#b0b0ba; font-size:0.92rem; }
+    .btn { display:inline-block; padding:12px 28px; background:#7c6af7; color:#fff !important; text-decoration:none; border-radius:8px; font-size:0.9rem; font-weight:500; margin:8px 0 20px; }
+    .divider { border:none; border-top:1px solid #2a2a30; margin:24px 0; }
+    .footer { padding:20px 36px; background:#111114; border-top:1px solid #2a2a30; font-size:0.78rem; color:#606068; line-height:1.6; }
+    .footer a { color:#7c6af7; text-decoration:none; }
+    .url-fallback { word-break:break-all; font-size:0.78rem; color:#606068; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <a href="#">μ<span>Tau</span>-Inventions</a>
+    </div>
+    <div class="body">
+      {% block body %}{% endblock %}
+    </div>
+    <div class="footer">
+      {% block footer %}
+      muTau-Inventions GmbH &mdash; Alle Rechte vorbehalten.<br>
+      Du erhältst diese E-Mail, weil du ein Konto bei muTau-Inventions hast.
+      {% endblock %}
+    </div>
+  </div>
+</body>
+</html>

@@ -1,67 +1,48 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Admin — Nutzer{% endblock %}
+{% block title %}Nutzer{% endblock %}
 {% block admin_content %}
+<div class="admin-header">
+  <h1>Nutzer</h1>
+</div>
 
-<h2>Nutzer</h2>
-
-<table class="admin-table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>E-Mail</th>
-            <th>Status</th>
-            <th>Newsletter</th>
-            <th>Registriert</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for user in users %}
-        <tr>
-            <td>
-                <div style="display:flex;align-items:center;gap:0.5rem">
-                    {{ user.name }}
-                    {% if user.is_admin %}<span class="badge badge-purple">Admin</span>{% endif %}
-                </div>
-            </td>
-            <td style="color:var(--text-muted);font-size:0.83rem">{{ user.email }}</td>
-            <td>
-                {% if user.is_verified %}
-                    <span class="badge badge-green">Verifiziert</span>
-                {% else %}
-                    <span class="badge badge-yellow">Ausstehend</span>
-                {% endif %}
-            </td>
-            <td>
-                {% if user.newsletter %}
-                    <span class="badge badge-green">Ja</span>
-                {% else %}
-                    <span class="badge badge-gray">Nein</span>
-                {% endif %}
-            </td>
-            <td style="color:var(--text-muted);font-size:0.78rem">
-                {{ user.created_at.strftime('%d.%m.%Y') if user.created_at else '—' }}
-            </td>
-            <td style="display:flex;gap:0.4rem;flex-wrap:wrap">
-                {% if user.id != current_user.id %}
-                <form method="POST" action="{{ url_for('admin.toggle_admin', user_id=user.id) }}">
-                    <button type="submit" class="btn btn-sm btn-outline">
-                        {{ 'Admin entfernen' if user.is_admin else 'Admin machen' }}
-                    </button>
-                </form>
-                <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}"
-                      onsubmit="return confirm('Nutzer {{ user.name }} wirklich löschen? Alle Angebotsanfragen werden ebenfalls gelöscht.')">
-                    <button type="submit" class="btn btn-sm btn-danger">Löschen</button>
-                </form>
-                {% else %}
-                <span style="color:var(--text-muted);font-size:0.78rem;padding:0.4rem 0">(Du)</span>
-                {% endif %}
-            </td>
-        </tr>
+<div class="admin-card" style="padding:0">
+  {% for u in users %}
+  <div style="display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid var(--surface-3)">
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <strong>{{ u.name or '—' }}</strong>
+        {% if u.is_admin %}<span class="badge badge-answered">Admin</span>{% endif %}
+        {% if u.is_verified %}
+          <span class="badge badge-answered" style="opacity:0.7">Verifiziert</span>
         {% else %}
-        <tr><td colspan="6" style="color:var(--text-muted);text-align:center;padding:2rem">Keine Nutzer.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
-
+          <span class="badge badge-new">Unverifiziert</span>
+        {% endif %}
+        {% if u.newsletter %}<span class="badge badge-read">Newsletter</span>{% endif %}
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px">
+        {{ u.email }} · Registriert {{ u.created_at.strftime('%d.%m.%Y') }}
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
+      {% if not u.is_verified %}
+      <form method="POST" action="{{ url_for('admin.resend_verification', user_id=u.id) }}">
+        <button class="btn btn-ghost btn-sm">Mail erneut senden</button>
+      </form>
+      {% endif %}
+      {% if u.id != current_user.id %}
+      <form method="POST" action="{{ url_for('admin.toggle_admin', user_id=u.id) }}">
+        <button class="btn btn-ghost btn-sm">{{ 'Admin entfernen' if u.is_admin else 'Zum Admin machen' }}</button>
+      </form>
+      <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}" onsubmit="return confirm('Nutzer {{ u.name or u.email }} wirklich löschen?')">
+        <button class="btn btn-danger btn-sm">Löschen</button>
+      </form>
+      {% else %}
+      <span style="font-size:0.78rem;color:var(--text-muted);padding:6px 0">Du</span>
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <div style="padding:48px;text-align:center;color:var(--text-muted)">Keine Nutzer gefunden.</div>
+  {% endfor %}
+</div>
 {% endblock %}

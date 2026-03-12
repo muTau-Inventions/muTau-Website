@@ -1,0 +1,36 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Angebotsanfrage #{{ offer.id }}{% endblock %}
+{% block admin_content %}
+<div class="admin-header">
+  <h1>Anfrage #{{ offer.id }}</h1>
+  <a href="{{ url_for('admin.offers') }}" class="btn btn-ghost">← Zurück</a>
+</div>
+
+<div class="admin-card" style="max-width:640px">
+  <table class="detail-table">
+    <tr><th>Status</th><td>
+      <span class="badge badge-{{ offer.status }}">{{ offer.status }}</span>
+    </td></tr>
+    <tr><th>Eingegangen</th><td>{{ offer.created_at.strftime('%d.%m.%Y %H:%M') }}</td></tr>
+    <tr><th>Name</th><td>{{ offer.name }}</td></tr>
+    <tr><th>E-Mail</th><td><a href="mailto:{{ offer.email }}">{{ offer.email }}</a></td></tr>
+    <tr><th>Unternehmen</th><td>{{ offer.company or '—' }}</td></tr>
+    <tr><th>Produktinteresse</th><td>{{ offer.product_interest or '—' }}</td></tr>
+  </table>
+  <div style="margin-top:20px">
+    <label style="font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">Nachricht</label>
+    <div style="margin-top:8px;padding:16px;background:var(--surface-2);border-radius:8px;line-height:1.7;white-space:pre-wrap;font-size:0.9rem">{{ offer.message }}</div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap">
+    {% if offer.status != 'answered' %}
+    <form method="POST" action="{{ url_for('admin.mark_offer_answered', offer_id=offer.id) }}">
+      <button class="btn">Als beantwortet markieren</button>
+    </form>
+    {% endif %}
+    <a href="mailto:{{ offer.email }}?subject=Re: Ihre Anfrage bei muTau-Inventions" class="btn btn-ghost">Per E-Mail antworten</a>
+    <form method="POST" action="{{ url_for('admin.delete_offer', offer_id=offer.id) }}" onsubmit="return confirm('Anfrage wirklich löschen?')">
+      <button class="btn btn-danger">Löschen</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

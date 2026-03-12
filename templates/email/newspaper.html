@@ -1,18 +1,20 @@
-{% extends "email/base.html" %}
-
+{% extends "email/base_email.html" %}
+{% block subject %}Neue Publikation: {{ paper.title }}{% endblock %}
 {% block body %}
 <h2>Neue Forschungspublikation</h2>
-<h3>{{ paper.title }}</h3>
-{% if paper.authors %}<p style="color:#a5b4fc;font-size:0.83rem">{{ paper.authors }}</p>{% endif %}
-{% if paper.description %}<p>{{ paper.description }}</p>{% endif %}
-<a class="btn" href="{{ pdf_url }}">Paper lesen (PDF)</a>
-<p><a href="{{ research_url }}" class="muted">Alle Publikationen ansehen</a></p>
-<hr>
-<p style="font-size:0.78rem;color:#556070">
-  Du erhältst diese E-Mail, weil du den muTau-Newsletter abonniert hast.<br>
-  Du kannst ihn jederzeit in deinen
-  <a href="{{ account_url }}" class="muted">Account-Einstellungen</a> deaktivieren.
+<p>Eine neue Publikation ist auf muTau-Inventions verfügbar:</p>
+<p style="background:#1e1e24;border:1px solid #2a2a30;border-radius:8px;padding:16px;margin:0 0 20px">
+  <strong style="color:#f0f0f2;display:block;margin-bottom:6px">{{ paper.title }}</strong>
+  {% if paper.authors %}<span style="font-size:0.82rem;color:#7c6af7">{{ paper.authors }}</span><br>{% endif %}
+  {% if paper.date %}<span style="font-size:0.8rem;color:#606068">{{ paper.date.strftime('%d.%m.%Y') }}</span><br>{% endif %}
+  {% if paper.description %}<span style="font-size:0.85rem;display:block;margin-top:8px">{{ paper.description }}</span>{% endif %}
 </p>
+<a href="{{ pdf_url }}" class="btn">PDF herunterladen</a>
+&nbsp;
+<a href="{{ research_url }}" style="font-size:0.85rem;color:#7c6af7;text-decoration:none">Alle Publikationen →</a>
 {% endblock %}
-
-{% block footer_label %}Newsletter{% endblock %}
+{% block footer %}
+muTau-Inventions GmbH &mdash;
+Du erhältst diese E-Mail, weil du den Newsletter abonniert hast.<br>
+<a href="{{ unsubscribe_url }}">Newsletter abbestellen</a>
+{% endblock %}

@@ -1,12 +1,13 @@
-{% extends "email/base.html" %}
-
+{% extends "email/base_email.html" %}
+{% block subject %}E-Mail-Adresse bestätigen{% endblock %}
 {% block body %}
-<h2>Hallo {{ user.name }},</h2>
-<p>danke für deine Registrierung bei muTau-Inventions!</p>
-<p>Bitte bestätige deine E-Mail-Adresse, indem du auf den Button klickst.
-Der Link ist <strong>24 Stunden</strong> gültig.</p>
-<a class="btn" href="{{ verify_url }}">E-Mail-Adresse bestätigen</a>
-<p>Falls du dich nicht registriert hast, kannst du diese E-Mail ignorieren.</p>
+<h2>Hallo{% if user.name %} {{ user.name.split()[0] }}{% endif %},</h2>
+<p>Vielen Dank für deine Registrierung bei muTau-Inventions. Bitte bestätige deine E-Mail-Adresse mit dem folgenden Button:</p>
+<a href="{{ verify_url }}" class="btn">E-Mail-Adresse bestätigen</a>
+<p>Der Link ist <strong>24 Stunden</strong> gültig.</p>
+<hr class="divider">
+<p class="url-fallback">Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:<br>{{ verify_url }}</p>
 {% endblock %}
-
-{% block footer_label %}E-Mail-Bestätigung{% endblock %}
+{% block footer %}
+muTau-Inventions GmbH &mdash; Falls du dich nicht registriert hast, kannst du diese E-Mail ignorieren.
+{% endblock %}

@@ -1,38 +1,33 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Admin — Produkte{% endblock %}
+{% block title %}Produkte{% endblock %}
 {% block admin_content %}
-
-<h2>Produkte</h2>
-
-<table class="admin-table">
-    <thead>
-        <tr>
-            <th>Slug</th>
-            <th>Name</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for product in products %}
-        <tr>
-            <td style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted)">{{ product.slug }}</td>
-            <td>{{ product.name }}</td>
-            <td>
-                {% if product.is_active %}
-                    <span class="badge badge-green">Aktiv</span>
-                {% else %}
-                    <span class="badge badge-gray">Inaktiv</span>
-                {% endif %}
-            </td>
-        </tr>
-        {% else %}
-        <tr><td colspan="3" style="color:var(--text-muted);text-align:center;padding:2rem">Keine Produkte.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<div class="coming-soon" style="margin-top:2rem">
-    <p>Bearbeitung von Produkten wird in einem zukünftigen Release implementiert.</p>
+<div class="admin-header">
+  <h1>Produkte</h1>
 </div>
 
+<div class="admin-card" style="padding:0">
+  {% for p in products %}
+  <div style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid var(--surface-3)">
+    <span style="font-size:1.5rem;width:36px;text-align:center">{{ p.icon or '📦' }}</span>
+    <div style="flex:1;min-width:0">
+      <strong style="{% if not p.is_active %}color:var(--text-muted);text-decoration:line-through{% endif %}">{{ p.name }}</strong>
+      <span style="font-size:0.75rem;color:var(--text-muted);margin-left:8px">{{ p.slug }}</span>
+      {% if p.description %}
+      <div style="font-size:0.82rem;color:var(--text-soft);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.description[:80] }}{% if p.description|length > 80 %}…{% endif %}</div>
+      {% endif %}
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+      <span class="badge {% if p.is_active %}badge-answered{% else %}badge-read{% endif %}">
+        {{ 'Aktiv' if p.is_active else 'Inaktiv' }}
+      </span>
+      <a href="{{ url_for('admin.edit_product', product_id=p.id) }}" class="btn btn-ghost btn-sm">Bearbeiten</a>
+      <form method="POST" action="{{ url_for('admin.toggle_product', product_id=p.id) }}">
+        <button class="btn btn-ghost btn-sm">{{ 'Deaktivieren' if p.is_active else 'Aktivieren' }}</button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <div style="padding:48px;text-align:center;color:var(--text-muted)">Keine Produkte vorhanden.</div>
+  {% endfor %}
+</div>
 {% endblock %}

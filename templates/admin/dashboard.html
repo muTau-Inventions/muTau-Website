@@ -1,95 +1,93 @@
 {% extends "admin/base_admin.html" %}
 {% block title %}Admin Dashboard{% endblock %}
 {% block admin_content %}
-
-<h2>Dashboard</h2>
-
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-value">{{ stats.users }}</div>
-        <div class="stat-label">Nutzer gesamt</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-value">{{ stats.verified_users }}</div>
-        <div class="stat-label">Verifiziert</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-value">{{ stats.newsletter }}</div>
-        <div class="stat-label">Newsletter</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-value">{{ stats.products }}</div>
-        <div class="stat-label">Produkte</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-value">{{ stats.papers }}</div>
-        <div class="stat-label">Publikationen</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-value">{{ stats.offers }}</div>
-        <div class="stat-label">Anfragen</div>
-    </div>
-    {% if stats.new_offers > 0 %}
-    <div class="stat-card" style="border-color:rgba(245,158,11,0.3)">
-        <div class="stat-value" style="color:#fbbf24">{{ stats.new_offers }}</div>
-        <div class="stat-label">Neu / Ungelesen</div>
-    </div>
-    {% endif %}
-    {% if stats.papers_pending > 0 %}
-    <div class="stat-card" style="border-color:rgba(139,92,246,0.3)">
-        <div class="stat-value" style="color:#c4b5fd">{{ stats.papers_pending }}</div>
-        <div class="stat-label">Newsletter ausstehend</div>
-    </div>
-    {% endif %}
+<div class="admin-header">
+  <h1>Dashboard</h1>
 </div>
 
-{% if recent_offers %}
-<h3 style="font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--text);margin:2rem 0 1rem;letter-spacing:-0.02em">
-    Letzte Angebotsanfragen
-</h3>
-<table class="admin-table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Unternehmen</th>
-            <th>Produkt</th>
-            <th>Datum</th>
-            <th>Status</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for offer in recent_offers %}
-        <tr>
-            <td>
-                <div>{{ offer.name }}</div>
-                <div style="color:var(--text-muted);font-size:0.76rem">{{ offer.email }}</div>
-            </td>
-            <td style="color:var(--text-muted)">{{ offer.company or '—' }}</td>
-            <td>
-                {% if offer.product_interest %}
-                    <span class="badge badge-purple">{{ offer.product_interest }}</span>
-                {% else %}
-                    <span style="color:var(--text-muted)">—</span>
-                {% endif %}
-            </td>
-            <td style="color:var(--text-muted);font-size:0.78rem;white-space:nowrap">
-                {{ offer.created_at.strftime('%d.%m.%Y %H:%M') }}
-            </td>
-            <td>
-                {% if offer.status == 'new' %}<span class="badge badge-yellow">Neu</span>
-                {% elif offer.status == 'read' %}<span class="badge badge-gray">Gelesen</span>
-                {% else %}<span class="badge badge-green">Beantwortet</span>{% endif %}
-            </td>
-            <td>
-                <a href="{{ url_for('admin.offers') }}" class="btn btn-sm btn-outline">Alle</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p style="color:var(--text-muted);font-size:0.85rem;margin-top:1.5rem">Noch keine Angebotsanfragen eingegangen.</p>
+{% if stats.papers_pending > 0 %}
+<div class="admin-alert">
+  {{ stats.papers_pending }} Publikation{{ 'en' if stats.papers_pending != 1 else '' }} ohne Newsletter-Versand —
+  <a href="{{ url_for('admin.papers') }}">Jetzt senden</a>
+</div>
+{% endif %}
+{% if stats.unread_contact > 0 %}
+<div class="admin-alert" style="border-color:var(--primary);background:color-mix(in srgb,var(--primary) 6%,transparent)">
+  {{ stats.unread_contact }} ungelesene Kontaktnachricht{{ 'en' if stats.unread_contact != 1 else '' }} —
+  <a href="{{ url_for('admin.contact_messages') }}">Ansehen</a>
+</div>
 {% endif %}
 
+<div class="stats-grid">
+  <a href="{{ url_for('admin.users') }}" class="stat-card">
+    <span class="stat-value">{{ stats.users }}</span>
+    <span class="stat-label">Nutzer gesamt</span>
+  </a>
+  <a href="{{ url_for('admin.users') }}" class="stat-card">
+    <span class="stat-value">{{ stats.verified_users }}</span>
+    <span class="stat-label">Verifiziert</span>
+  </a>
+  <a href="{{ url_for('admin.users') }}" class="stat-card">
+    <span class="stat-value">{{ stats.newsletter }}</span>
+    <span class="stat-label">Newsletter-Abo</span>
+  </a>
+  <a href="{{ url_for('admin.products') }}" class="stat-card">
+    <span class="stat-value">{{ stats.products }}</span>
+    <span class="stat-label">Aktive Produkte</span>
+  </a>
+  <a href="{{ url_for('admin.papers') }}" class="stat-card">
+    <span class="stat-value">{{ stats.papers }}</span>
+    <span class="stat-label">Publikationen</span>
+  </a>
+  <a href="{{ url_for('admin.offers') }}" class="stat-card">
+    <span class="stat-value">{{ stats.new_offers }}</span>
+    <span class="stat-label">Neue Anfragen</span>
+  </a>
+  <a href="{{ url_for('admin.contact_messages') }}" class="stat-card">
+    <span class="stat-value">{{ stats.unread_contact }}</span>
+    <span class="stat-label">Neue Nachrichten</span>
+  </a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:8px">
+
+  <div>
+    <h2 style="font-size:1rem;margin-bottom:12px;color:var(--text-soft)">Letzte Anfragen</h2>
+    {% if recent_offers %}
+    <div class="admin-card" style="padding:0">
+      {% for o in recent_offers %}
+      <a href="{{ url_for('admin.offer_detail', offer_id=o.id) }}" class="table-row-link">
+        <div style="display:flex;justify-content:space-between;gap:8px">
+          <span><strong>{{ o.name }}</strong> {% if o.company %}<span style="color:var(--text-muted);font-size:0.82rem">· {{ o.company }}</span>{% endif %}</span>
+          <span class="badge badge-{{ o.status }}">{{ o.status }}</span>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px">{{ o.created_at.strftime('%d.%m.%Y') }} · {{ o.product_interest or '—' }}</div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="admin-card" style="color:var(--text-muted);text-align:center">Keine Anfragen vorhanden.</div>
+    {% endif %}
+  </div>
+
+  <div>
+    <h2 style="font-size:1rem;margin-bottom:12px;color:var(--text-soft)">Letzte Nachrichten</h2>
+    {% if recent_contacts %}
+    <div class="admin-card" style="padding:0">
+      {% for m in recent_contacts %}
+      <div class="table-row-link" style="{% if not m.read %}background:color-mix(in srgb,var(--primary) 5%,transparent){% endif %}">
+        <div style="display:flex;justify-content:space-between;gap:8px">
+          <strong>{{ m.name }}</strong>
+          {% if not m.read %}<span style="background:var(--primary);color:#fff;font-size:0.65rem;padding:2px 6px;border-radius:999px">NEU</span>{% endif %}
+        </div>
+        <div style="font-size:0.8rem;color:var(--text-soft);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.message[:60] }}{% if m.message|length > 60 %}…{% endif %}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="admin-card" style="color:var(--text-muted);text-align:center">Keine Nachrichten vorhanden.</div>
+    {% endif %}
+  </div>
+
+</div>
 {% endblock %}

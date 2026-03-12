@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timezone
 from flask_login import UserMixin
 from .extensions import db, bcrypt, login_manager
@@ -7,17 +8,22 @@ def _now():
     return datetime.now(timezone.utc)
 
 
+def _uuid():
+    return str(uuid.uuid4())
+
+
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
-    id            = db.Column(db.Integer, primary_key=True)
-    email         = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
-    name          = db.Column(db.String(120))
-    is_admin      = db.Column(db.Boolean, default=False, nullable=False)
-    is_verified   = db.Column(db.Boolean, default=False, nullable=False)
-    newsletter    = db.Column(db.Boolean, default=False, nullable=False)
-    created_at    = db.Column(db.DateTime(timezone=True), default=_now)
+    id                = db.Column(db.Integer, primary_key=True)
+    email             = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash     = db.Column(db.String(255), nullable=False)
+    name              = db.Column(db.String(120))
+    is_admin          = db.Column(db.Boolean, default=False, nullable=False)
+    is_verified       = db.Column(db.Boolean, default=False, nullable=False)
+    newsletter        = db.Column(db.Boolean, default=False, nullable=False)
+    unsubscribe_token = db.Column(db.String(36), unique=True, nullable=False, default=_uuid)
+    created_at        = db.Column(db.DateTime(timezone=True), default=_now)
 
     offers = db.relationship("Offer", backref="user", cascade="all, delete-orphan", passive_deletes=True)
 
@@ -65,9 +71,9 @@ class Product(db.Model):
     name        = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
     icon        = db.Column(db.String(10))
-    features    = db.Column(db.Text)
-    specs       = db.Column(db.Text)
-    support     = db.Column(db.Text)
+    features    = db.Column(db.Text)   # JSON array
+    specs       = db.Column(db.Text)   # JSON array
+    support     = db.Column(db.Text)   # JSON array
     is_active   = db.Column(db.Boolean, default=True, nullable=False)
 
     def features_list(self):
@@ -117,3 +123,15 @@ class Offer(db.Model):
     message          = db.Column(db.Text, nullable=False)
     created_at       = db.Column(db.DateTime(timezone=True), default=_now)
     status           = db.Column(db.String(20), default="new", nullable=False)
+
+
+class ContactMessage(db.Model):
+    """Stores contact form submissions so admins can review them."""
+    __tablename__ = "contact_messages"
+
+    id         = db.Column(db.Integer, primary_key=True)
+    name       = db.Column(db.String(120), nullable=False)
+    email      = db.Column(db.String(120), nullable=False)
+    message    = db.Column(db.Text, nullable=False)
+    read       = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), default=_now)

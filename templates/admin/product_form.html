@@ -1,0 +1,43 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Produkt bearbeiten{% endblock %}
+{% block admin_content %}
+<div class="admin-header">
+  <h1>Produkt bearbeiten: {{ product.name }}</h1>
+  <a href="{{ url_for('admin.products') }}" class="btn btn-ghost">← Zurück</a>
+</div>
+
+<div class="admin-card" style="max-width:680px">
+  <form method="POST">
+    <div class="form-row">
+      <div class="form-group" style="flex:2">
+        <label>Name <span style="color:var(--primary)">*</span></label>
+        <input type="text" name="name" required value="{{ product.name }}">
+      </div>
+      <div class="form-group" style="flex:0 0 80px">
+        <label>Icon (Emoji)</label>
+        <input type="text" name="icon" value="{{ product.icon or '' }}" placeholder="⚡" maxlength="4">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Beschreibung</label>
+      <textarea name="description" rows="4">{{ product.description or '' }}</textarea>
+    </div>
+    <div class="form-group">
+      <label>Features <span style="color:var(--text-muted);font-size:0.78rem">(eine Zeile pro Eintrag)</span></label>
+      <textarea name="features" rows="5" placeholder="ONNX-Modelle unterstützt&#10;Automatische Optimierung&#10;">{{ features_text }}</textarea>
+    </div>
+    <div class="form-group">
+      <label>Specs <span style="color:var(--text-muted);font-size:0.78rem">(eine Zeile pro Eintrag)</span></label>
+      <textarea name="specs" rows="5" placeholder="Eingangsformat: ONNX&#10;Zielplattform: Xilinx / Intel">{{ specs_text }}</textarea>
+    </div>
+    <div class="form-group">
+      <label>Support / Hinweise <span style="color:var(--text-muted);font-size:0.78rem">(eine Zeile pro Eintrag)</span></label>
+      <textarea name="support" rows="4" placeholder="Dokumentation verfügbar&#10;E-Mail-Support inklusive">{{ support_text }}</textarea>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px">
+      <button type="submit" class="btn">Speichern</button>
+      <a href="{{ url_for('admin.products') }}" class="btn btn-ghost">Abbrechen</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
