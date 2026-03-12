@@ -9,21 +9,27 @@
         <tr>
             <th>Name</th>
             <th>E-Mail</th>
-            <th>Admin</th>
+            <th>Status</th>
             <th>Newsletter</th>
             <th>Registriert</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
         {% for user in users %}
         <tr>
-            <td>{{ user.name }}</td>
+            <td>
+                <div style="display:flex;align-items:center;gap:0.5rem">
+                    {{ user.name }}
+                    {% if user.is_admin %}<span class="badge badge-purple">Admin</span>{% endif %}
+                </div>
+            </td>
             <td style="color:var(--text-muted);font-size:0.83rem">{{ user.email }}</td>
             <td>
-                {% if user.is_admin %}
-                    <span class="badge badge-purple">Admin</span>
+                {% if user.is_verified %}
+                    <span class="badge badge-green">Verifiziert</span>
                 {% else %}
-                    <span class="badge badge-gray">Nutzer</span>
+                    <span class="badge badge-yellow">Ausstehend</span>
                 {% endif %}
             </td>
             <td>
@@ -36,9 +42,24 @@
             <td style="color:var(--text-muted);font-size:0.78rem">
                 {{ user.created_at.strftime('%d.%m.%Y') if user.created_at else '—' }}
             </td>
+            <td style="display:flex;gap:0.4rem;flex-wrap:wrap">
+                {% if user.id != current_user.id %}
+                <form method="POST" action="{{ url_for('admin.toggle_admin', user_id=user.id) }}">
+                    <button type="submit" class="btn btn-sm btn-outline">
+                        {{ 'Admin entfernen' if user.is_admin else 'Admin machen' }}
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}"
+                      onsubmit="return confirm('Nutzer {{ user.name }} wirklich löschen? Alle Angebotsanfragen werden ebenfalls gelöscht.')">
+                    <button type="submit" class="btn btn-sm btn-danger">Löschen</button>
+                </form>
+                {% else %}
+                <span style="color:var(--text-muted);font-size:0.78rem;padding:0.4rem 0">(Du)</span>
+                {% endif %}
+            </td>
         </tr>
         {% else %}
-        <tr><td colspan="5" style="color:var(--text-muted);text-align:center;padding:2rem">Keine Nutzer.</td></tr>
+        <tr><td colspan="6" style="color:var(--text-muted);text-align:center;padding:2rem">Keine Nutzer.</td></tr>
         {% endfor %}
     </tbody>
 </table>

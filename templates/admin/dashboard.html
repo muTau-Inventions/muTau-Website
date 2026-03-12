@@ -7,7 +7,11 @@
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-value">{{ stats.users }}</div>
-        <div class="stat-label">Nutzer</div>
+        <div class="stat-label">Nutzer gesamt</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.verified_users }}</div>
+        <div class="stat-label">Verifiziert</div>
     </div>
     <div class="stat-card">
         <div class="stat-value">{{ stats.newsletter }}</div>
@@ -31,10 +35,61 @@
         <div class="stat-label">Neu / Ungelesen</div>
     </div>
     {% endif %}
+    {% if stats.papers_pending > 0 %}
+    <div class="stat-card" style="border-color:rgba(139,92,246,0.3)">
+        <div class="stat-value" style="color:#c4b5fd">{{ stats.papers_pending }}</div>
+        <div class="stat-label">Newsletter ausstehend</div>
+    </div>
+    {% endif %}
 </div>
 
-<p style="color:var(--text-muted);font-size:0.85rem">
-    Weitere Admin-Funktionen werden in einem zukünftigen Release implementiert.
-</p>
+{% if recent_offers %}
+<h3 style="font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--text);margin:2rem 0 1rem;letter-spacing:-0.02em">
+    Letzte Angebotsanfragen
+</h3>
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Unternehmen</th>
+            <th>Produkt</th>
+            <th>Datum</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for offer in recent_offers %}
+        <tr>
+            <td>
+                <div>{{ offer.name }}</div>
+                <div style="color:var(--text-muted);font-size:0.76rem">{{ offer.email }}</div>
+            </td>
+            <td style="color:var(--text-muted)">{{ offer.company or '—' }}</td>
+            <td>
+                {% if offer.product_interest %}
+                    <span class="badge badge-purple">{{ offer.product_interest }}</span>
+                {% else %}
+                    <span style="color:var(--text-muted)">—</span>
+                {% endif %}
+            </td>
+            <td style="color:var(--text-muted);font-size:0.78rem;white-space:nowrap">
+                {{ offer.created_at.strftime('%d.%m.%Y %H:%M') }}
+            </td>
+            <td>
+                {% if offer.status == 'new' %}<span class="badge badge-yellow">Neu</span>
+                {% elif offer.status == 'read' %}<span class="badge badge-gray">Gelesen</span>
+                {% else %}<span class="badge badge-green">Beantwortet</span>{% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('admin.offers') }}" class="btn btn-sm btn-outline">Alle</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p style="color:var(--text-muted);font-size:0.85rem;margin-top:1.5rem">Noch keine Angebotsanfragen eingegangen.</p>
+{% endif %}
 
 {% endblock %}

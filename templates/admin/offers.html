@@ -2,15 +2,38 @@
 {% block title %}Admin — Angebotsanfragen{% endblock %}
 {% block admin_content %}
 
-<h2>Angebotsanfragen</h2>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem;flex-wrap:wrap;gap:0.75rem">
+    <h2 style="margin:0">Angebotsanfragen</h2>
+    <div style="display:flex;gap:0.4rem">
+        <a href="{{ url_for('admin.offers') }}"
+           class="btn btn-sm {% if not status_filter %}btn-outline{% else %}btn-outline{% endif %}"
+           style="{% if not status_filter %}background:var(--primary-dim);{% endif %}">
+            Alle
+        </a>
+        <a href="{{ url_for('admin.offers', status='new') }}"
+           class="btn btn-sm btn-outline"
+           style="{% if status_filter == 'new' %}background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.4);color:#fcd34d;{% endif %}">
+            Neu
+        </a>
+        <a href="{{ url_for('admin.offers', status='read') }}"
+           class="btn btn-sm btn-outline"
+           style="{% if status_filter == 'read' %}background:var(--primary-dim);{% endif %}">
+            Gelesen
+        </a>
+        <a href="{{ url_for('admin.offers', status='answered') }}"
+           class="btn btn-sm btn-outline"
+           style="{% if status_filter == 'answered' %}background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:#6ee7b7;{% endif %}">
+            Beantwortet
+        </a>
+    </div>
+</div>
 
 {% if offers %}
 <table class="admin-table">
     <thead>
         <tr>
             <th>#</th>
-            <th>Name</th>
-            <th>E-Mail</th>
+            <th>Absender</th>
             <th>Unternehmen</th>
             <th>Produkt</th>
             <th>Datum</th>
@@ -22,8 +45,10 @@
         {% for offer in offers %}
         <tr>
             <td style="color:var(--text-muted);font-size:0.78rem">{{ offer.id }}</td>
-            <td>{{ offer.name }}</td>
-            <td style="color:var(--text-muted)">{{ offer.email }}</td>
+            <td>
+                <div>{{ offer.name }}</div>
+                <div style="color:var(--text-muted);font-size:0.76rem">{{ offer.email }}</div>
+            </td>
             <td style="color:var(--text-muted)">{{ offer.company or '—' }}</td>
             <td>
                 {% if offer.product_interest %}
@@ -36,25 +61,26 @@
                 {{ offer.created_at.strftime('%d.%m.%Y %H:%M') }}
             </td>
             <td>
-                {% if offer.status == 'new' %}
-                    <span class="badge badge-yellow">Neu</span>
-                {% elif offer.status == 'read' %}
-                    <span class="badge badge-gray">Gelesen</span>
-                {% else %}
-                    <span class="badge badge-green">Beantwortet</span>
-                {% endif %}
+                {% if offer.status == 'new' %}<span class="badge badge-yellow">Neu</span>
+                {% elif offer.status == 'read' %}<span class="badge badge-gray">Gelesen</span>
+                {% else %}<span class="badge badge-green">Beantwortet</span>{% endif %}
             </td>
-            <td>
+            <td style="display:flex;gap:0.4rem;flex-wrap:wrap">
                 {% if offer.status == 'new' %}
                 <form method="POST" action="{{ url_for('admin.mark_offer_read', offer_id=offer.id) }}">
-                    <button type="submit" class="btn btn-sm btn-outline">Als gelesen markieren</button>
+                    <button type="submit" class="btn btn-sm btn-outline">Gelesen</button>
+                </form>
+                {% endif %}
+                {% if offer.status != 'answered' %}
+                <form method="POST" action="{{ url_for('admin.mark_offer_answered', offer_id=offer.id) }}">
+                    <button type="submit" class="btn btn-sm">Beantwortet</button>
                 </form>
                 {% endif %}
             </td>
         </tr>
-        <!-- Expandable message row -->
+        <!-- Message row -->
         <tr>
-            <td colspan="8" style="padding: 0 1rem 1rem 3rem; color:var(--text-soft); font-size:0.85rem; border-bottom: 1px solid var(--border); line-height:1.7">
+            <td colspan="7" style="padding:0 1rem 1rem 3rem;color:var(--text-soft);font-size:0.85rem;border-bottom:1px solid var(--border);line-height:1.7">
                 <em>{{ offer.message }}</em>
             </td>
         </tr>
@@ -64,7 +90,7 @@
 {% else %}
 <div class="coming-soon">
     <p style="font-size:1.5rem">📋</p>
-    <p>Noch keine Angebotsanfragen eingegangen.</p>
+    <p>Keine Anfragen{% if status_filter %} mit Status „{{ status_filter }}"{% endif %}.</p>
 </div>
 {% endif %}
 

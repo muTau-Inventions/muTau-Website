@@ -15,7 +15,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     name          = db.Column(db.String(120))
     is_admin      = db.Column(db.Boolean, default=False, nullable=False)
-    is_verified   = db.Column(db.Boolean, default=True,  nullable=False)
+    is_verified   = db.Column(db.Boolean, default=False, nullable=False)
     newsletter    = db.Column(db.Boolean, default=False, nullable=False)
     created_at    = db.Column(db.DateTime(timezone=True), default=_now)
 
@@ -31,6 +31,18 @@ class User(UserMixin, db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+class EmailVerificationToken(db.Model):
+    __tablename__ = "email_verification_tokens"
+
+    id         = db.Column(db.Integer, primary_key=True)
+    token      = db.Column(db.String(100), unique=True, nullable=False)
+    user_id    = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    used       = db.Column(db.Boolean, default=False, nullable=False)
+
+    user = db.relationship("User", backref="verification_tokens")
 
 
 class PasswordResetToken(db.Model):

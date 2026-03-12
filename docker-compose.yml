@@ -26,12 +26,12 @@ services:
     environment:
       DATABASE_URL: postgresql://mutau:strongpassword123@db:5432/mutau
       SECRET_KEY: change_this_in_production
-      PYTHONPATH: /app/src
     volumes:
       - ./templates:/app/templates
       - ./static:/app/static
       - ./docs:/app/docs
       - ./research:/app/research
+      - ./config.yml:/app/config.yml:ro
 
 volumes:
   postgres_data:

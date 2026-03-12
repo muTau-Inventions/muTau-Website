@@ -1,0 +1,18 @@
+{% extends "email/base.html" %}
+
+{% block body %}
+<h2>Neue Forschungspublikation</h2>
+<h3>{{ paper.title }}</h3>
+{% if paper.authors %}<p style="color:#a5b4fc;font-size:0.83rem">{{ paper.authors }}</p>{% endif %}
+{% if paper.description %}<p>{{ paper.description }}</p>{% endif %}
+<a class="btn" href="{{ pdf_url }}">Paper lesen (PDF)</a>
+<p><a href="{{ research_url }}" class="muted">Alle Publikationen ansehen</a></p>
+<hr>
+<p style="font-size:0.78rem;color:#556070">
+  Du erhältst diese E-Mail, weil du den muTau-Newsletter abonniert hast.<br>
+  Du kannst ihn jederzeit in deinen
+  <a href="{{ account_url }}" class="muted">Account-Einstellungen</a> deaktivieren.
+</p>
+{% endblock %}
+
+{% block footer_label %}Newsletter{% endblock %}

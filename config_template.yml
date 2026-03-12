@@ -1,0 +1,23 @@
+app:
+  # Python logging level: DEBUG | INFO | WARNING | ERROR
+  log_level: "INFO"
+
+  # Base URL used for links in emails. No trailing slash.
+  # Change this to your production domain when deploying.
+  base_url: "http://localhost"
+
+mail:
+  smtp_host: "smtp.erikdonath.de"
+  smtp_port: 587
+  smtp_use_tls: true
+  smtp_user: "mutau@erikdonath.de"
+  smtp_password: ""
+
+  # from_address: if blank, smtp_user is used as the sender.
+  # Most SMTP servers require this to match the authenticated user.
+  from_address: ""
+
+  subjects:
+    newsletter: "Neue Forschungspublikation: {title}"
+    verification: "Bitte bestätige deine E-Mail-Adresse — muTau-Inventions"
+    password_reset: "Passwort zurücksetzen — muTau-Inventions"

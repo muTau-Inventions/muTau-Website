@@ -11,26 +11,43 @@
             <th>Autoren</th>
             <th>Datum</th>
             <th>Newsletter</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
         {% for paper in papers %}
         <tr>
-            <td>{{ paper.title }}</td>
-            <td style="color:var(--text-muted)">{{ paper.authors }}</td>
-            <td style="color:var(--text-muted);font-size:0.78rem">
+            <td>
+                <div>{{ paper.title }}</div>
+                {% if paper.description %}
+                <div style="color:var(--text-muted);font-size:0.76rem;margin-top:0.15rem;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                    {{ paper.description }}
+                </div>
+                {% endif %}
+            </td>
+            <td style="color:var(--text-muted)">{{ paper.authors or '—' }}</td>
+            <td style="color:var(--text-muted);font-size:0.78rem;white-space:nowrap">
                 {{ paper.date.strftime('%d.%m.%Y') if paper.date else '—' }}
             </td>
             <td>
                 {% if paper.notified %}
                     <span class="badge badge-green">Gesendet</span>
                 {% else %}
-                    <span class="badge badge-gray">Ausstehend</span>
+                    <span class="badge badge-yellow">Ausstehend</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if not paper.notified %}
+                <form method="POST"
+                      action="{{ url_for('admin.send_newsletter', paper_id=paper.id) }}"
+                      onsubmit="return confirm('Newsletter an alle Abonnenten senden für: {{ paper.title }}?')">
+                    <button type="submit" class="btn btn-sm">Newsletter senden</button>
+                </form>
                 {% endif %}
             </td>
         </tr>
         {% else %}
-        <tr><td colspan="4" style="color:var(--text-muted);text-align:center;padding:2rem">Keine Papiere.</td></tr>
+        <tr><td colspan="5" style="color:var(--text-muted);text-align:center;padding:2rem">Keine Papiere.</td></tr>
         {% endfor %}
     </tbody>
 </table>
