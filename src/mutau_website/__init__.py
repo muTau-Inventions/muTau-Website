@@ -2,34 +2,24 @@
 import logging
 import os
 
-from flask import Flask, render_template
-from .extensions import db, bcrypt, login_manager
-from .models import User  # noqa: F401 — must be imported before create_all()
+from flask import Flask, render_template, request, abort
+from .extensions import db, bcrypt, login_manager, generate_csrf_token, validate_csrf_token
+from .models import User  # noqa: F401
 
 
 def _configure_logging(app: Flask) -> None:
-    """
-    Route all app + library logs through gunicorn's error logger when running
-    under gunicorn, or fall back to a basic stderr handler in dev.
-    """
     from .config import get_log_level
     level = get_log_level()
-
     gunicorn_logger = logging.getLogger("gunicorn.error")
-
     if gunicorn_logger.handlers:
-        # Running under gunicorn — reuse its handlers so output lands in
-        # the same stream that `docker compose logs` captures.
         root = logging.getLogger()
         root.handlers = gunicorn_logger.handlers
         root.setLevel(level)
     else:
-        # Dev / direct flask run — basic stderr output.
         logging.basicConfig(
             level=level,
             format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         )
-
     app.logger.setLevel(level)
 
 
@@ -40,35 +30,50 @@ def create_app() -> Flask:
         static_folder=os.path.join(os.path.dirname(__file__), "..", "..", "static"),
     )
 
-    # ── Logging (must be early so config loader messages are captured) ────
+    # LOGGING
     _configure_logging(app)
     logger = logging.getLogger(__name__)
 
-    # ── Secret key ────────────────────────────────────────────────────────
+    # SECRET KEY
     secret_key = os.environ.get("SECRET_KEY", "")
     if not secret_key or secret_key == "change_this_in_production":
-        logger.warning(
+        raise RuntimeError(
             "SECRET_KEY environment variable is not set or still uses the default value. "
             "Set a strong random key before running."
         )
     app.secret_key = secret_key
 
-    # ── Database ──────────────────────────────────────────────────────────
+    # DATABASE
     database_url = os.environ.get("DATABASE_URL")
     if not database_url:
         raise RuntimeError("DATABASE_URL environment variable is not set.")
-
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    # ── Extensions ────────────────────────────────────────────────────────
+    # EXTENSIONS
     db.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
 
-    # ── Blueprints ────────────────────────────────────────────────────────
-    from .routes import main_bp, auth_bp, content_bp, products_bp, legal_bp, admin_bp
+    # JINJA GLOBALS
+    app.jinja_env.globals["csrf_token"] = generate_csrf_token
 
+    # CSRF PROTECTION
+    _CSRF_EXEMPT = {
+        # Add any webhook endpoints here if needed in future
+    }
+
+    @app.before_request
+    def enforce_csrf():
+        if request.method in ("POST", "PUT", "PATCH", "DELETE"):
+            if request.endpoint in _CSRF_EXEMPT:
+                return
+            token = request.form.get("csrf_token", "")
+            if not validate_csrf_token(token):
+                abort(403)
+
+    # BLUEPRINTS
+    from .routes import main_bp, auth_bp, content_bp, products_bp, legal_bp, admin_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(content_bp)
@@ -76,7 +81,7 @@ def create_app() -> Flask:
     app.register_blueprint(legal_bp)
     app.register_blueprint(admin_bp)
 
-    # ── DB init (safe with --preload: runs once in gunicorn master) ───────
+    # DB INIT
     with app.app_context():
         from .models import EmailVerificationToken, PasswordResetToken, Product, Paper, Offer, ContactMessage  # noqa: F401
         db.create_all()
@@ -84,7 +89,7 @@ def create_app() -> Flask:
         from .seed import seed_products
         seed_products()
 
-    # ── Error handlers ────────────────────────────────────────────────────
+    # ERROR HANDLERS
     @app.errorhandler(403)
     def forbidden(e):
         return render_template("errors/403.html"), 403

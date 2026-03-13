@@ -1,23 +1,22 @@
 app:
-  # Python logging level: DEBUG | INFO | WARNING | ERROR
-  log_level: "INFO"
+  secret_key: "CHANGE_ME_TO_A_LONG_RANDOM_STRING"
+  base_url: "https://mutau-inventions.com"
 
-  # Base URL used for links in emails. No trailing slash.
-  # Change this to your production domain when deploying.
-  base_url: "http://localhost"
+  # Absolute paths to content folders.
+  # In Docker these are bind-mounted at /app/docs and /app/research.
+  # For local development set them to absolute paths on your machine.
+  docs_folder: "/app/docs"
+  research_folder: "/app/research"
+
+  log_level: "INFO"   # DEBUG | INFO | WARNING | ERROR | CRITICAL
+
+database:
+  url: "postgresql://user:password@db:5432/mutau"
 
 mail:
-  smtp_host: "smtp.erikdonath.de"
-  smtp_port: 587
-  smtp_use_tls: true
-  smtp_user: "mutau@erikdonath.de"
-  smtp_password: ""
-
-  # from_address: if blank, smtp_user is used as the sender.
-  # Most SMTP servers require this to match the authenticated user.
-  from_address: ""
-
-  subjects:
-    newsletter: "Neue Forschungspublikation: {title}"
-    verification: "Bitte bestätige deine E-Mail-Adresse — muTau-Inventions"
-    password_reset: "Passwort zurücksetzen — muTau-Inventions"
+  server: "smtp.example.com"
+  port: 587
+  use_tls: true
+  username: "noreply@mutau-inventions.com"
+  password: "CHANGE_ME"
+  sender: "muTau-Inventions <noreply@mutau-inventions.com>"

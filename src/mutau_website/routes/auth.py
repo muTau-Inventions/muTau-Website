@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 auth_bp = Blueprint("auth", __name__)
 
 
-# ── Register ───────────────────────────────────────────────────────────────
+# REGISTER
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
@@ -33,7 +33,7 @@ def register():
             flash("Bitte akzeptiere die AGB.", "danger")
             return render_template("auth/register.html")
         if password != confirm:
-            flash("Die Passwörter stimmen nicht überein.", "danger")
+            flash("Die Passwoerter stimmen nicht ueberein.", "danger")
             return render_template("auth/register.html")
         if len(password) < 8:
             flash("Das Passwort muss mindestens 8 Zeichen lang sein.", "danger")
@@ -52,7 +52,7 @@ def register():
 
         try:
             db.session.add(user)
-            db.session.flush()  # get user.id before commit
+            db.session.flush()
 
             token_str = secrets.token_urlsafe(48)
             token = EmailVerificationToken(
@@ -63,11 +63,10 @@ def register():
             db.session.add(token)
             db.session.commit()
 
-            # _external=True uses the actual request host — works behind proxies/Codespaces
             verify_url = url_for("auth.verify_email", token=token_str, _external=True)
             send_verification_email(user, verify_url)
 
-            flash("Registrierung erfolgreich. Bitte bestätige deine E-Mail-Adresse.", "success")
+            flash("Registrierung erfolgreich. Bitte bestatige deine E-Mail-Adresse.", "success")
             return redirect(url_for("auth.login"))
         except Exception:
             db.session.rollback()
@@ -77,18 +76,18 @@ def register():
     return render_template("auth/register.html")
 
 
-# ── E-Mail Verification ────────────────────────────────────────────────────
+# EMAIL VERIFICATION
 
 @auth_bp.route("/verify-email/<token>")
 def verify_email(token):
     record = EmailVerificationToken.query.filter_by(token=token, used=False).first()
 
     if not record:
-        flash("Ungültiger oder bereits verwendeter Bestätigungslink.", "danger")
+        flash("Ungueltiger oder bereits verwendeter Bestaetigungslink.", "danger")
         return redirect(url_for("auth.login"))
 
     if datetime.now(timezone.utc) > record.expires_at:
-        flash("Der Bestätigungslink ist abgelaufen. Bitte registriere dich erneut.", "danger")
+        flash("Der Bestaetigungslink ist abgelaufen. Bitte registriere dich erneut.", "danger")
         return redirect(url_for("auth.register"))
 
     record.used             = True
@@ -96,11 +95,11 @@ def verify_email(token):
     db.session.commit()
 
     logger.info("E-mail verified for user %s", record.user.email)
-    flash("E-Mail-Adresse erfolgreich bestätigt. Du kannst dich jetzt anmelden.", "success")
+    flash("E-Mail-Adresse erfolgreich bestaetigt. Du kannst dich jetzt anmelden.", "success")
     return redirect(url_for("auth.login"))
 
 
-# ── Login ──────────────────────────────────────────────────────────────────
+# LOGIN
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -119,7 +118,7 @@ def login():
             return render_template("auth/login.html")
 
         if not user.is_verified:
-            flash("Bitte bestätige zuerst deine E-Mail-Adresse.", "warning")
+            flash("Bitte bestatige zuerst deine E-Mail-Adresse.", "warning")
             return render_template("auth/login.html")
 
         login_user(user, remember=remember)
@@ -129,7 +128,7 @@ def login():
     return render_template("auth/login.html")
 
 
-# ── Logout ─────────────────────────────────────────────────────────────────
+# LOGOUT
 
 @auth_bp.route("/logout")
 @login_required
@@ -139,7 +138,7 @@ def logout():
     return redirect(url_for("main.index"))
 
 
-# ── Forgot Password ────────────────────────────────────────────────────────
+# FORGOT PASSWORD
 
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
@@ -147,7 +146,6 @@ def forgot_password():
         email = request.form.get("email", "").strip().lower()
         user  = User.query.filter_by(email=email, is_verified=True).first()
 
-        # Always show the same message to prevent e-mail enumeration
         flash("Falls diese E-Mail registriert ist, wurde ein Reset-Link gesendet.", "info")
 
         if user:
@@ -162,7 +160,6 @@ def forgot_password():
             db.session.add(token)
             db.session.commit()
 
-            # _external=True uses the actual request host — works behind proxies/Codespaces
             reset_url = url_for("auth.reset_password", token=token_str, _external=True)
             send_password_reset_email(user, reset_url)
 
@@ -171,14 +168,14 @@ def forgot_password():
     return render_template("auth/forgot_password.html")
 
 
-# ── Reset Password ─────────────────────────────────────────────────────────
+# RESET PASSWORD
 
 @auth_bp.route("/reset-password/<token>", methods=["GET", "POST"])
 def reset_password(token):
     record = PasswordResetToken.query.filter_by(token=token, used=False).first()
 
     if not record:
-        flash("Ungültiger oder bereits verwendeter Reset-Link.", "danger")
+        flash("Ungueltiger oder bereits verwendeter Reset-Link.", "danger")
         return redirect(url_for("auth.forgot_password"))
 
     if datetime.now(timezone.utc) > record.expires_at:
@@ -194,7 +191,7 @@ def reset_password(token):
             return render_template("auth/reset_password.html", token=token)
 
         if password != confirm:
-            flash("Die Passwörter stimmen nicht überein.", "danger")
+            flash("Die Passwoerter stimmen nicht ueberein.", "danger")
             return render_template("auth/reset_password.html", token=token)
 
         record.used = True
@@ -202,19 +199,19 @@ def reset_password(token):
         db.session.commit()
 
         logger.info("Password reset completed for user %s", record.user.email)
-        flash("Passwort erfolgreich geändert. Du kannst dich jetzt anmelden.", "success")
+        flash("Passwort erfolgreich geaendert. Du kannst dich jetzt anmelden.", "success")
         return redirect(url_for("auth.login"))
 
     return render_template("auth/reset_password.html", token=token)
 
 
-# ── Unsubscribe (no login required — token in email) ──────────────────────
+# UNSUBSCRIBE
 
 @auth_bp.route("/unsubscribe/<token>")
 def unsubscribe(token):
     user = User.query.filter_by(unsubscribe_token=token).first()
     if not user:
-        flash("Ungültiger Abmeldelink.", "danger")
+        flash("Ungueltiger Abmeldelink.", "danger")
         return redirect(url_for("main.index"))
 
     if not user.newsletter:
@@ -224,10 +221,10 @@ def unsubscribe(token):
     user.newsletter = False
     db.session.commit()
     logger.info("User %s unsubscribed from newsletter via token", user.email)
-    return render_template("auth/unsubscribed.html", user=user)
+    return render_template("auth/unsubscribe.html", user=user)
 
 
-# ── Account ────────────────────────────────────────────────────────────────
+# ACCOUNT
 
 @auth_bp.route("/account")
 @login_required
@@ -249,12 +246,14 @@ def toggle_newsletter():
 @login_required
 def delete_account():
     confirm = request.form.get("confirm", "")
-    if confirm != "LÖSCHEN":
-        flash("Bitte gib LÖSCHEN ein, um deinen Account zu löschen.", "danger")
+    if confirm != "LOESCHEN":
+        flash("Bitte gib LOESCHEN ein, um deinen Account zu loeschen.", "danger")
         return redirect(url_for("auth.account"))
 
+    # Capture the user object before clearing the session proxy
+    user = current_user._get_current_object()
     logout_user()
-    db.session.delete(current_user._get_current_object())
+    db.session.delete(user)
     db.session.commit()
-    flash("Dein Account wurde gelöscht.", "info")
+    flash("Dein Account wurde geloescht.", "info")
     return redirect(url_for("main.index"))

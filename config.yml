@@ -3,18 +3,12 @@ app:
   log_level: "INFO"
   base_url: "https://solid-carnival-qxqxqwwjwgqf4qw7-80.app.github.dev"
 
+  docs_folder: "/app/docs"
+  research_folder: "/app/research"
+
 mail:
   smtp_host: "smtp.protonmail.ch"
   smtp_port: 587
   smtp_use_tls: true
   smtp_user: "mutau@erikdonath.de"
   smtp_password: "LBJW882CC5RCH7EK"
-
-  # from_address: if blank, smtp_user is used as the sender.
-  # Most SMTP servers require this to match the authenticated user.
-  from_address: ""
-
-  subjects:
-    newsletter: "Neue Forschungspublikation: {title}"
-    verification: "Bitte bestätige deine E-Mail-Adresse — muTau-Inventions"
-    password_reset: "Passwort zurücksetzen — muTau-Inventions"

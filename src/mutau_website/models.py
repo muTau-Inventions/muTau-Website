@@ -27,16 +27,16 @@ class User(UserMixin, db.Model):
 
     offers = db.relationship("Offer", backref="user", cascade="all, delete-orphan", passive_deletes=True)
 
-    def set_password(self, password):
+    def set_password(self, password: str) -> None:
         self.password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
 
-    def check_password(self, password):
+    def check_password(self, password: str) -> bool:
         return bcrypt.check_password_hash(self.password_hash, password)
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 class EmailVerificationToken(db.Model):
@@ -71,9 +71,9 @@ class Product(db.Model):
     name        = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
     icon        = db.Column(db.String(10))
-    features    = db.Column(db.Text)   # JSON array
-    specs       = db.Column(db.Text)   # JSON array
-    support     = db.Column(db.Text)   # JSON array
+    features    = db.Column(db.Text)
+    specs       = db.Column(db.Text)
+    support     = db.Column(db.Text)
     is_active   = db.Column(db.Boolean, default=True, nullable=False)
 
     def features_list(self):
@@ -126,12 +126,13 @@ class Offer(db.Model):
 
 
 class ContactMessage(db.Model):
-    """Stores contact form submissions so admins can review them."""
+    """Stores contact form submissions for admin review."""
     __tablename__ = "contact_messages"
 
     id         = db.Column(db.Integer, primary_key=True)
     name       = db.Column(db.String(120), nullable=False)
     email      = db.Column(db.String(120), nullable=False)
+    subject    = db.Column(db.String(200))
     message    = db.Column(db.Text, nullable=False)
     read       = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), default=_now)

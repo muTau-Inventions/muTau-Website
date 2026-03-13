@@ -9,7 +9,7 @@
 <div id="product-{{ product.slug }}" class="container">
     <a href="{{ url_for('products.products') }}" class="btn btn-outline btn-sm"
        style="margin-bottom:1.75rem; display:inline-flex;">
-        ← Zurück zu Produkten
+        &larr; Zurück zu Produkten
     </a>
 
     <div class="product-detail-grid">
@@ -18,7 +18,7 @@
         <div class="product-detail-info">
             <h1>{{ product.name }}</h1>
             <p>{{ product.description }}</p>
-            <a href="{{ url_for('main.offer') }}?product={{ product.slug }}" class="btn">
+            <a href="{{ url_for('main.offer', product=product.slug) }}" class="btn">
                 Angebot anfragen
             </a>
         </div>

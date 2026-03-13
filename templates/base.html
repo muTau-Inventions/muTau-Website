@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>muTau-Inventions | {% block title %}AI to FPGA Toolchain{% endblock %}</title>
-    <!-- Anti-FOUC: apply saved theme before any CSS renders -->
+    <!-- Anti-FOUC: apply saved theme before CSS renders -->
     <script>
       (function(){
         try {
@@ -29,7 +29,6 @@
     <div class="nav-inner">
         <a href="{{ url_for('main.index') }}" class="logo">muTau</a>
 
-        <!-- Desktop links -->
         <ul id="navLinks">
             <li><a href="{{ url_for('main.index') }}"        {% if request.endpoint == 'main.index'                                   %}class="active"{% endif %}>Home</a></li>
             <li><a href="{{ url_for('content.research') }}"  {% if request.endpoint == 'content.research'                             %}class="active"{% endif %}>Forschung</a></li>
@@ -39,9 +38,8 @@
             <li><a href="{{ url_for('main.contact') }}"      {% if request.endpoint == 'main.contact'                                 %}class="active"{% endif %}>Kontakt</a></li>
         </ul>
 
-        <!-- Desktop auth + theme toggle -->
         <div class="nav-auth">
-            <button class="theme-toggle" id="themeToggle" title="Theme wechseln" aria-label="Theme wechseln">🌙</button>
+            <button class="theme-toggle" id="themeToggle" title="Light Mode aktivieren" aria-label="Light Mode aktivieren">☀</button>
             {% if current_user.is_authenticated %}
                 {% if current_user.is_admin %}
                     <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline">Admin</a>
@@ -54,14 +52,12 @@
             {% endif %}
         </div>
 
-        <!-- Mobile hamburger -->
         <button class="nav-hamburger" id="navHamburger" aria-label="Menü" aria-expanded="false">
             <span></span><span></span><span></span>
         </button>
     </div>
 </nav>
 
-<!-- Mobile drawer -->
 <div class="nav-drawer" id="navDrawer" role="navigation" aria-label="Mobile Navigation">
     <a href="{{ url_for('main.index') }}"        {% if request.endpoint == 'main.index'                                   %}class="active"{% endif %}>Home</a>
     <a href="{{ url_for('content.research') }}"  {% if request.endpoint == 'content.research'                             %}class="active"{% endif %}>Forschung</a>
@@ -80,7 +76,7 @@
             <a href="{{ url_for('auth.login') }}"    class="btn btn-sm btn-outline">Login</a>
             <a href="{{ url_for('auth.register') }}" class="btn btn-sm">Registrieren</a>
         {% endif %}
-        <button class="theme-toggle" id="themeToggleMobile" title="Theme wechseln">🌙</button>
+        <button class="theme-toggle" id="themeToggleMobile" title="Light Mode aktivieren">☀</button>
     </div>
 </div>
 

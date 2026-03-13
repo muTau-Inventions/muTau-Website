@@ -6,6 +6,7 @@
     <div class="auth-box" style="max-width:520px">
         <h2>Account erstellen</h2>
         <form method="POST" action="{{ url_for('auth.register') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
                 <div class="form-group">
                     <label>Vorname</label>

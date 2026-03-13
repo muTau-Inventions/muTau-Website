@@ -1,0 +1,58 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{% if paper %}Publikation bearbeiten{% else %}Neue Publikation{% endif %}{% endblock %}
+{% block admin_content %}
+<div class="admin-header">
+    <h1>{% if paper %}Publikation bearbeiten: {{ paper.title }}{% else %}Neue Publikation{% endif %}</h1>
+    <a href="{{ url_for('admin.papers') }}" class="btn btn-ghost">&larr; Zurück</a>
+</div>
+
+<div class="admin-card" style="max-width:680px">
+    <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+            <label>Titel <span style="color:var(--primary)">*</span></label>
+            <input type="text" name="title" required value="{{ paper.title if paper else '' }}" placeholder="Titel der Publikation">
+        </div>
+
+        <div class="form-group">
+            <label>Autoren</label>
+            <input type="text" name="authors" value="{{ paper.authors if paper else '' }}" placeholder="Max Mueller, Sarah Schmidt">
+        </div>
+
+        <div class="form-group">
+            <label>Datum</label>
+            <input type="date" name="date" value="{{ paper.date.strftime('%Y-%m-%d') if paper and paper.date else '' }}">
+        </div>
+
+        <div class="form-group">
+            <label>Beschreibung / Abstract</label>
+            <textarea name="description" rows="4" placeholder="Kurze Zusammenfassung der Publikation...">{{ paper.description if paper else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>
+                PDF-Datei
+                {% if paper %}
+                    <span style="color:var(--text-muted);font-size:0.78rem">(leer lassen um bestehende Datei zu behalten)</span>
+                {% else %}
+                    <span style="color:var(--primary)">*</span>
+                {% endif %}
+            </label>
+            {% if paper %}
+            <div style="font-size:0.82rem;color:var(--text-soft);margin-bottom:0.5rem;padding:0.5rem 0.75rem;background:var(--surface-2);border-radius:var(--radius);border:1px solid var(--border)">
+                Aktuell: <code>{{ paper.pdf_path }}</code>
+            </div>
+            {% endif %}
+            <input type="file" name="pdf_file" accept=".pdf"
+                   style="width:100%;padding:0.65rem 0.9rem;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:0.88rem;cursor:pointer"
+                   {% if not paper %}required{% endif %}>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:8px">
+            <button type="submit" class="btn">{% if paper %}Speichern{% else %}Hinzufuegen{% endif %}</button>
+            <a href="{{ url_for('admin.papers') }}" class="btn btn-ghost">Abbrechen</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

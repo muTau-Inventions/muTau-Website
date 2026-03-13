@@ -7,20 +7,20 @@ INITIAL_PRODUCTS = [
     {
         "slug": "converter",
         "name": "muTau Converter",
-        "icon": "🔄",
-        "description": "Konvertiert neuronale Netzwerke direkt in High-Level Synthesis Code für maximale Performance auf FPGAs.",
+        "icon": "CNV",
+        "description": "Konvertiert neuronale Netzwerke direkt in High-Level Synthesis Code fuer maximale Performance auf FPGAs.",
         "features": json.dumps([
-            "Unterstützung für TensorFlow, PyTorch und ONNX",
+            "Unterstuetzung fuer TensorFlow, PyTorch und ONNX",
             "Automatische Layer-Erkennung und Mapping",
-            "Optimierte HLS-Ausgabe für Vivado und Quartus",
+            "Optimierte HLS-Ausgabe fuer Vivado und Quartus",
             "Batch-Konvertierung mehrerer Modelle",
             "Detaillierte Konvertierungs-Reports",
         ]),
         "specs": json.dumps([
             "Python 3.9+ erforderlich",
-            "Unterstützte Frameworks: TF 2.x, PyTorch 1.x/2.x, ONNX 1.x",
+            "Unterstuetzte Frameworks: TF 2.x, PyTorch 1.x/2.x, ONNX 1.x",
             "Ausgabeformate: Vivado HLS, Intel HLS Compiler",
-            "Max. Modellgröße: unbegrenzt (RAM-abhängig)",
+            "Max. Modellgroesse: unbegrenzt (RAM-abhaengig)",
             "CLI + Python API",
         ]),
         "support": json.dumps([
@@ -33,17 +33,17 @@ INITIAL_PRODUCTS = [
     {
         "slug": "soc-builder",
         "name": "muTau SoC Builder",
-        "icon": "⚙️",
+        "icon": "SOC",
         "description": "Automatische Integration von KI-Beschleunigern in SoC-Designs mit Schnittstellen-Generierung.",
         "features": json.dumps([
             "Automatische AXI-Schnittstellen-Generierung",
             "Integration mit Xilinx und Intel SoC-Plattformen",
             "DMA-Controller-Konfiguration",
             "Memory-Map-Management",
-            "TCL-Skript-Export für Vivado/Quartus",
+            "TCL-Skript-Export fuer Vivado/Quartus",
         ]),
         "specs": json.dumps([
-            "Unterstützte Boards: ZCU102, DE10-Nano, u.v.m.",
+            "Unterstuetzte Boards: ZCU102, DE10-Nano, u.v.m.",
             "Schnittstellen: AXI4, AXI4-Lite, AXI4-Stream",
             "Ausgabe: IP-Core, Vivado-Projekt, QSYS-Projekt",
             "Linux- und Bare-Metal-Support",
@@ -58,10 +58,10 @@ INITIAL_PRODUCTS = [
     {
         "slug": "profiler",
         "name": "muTau Profiler",
-        "icon": "📊",
-        "description": "Performance-Analyse und Ressourcenabschätzung vor der Synthese — spart stundenlange Build-Zyklen.",
+        "icon": "PRF",
+        "description": "Performance-Analyse und Ressourcenabschaetzung vor der Synthese - spart stundenlange Build-Zyklen.",
         "features": json.dumps([
-            "Ressourcenabschätzung (LUT, DSP, BRAM) ohne Synthese",
+            "Ressourcenabschaetzung (LUT, DSP, BRAM) ohne Synthese",
             "Latenz- und Throughput-Analyse",
             "Bottleneck-Erkennung",
             "Vergleich verschiedener Quantisierungsstufen",
@@ -69,7 +69,7 @@ INITIAL_PRODUCTS = [
         ]),
         "specs": json.dumps([
             "Statische Analyse: < 30 Sekunden",
-            "Unterstützte Ziele: Artix-7, Kintex-7, Zynq, Cyclone V",
+            "Unterstuetzte Ziele: Artix-7, Kintex-7, Zynq, Cyclone V",
             "Ausgabe: HTML, PDF, JSON",
             "Integration mit muTau Converter",
         ]),
@@ -82,12 +82,12 @@ INITIAL_PRODUCTS = [
     {
         "slug": "optimizer",
         "name": "muTau Optimizer",
-        "icon": "🎯",
-        "description": "Automatische Quantisierung und Hardware-Optimierung für minimalen Ressourcenverbrauch bei maximaler Genauigkeit.",
+        "icon": "OPT",
+        "description": "Automatische Quantisierung und Hardware-Optimierung fuer minimalen Ressourcenverbrauch bei maximaler Genauigkeit.",
         "features": json.dumps([
             "Post-Training Quantisierung (INT8, INT4)",
             "Pruning und Weight-Sharing",
-            "Automatisches Hyperparameter-Tuning für Hardware",
+            "Automatisches Hyperparameter-Tuning fuer Hardware",
             "Accuracy-vs-Resources Trade-off Analyse",
             "One-Click-Optimierung mit vordefinierten Profilen",
         ]),
@@ -95,7 +95,7 @@ INITIAL_PRODUCTS = [
             "Quantisierungsmodi: FP32, FP16, INT8, INT4",
             "Pruning: strukturiert und unstrukturiert",
             "Kompatibel mit muTau Converter Output",
-            "GPU-beschleunigte Optimierung möglich",
+            "GPU-beschleunigte Optimierung moeglich",
         ]),
         "support": json.dumps([
             "Email-Support",
@@ -107,8 +107,13 @@ INITIAL_PRODUCTS = [
 
 
 def seed_products():
-    if Product.query.count() == 0:
-        for data in INITIAL_PRODUCTS:
-            product = Product(**data)
-            db.session.add(product)
-        db.session.commit()
+    """Upsert initial products by slug so changes in this file apply on restart."""
+    for data in INITIAL_PRODUCTS:
+        existing = Product.query.filter_by(slug=data["slug"]).first()
+        if existing is None:
+            db.session.add(Product(**data))
+        else:
+            for key, value in data.items():
+                if key != "slug":
+                    setattr(existing, key, value)
+    db.session.commit()

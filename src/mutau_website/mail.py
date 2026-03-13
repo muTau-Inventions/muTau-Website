@@ -5,8 +5,8 @@ SMTP settings come from config.yml.
 """
 import logging
 import smtplib
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 from flask import render_template, url_for
 
@@ -15,7 +15,7 @@ from .config import get_mail_cfg
 logger = logging.getLogger(__name__)
 
 
-# ── Internal helpers ───────────────────────────────────────────────────────
+# INTERNAL HELPERS
 
 def _smtp_cfg() -> dict:
     mc = get_mail_cfg()
@@ -25,18 +25,16 @@ def _smtp_cfg() -> dict:
         "use_tls":  bool(mc.get("smtp_use_tls", True)),
         "user":     mc.get("smtp_user", ""),
         "password": mc.get("smtp_password", ""),
-        # from_address must match the authenticated SMTP user on most servers.
-        # Leave it blank in config.yml to fall back to smtp_user automatically.
         "sender":   mc.get("from_address") or mc.get("smtp_user", ""),
     }
 
 
 def _subject(key: str, **fmt) -> str:
-    mc       = get_mail_cfg()
+    mc = get_mail_cfg()
     defaults = {
         "newsletter":     "Neue Forschungspublikation: {title}",
-        "verification":   "Bitte bestätige deine E-Mail-Adresse — muTau-Inventions",
-        "password_reset": "Passwort zurücksetzen — muTau-Inventions",
+        "verification":   "Bitte bestatige deine E-Mail-Adresse - muTau-Inventions",
+        "password_reset": "Passwort zuruecksetzen - muTau-Inventions",
     }
     tpl = mc.get("subjects", {}).get(key, defaults.get(key, key))
     return tpl.format(**fmt) if fmt else tpl
@@ -45,7 +43,6 @@ def _subject(key: str, **fmt) -> str:
 def _send(to_addresses: list, subject: str, body_html: str) -> None:
     """Send one e-mail. Raises on SMTP failure."""
     cfg = _smtp_cfg()
-
     if not cfg["host"]:
         raise RuntimeError("mail.smtp_host is not configured in config.yml")
 
@@ -62,16 +59,12 @@ def _send(to_addresses: list, subject: str, body_html: str) -> None:
             smtp.login(cfg["user"], cfg["password"])
         smtp.sendmail(cfg["sender"], to_addresses, msg.as_string())
 
-    logger.info("Mail sent  to=%s  subject=%r", to_addresses, subject)
+    logger.info("Mail sent to=%s subject=%r", to_addresses, subject)
 
 
-# ── Public API ─────────────────────────────────────────────────────────────
+# PUBLIC API
 
 def send_verification_email(user, verify_url: str) -> None:
-    """
-    Send account e-mail verification after registration.
-    verify_url: absolute URL to the /verify-email/<token> route.
-    """
     try:
         body = render_template("email/verification.html", user=user, verify_url=verify_url)
         _send([user.email], _subject("verification"), body)
@@ -80,10 +73,6 @@ def send_verification_email(user, verify_url: str) -> None:
 
 
 def send_password_reset_email(user, reset_url: str) -> None:
-    """
-    Send a password-reset link.
-    reset_url: absolute URL to the /reset-password/<token> route.
-    """
     try:
         body = render_template("email/password_reset.html", user=user, reset_url=reset_url)
         _send([user.email], _subject("password_reset"), body)
@@ -92,10 +81,6 @@ def send_password_reset_email(user, reset_url: str) -> None:
 
 
 def send_newsletter(users, paper, pdf_url: str, research_url: str) -> None:
-    """
-    Notify newsletter subscribers about a new research paper.
-    Each recipient gets a personalised unsubscribe link via their token.
-    """
     subject = _subject("newsletter", title=paper.title)
     failed  = 0
 

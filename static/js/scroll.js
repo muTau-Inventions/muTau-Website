@@ -2,25 +2,27 @@
     'use strict';
 
     function initScrollAnimations() {
-        const selector = '.card, .paper, .product-card, .team-card, .feature-list li';
-        const elements = document.querySelectorAll(selector);
+        var selector = '.card, .paper, .product-card, .team-card, .feature-list li';
+        var elements = document.querySelectorAll(selector);
 
         if (!elements.length) return;
 
-        const observer = new IntersectionObserver(function (entries) {
+        var observer = new IntersectionObserver(function (entries) {
             entries.forEach(function (entry) {
                 if (entry.isIntersecting) {
-                    entry.target.style.opacity   = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                    observer.unobserve(entry.target);
+                    var el = entry.target;
+                    // Remove inline styles so CSS transitions (including hover) take over cleanly
+                    el.style.opacity   = '';
+                    el.style.transform = '';
+                    el.style.transition = '';
+                    el.classList.add('visible');
+                    observer.unobserve(el);
                 }
             });
         }, { threshold: 0.08 });
 
         elements.forEach(function (el) {
-            el.style.opacity    = '0';
-            el.style.transform  = 'translateY(24px)';
-            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            el.classList.add('scroll-hidden');
             observer.observe(el);
         });
     }

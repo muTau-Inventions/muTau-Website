@@ -10,7 +10,7 @@ down:
 	docker compose down
 
 logs:
-	docker compose logs -f web
+	docker compose logs -f
 
 shell:
 	docker compose exec web bash

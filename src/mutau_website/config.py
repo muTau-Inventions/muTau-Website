@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 _CONFIG_PATH_ENV = "CONFIG_PATH"
 _DEFAULT_PATHS = [
     os.environ.get(_CONFIG_PATH_ENV, ""),
-    "/app/config.yml",                                                      # container default
-    os.path.join(os.path.dirname(__file__), "..", "..", "config.yml"),      # repo root (dev)
+    "/app/config.yml",
+    os.path.join(os.path.dirname(__file__), "..", "..", "config.yml"),
 ]
 
 
@@ -27,7 +27,6 @@ def _load() -> dict:
                 data = yaml.safe_load(fh) or {}
             logger.info("Loaded config from %s", os.path.abspath(path))
             return data
-
     logger.warning(
         "config.yml not found (searched: %s). Using empty defaults.",
         [p for p in _DEFAULT_PATHS if p],
@@ -38,7 +37,7 @@ def _load() -> dict:
 cfg: dict = _load()
 
 
-# ── Convenience accessors ──────────────────────────────────────────────────
+# ACCESSORS
 
 def get_log_level() -> int:
     name = cfg.get("app", {}).get("log_level", "INFO").upper()
@@ -50,9 +49,12 @@ def get_mail_cfg() -> dict:
 
 
 def get_base_url() -> str:
-    """
-    Base URL used to build absolute links in emails.
-    Configured via app.base_url in config.yml.
-    Falls back to http://localhost if not set.
-    """
     return cfg.get("app", {}).get("base_url", "http://localhost").rstrip("/")
+
+
+def get_docs_folder() -> str:
+    return cfg.get("app", {}).get("docs_folder", "/app/docs")
+
+
+def get_research_folder() -> str:
+    return cfg.get("app", {}).get("research_folder", "/app/research")

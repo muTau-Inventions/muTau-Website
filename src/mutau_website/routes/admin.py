@@ -1,9 +1,9 @@
 import json
 import logging
 import os
+import secrets
 
-
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from werkzeug.utils import secure_filename
 from flask import (
     Blueprint, render_template, redirect, url_for,
@@ -11,47 +11,37 @@ from flask import (
 )
 from flask_login import login_required, current_user
 
-
 from ..extensions import db, admin_required
 from ..models import User, Product, Paper, Offer, ContactMessage
-
 
 logger = logging.getLogger(__name__)
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
-
 ALLOWED_EXTENSIONS = {"pdf"}
 
 
-
 def _research_dir() -> str:
-    return os.path.join(current_app.root_path, "..", "..", "research")
-
+    from ..config import get_research_folder
+    return get_research_folder()
 
 
 def _allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-
 def _lines_to_json(text: str) -> str:
-    """Convert newline-separated text to a JSON array string."""
     items = [line.strip() for line in text.splitlines() if line.strip()]
     return json.dumps(items, ensure_ascii=False)
 
 
-
 def _json_to_lines(json_str: str) -> str:
-    """Convert a JSON array string to newline-separated text."""
     try:
         return "\n".join(json.loads(json_str or "[]"))
     except Exception:
         return ""
 
 
-
-# ── Dashboard ──────────────────────────────────────────────────────────────
-
+# DASHBOARD
 
 @admin_bp.route("/")
 @login_required
@@ -88,9 +78,7 @@ def dashboard():
     )
 
 
-
-# ── Products ───────────────────────────────────────────────────────────────
-
+# PRODUCTS
 
 @admin_bp.route("/products")
 @login_required
@@ -100,26 +88,27 @@ def products():
     return render_template("admin/products.html", products=all_products)
 
 
-
 @admin_bp.route("/products/<int:product_id>/toggle", methods=["POST"])
 @login_required
 @admin_required
 def toggle_product(product_id):
-    product = Product.query.get_or_404(product_id)
+    product = db.session.get(Product, product_id)
+    if not product:
+        abort(404)
     product.is_active = not product.is_active
     db.session.commit()
     state = "aktiviert" if product.is_active else "deaktiviert"
-    flash(f"Produkt „{product.name}“ wurde {state}.", "success")
+    flash(f"Produkt \"{product.name}\" wurde {state}.", "success")
     return redirect(url_for("admin.products"))
-
 
 
 @admin_bp.route("/products/<int:product_id>/edit", methods=["GET", "POST"])
 @login_required
 @admin_required
 def edit_product(product_id):
-    product = Product.query.get_or_404(product_id)
-
+    product = db.session.get(Product, product_id)
+    if not product:
+        abort(404)
 
     if request.method == "POST":
         product.name        = request.form.get("name", "").strip()
@@ -129,20 +118,20 @@ def edit_product(product_id):
         product.specs       = _lines_to_json(request.form.get("specs", ""))
         product.support     = _lines_to_json(request.form.get("support", ""))
 
-
         if not product.name:
             flash("Name darf nicht leer sein.", "danger")
-            return render_template("admin/product_form.html", product=product,
-                                   features_text=request.form.get("features", ""),
-                                   specs_text=request.form.get("specs", ""),
-                                   support_text=request.form.get("support", ""))
-
+            return render_template(
+                "admin/product_form.html",
+                product=product,
+                features_text=request.form.get("features", ""),
+                specs_text=request.form.get("specs", ""),
+                support_text=request.form.get("support", ""),
+            )
 
         db.session.commit()
         logger.info("Admin %s updated product %d (%s)", current_user.email, product.id, product.slug)
-        flash(f"Produkt „{product.name}“ gespeichert.", "success")
+        flash(f"Produkt \"{product.name}\" gespeichert.", "success")
         return redirect(url_for("admin.products"))
-
 
     return render_template(
         "admin/product_form.html",
@@ -153,9 +142,7 @@ def edit_product(product_id):
     )
 
 
-
-# ── Papers ─────────────────────────────────────────────────────────────────
-
+# PAPERS
 
 @admin_bp.route("/papers")
 @login_required
@@ -163,7 +150,6 @@ def edit_product(product_id):
 def papers():
     all_papers = Paper.query.order_by(Paper.date.desc()).all()
     return render_template("admin/papers.html", papers=all_papers)
-
 
 
 @admin_bp.route("/papers/new", methods=["GET", "POST"])
@@ -177,27 +163,28 @@ def new_paper():
         description = request.form.get("description", "").strip()
         pdf_file    = request.files.get("pdf_file")
 
-
         if not title:
             flash("Titel darf nicht leer sein.", "danger")
             return render_template("admin/paper_form.html", paper=None)
-
 
         if not pdf_file or not pdf_file.filename:
             flash("Bitte eine PDF-Datei hochladen.", "danger")
             return render_template("admin/paper_form.html", paper=None)
 
-
         if not _allowed_file(pdf_file.filename):
             flash("Nur PDF-Dateien sind erlaubt.", "danger")
             return render_template("admin/paper_form.html", paper=None)
 
-
-        filename = secure_filename(pdf_file.filename)
+        filename     = secure_filename(pdf_file.filename)
         research_dir = _research_dir()
+
+        # Check for duplicate filename before writing to disk
+        if Paper.query.filter_by(pdf_path=filename).first():
+            flash(f"Eine Publikation mit der Datei \"{filename}\" existiert bereits.", "danger")
+            return render_template("admin/paper_form.html", paper=None)
+
         os.makedirs(research_dir, exist_ok=True)
         pdf_file.save(os.path.join(research_dir, filename))
-
 
         date = None
         if date_str:
@@ -205,7 +192,6 @@ def new_paper():
                 date = datetime.strptime(date_str, "%Y-%m-%d").date()
             except ValueError:
                 pass
-
 
         paper = Paper(
             pdf_path=filename,
@@ -217,28 +203,25 @@ def new_paper():
         db.session.add(paper)
         db.session.commit()
 
-
         logger.info("Admin %s created paper %d ('%s')", current_user.email, paper.id, paper.title)
-        flash(f"Publikation „{paper.title}“ wurde hinzugefügt.", "success")
+        flash(f"Publikation \"{paper.title}\" wurde hinzugefuegt.", "success")
         return redirect(url_for("admin.papers"))
 
-
     return render_template("admin/paper_form.html", paper=None)
-
 
 
 @admin_bp.route("/papers/<int:paper_id>/edit", methods=["GET", "POST"])
 @login_required
 @admin_required
 def edit_paper(paper_id):
-    paper = Paper.query.get_or_404(paper_id)
-
+    paper = db.session.get(Paper, paper_id)
+    if not paper:
+        abort(404)
 
     if request.method == "POST":
         paper.title       = request.form.get("title", "").strip()
         paper.authors     = request.form.get("authors", "").strip()
         paper.description = request.form.get("description", "").strip()
-
 
         date_str = request.form.get("date", "").strip()
         if date_str:
@@ -247,16 +230,19 @@ def edit_paper(paper_id):
             except ValueError:
                 pass
 
-
-        # Optional PDF replacement
         pdf_file = request.files.get("pdf_file")
         if pdf_file and pdf_file.filename:
             if not _allowed_file(pdf_file.filename):
                 flash("Nur PDF-Dateien sind erlaubt.", "danger")
                 return render_template("admin/paper_form.html", paper=paper)
 
+            new_filename = secure_filename(pdf_file.filename)
 
-            # Remove old file
+            # Check for duplicate only when the filename actually changes
+            if new_filename != paper.pdf_path and Paper.query.filter_by(pdf_path=new_filename).first():
+                flash(f"Eine Publikation mit der Datei \"{new_filename}\" existiert bereits.", "danger")
+                return render_template("admin/paper_form.html", paper=paper)
+
             old_path = os.path.join(_research_dir(), paper.pdf_path)
             if os.path.isfile(old_path):
                 try:
@@ -264,38 +250,31 @@ def edit_paper(paper_id):
                 except OSError:
                     logger.warning("Could not delete old PDF: %s", old_path)
 
-
-            filename = secure_filename(pdf_file.filename)
             research_dir = _research_dir()
             os.makedirs(research_dir, exist_ok=True)
-            pdf_file.save(os.path.join(research_dir, filename))
-            paper.pdf_path = filename
-
+            pdf_file.save(os.path.join(research_dir, new_filename))
+            paper.pdf_path = new_filename
 
         if not paper.title:
             flash("Titel darf nicht leer sein.", "danger")
             return render_template("admin/paper_form.html", paper=paper)
 
-
         db.session.commit()
         logger.info("Admin %s updated paper %d ('%s')", current_user.email, paper.id, paper.title)
-        flash(f"Publikation „{paper.title}“ gespeichert.", "success")
+        flash(f"Publikation \"{paper.title}\" gespeichert.", "success")
         return redirect(url_for("admin.papers"))
 
-
     return render_template("admin/paper_form.html", paper=paper)
-
 
 
 @admin_bp.route("/papers/<int:paper_id>/delete", methods=["POST"])
 @login_required
 @admin_required
 def delete_paper(paper_id):
-    paper = Paper.query.get_or_404(paper_id)
-    title = paper.title
-
-
-    # Remove PDF file
+    paper = db.session.get(Paper, paper_id)
+    if not paper:
+        abort(404)
+    title    = paper.title
     pdf_path = os.path.join(_research_dir(), paper.pdf_path)
     if os.path.isfile(pdf_path):
         try:
@@ -303,13 +282,11 @@ def delete_paper(paper_id):
         except OSError:
             logger.warning("Could not delete PDF file: %s", pdf_path)
 
-
     db.session.delete(paper)
     db.session.commit()
     logger.info("Admin %s deleted paper %d ('%s')", current_user.email, paper_id, title)
-    flash(f"Publikation „{title}“ wurde gelöscht.", "success")
+    flash(f"Publikation \"{title}\" wurde geloescht.", "success")
     return redirect(url_for("admin.papers"))
-
 
 
 @admin_bp.route("/papers/<int:paper_id>/send-newsletter", methods=["POST"])
@@ -318,40 +295,33 @@ def delete_paper(paper_id):
 def send_newsletter(paper_id):
     from ..mail import send_newsletter as _send_newsletter
 
-
-    paper = Paper.query.get_or_404(paper_id)
-
+    paper = db.session.get(Paper, paper_id)
+    if not paper:
+        abort(404)
 
     if paper.notified:
-        flash("Newsletter für diese Publikation wurde bereits gesendet.", "warning")
+        flash("Newsletter fuer diese Publikation wurde bereits gesendet.", "warning")
         return redirect(url_for("admin.papers"))
-
 
     subscribers = User.query.filter_by(newsletter=True, is_verified=True).all()
     if not subscribers:
         flash("Keine Newsletter-Abonnenten vorhanden.", "warning")
         return redirect(url_for("admin.papers"))
 
-
     pdf_url      = url_for("content.research_pdf", filename=paper.pdf_path, _external=True)
     research_url = url_for("content.research", _external=True)
 
-
     _send_newsletter(subscribers, paper, pdf_url=pdf_url, research_url=research_url)
-
 
     paper.notified = True
     db.session.commit()
-
 
     logger.info("Newsletter sent for paper %d ('%s') by admin %s", paper_id, paper.title, current_user.email)
     flash(f"Newsletter an {len(subscribers)} Abonnenten gesendet.", "success")
     return redirect(url_for("admin.papers"))
 
 
-
-# ── Offers ─────────────────────────────────────────────────────────────────
-
+# OFFERS
 
 @admin_bp.route("/offers")
 @login_required
@@ -365,44 +335,45 @@ def offers():
     return render_template("admin/offers.html", offers=all_offers, status_filter=status_filter)
 
 
-
 @admin_bp.route("/offers/<int:offer_id>")
 @login_required
 @admin_required
 def offer_detail(offer_id):
-    offer = Offer.query.get_or_404(offer_id)
+    offer = db.session.get(Offer, offer_id)
+    if not offer:
+        abort(404)
     if offer.status == "new":
         offer.status = "read"
         db.session.commit()
     return render_template("admin/offer_detail.html", offer=offer)
 
 
-
 @admin_bp.route("/offers/<int:offer_id>/mark-answered", methods=["POST"])
 @login_required
 @admin_required
 def mark_offer_answered(offer_id):
-    offer = Offer.query.get_or_404(offer_id)
+    offer = db.session.get(Offer, offer_id)
+    if not offer:
+        abort(404)
     offer.status = "answered"
     db.session.commit()
     return redirect(request.referrer or url_for("admin.offers"))
-
 
 
 @admin_bp.route("/offers/<int:offer_id>/delete", methods=["POST"])
 @login_required
 @admin_required
 def delete_offer(offer_id):
-    offer = Offer.query.get_or_404(offer_id)
+    offer = db.session.get(Offer, offer_id)
+    if not offer:
+        abort(404)
     db.session.delete(offer)
     db.session.commit()
-    flash("Anfrage wurde gelöscht.", "success")
+    flash("Anfrage wurde geloescht.", "success")
     return redirect(url_for("admin.offers"))
 
 
-
-# ── Contact messages ───────────────────────────────────────────────────────
-
+# CONTACT MESSAGES
 
 @admin_bp.route("/contact")
 @login_required
@@ -416,32 +387,32 @@ def contact_messages():
     return render_template("admin/contact_messages.html", messages=messages, show_all=show_all)
 
 
-
 @admin_bp.route("/contact/<int:msg_id>/read", methods=["POST"])
 @login_required
 @admin_required
 def mark_contact_read(msg_id):
-    msg = ContactMessage.query.get_or_404(msg_id)
+    msg = db.session.get(ContactMessage, msg_id)
+    if not msg:
+        abort(404)
     msg.read = True
     db.session.commit()
     return redirect(request.referrer or url_for("admin.contact_messages"))
-
 
 
 @admin_bp.route("/contact/<int:msg_id>/delete", methods=["POST"])
 @login_required
 @admin_required
 def delete_contact(msg_id):
-    msg = ContactMessage.query.get_or_404(msg_id)
+    msg = db.session.get(ContactMessage, msg_id)
+    if not msg:
+        abort(404)
     db.session.delete(msg)
     db.session.commit()
-    flash("Nachricht gelöscht.", "success")
+    flash("Nachricht geloescht.", "success")
     return redirect(url_for("admin.contact_messages"))
 
 
-
-# ── Users ──────────────────────────────────────────────────────────────────
-
+# USERS
 
 @admin_bp.route("/users")
 @login_required
@@ -451,14 +422,15 @@ def users():
     return render_template("admin/users.html", users=all_users)
 
 
-
 @admin_bp.route("/users/<int:user_id>/toggle-admin", methods=["POST"])
 @login_required
 @admin_required
 def toggle_admin(user_id):
-    user = User.query.get_or_404(user_id)
+    user = db.session.get(User, user_id)
+    if not user:
+        abort(404)
     if user.id == current_user.id:
-        flash("Du kannst deinen eigenen Admin-Status nicht ändern.", "warning")
+        flash("Du kannst deinen eigenen Admin-Status nicht aendern.", "warning")
         return redirect(url_for("admin.users"))
     user.is_admin = not user.is_admin
     db.session.commit()
@@ -467,54 +439,49 @@ def toggle_admin(user_id):
     return redirect(url_for("admin.users"))
 
 
-
 @admin_bp.route("/users/<int:user_id>/resend-verification", methods=["POST"])
 @login_required
 @admin_required
 def resend_verification(user_id):
-    import secrets
-    from datetime import timedelta
     from ..models import EmailVerificationToken
     from ..mail import send_verification_email
 
+    user = db.session.get(User, user_id)
+    if not user:
+        abort(404)
 
-    user = User.query.get_or_404(user_id)
     if user.is_verified:
         flash(f"{user.name} ist bereits verifiziert.", "info")
         return redirect(url_for("admin.users"))
-
 
     token_str = secrets.token_urlsafe(48)
     token = EmailVerificationToken(
         token=token_str,
         user_id=user.id,
-        expires_at=datetime.now(user.created_at.tzinfo) + timedelta(hours=24),
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
     )
     db.session.add(token)
     db.session.commit()
 
-
-    from datetime import timezone
-    from flask import url_for as _url_for
-    verify_url = _url_for("auth.verify_email", token=token_str, _external=True)
+    verify_url = url_for("auth.verify_email", token=token_str, _external=True)
     send_verification_email(user, verify_url)
 
-
-    flash(f"Bestätigungsmail an {user.email} gesendet.", "success")
+    flash(f"Bestaetigungsmail an {user.email} gesendet.", "success")
     return redirect(url_for("admin.users"))
-
 
 
 @admin_bp.route("/users/<int:user_id>/delete", methods=["POST"])
 @login_required
 @admin_required
 def delete_user(user_id):
-    user = User.query.get_or_404(user_id)
+    user = db.session.get(User, user_id)
+    if not user:
+        abort(404)
     if user.id == current_user.id:
-        flash("Du kannst deinen eigenen Account hier nicht löschen.", "warning")
+        flash("Du kannst deinen eigenen Account hier nicht loeschen.", "warning")
         return redirect(url_for("admin.users"))
     db.session.delete(user)
     db.session.commit()
     logger.info("Admin %s deleted user %d (%s)", current_user.email, user_id, user.email)
-    flash(f"Nutzer {user.name} wurde gelöscht.", "success")
+    flash(f"Nutzer {user.name} wurde geloescht.", "success")
     return redirect(url_for("admin.users"))

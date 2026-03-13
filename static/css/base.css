@@ -197,8 +197,8 @@ body::after {
 
 /* Theme toggle button */
 .theme-toggle {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -207,7 +207,7 @@ body::after {
     border: 1px solid var(--border);
     color: var(--text-soft);
     cursor: pointer;
-    font-size: 0.88rem;
+    font-size: 1rem;
     line-height: 1;
     transition: background var(--transition), border-color var(--transition), color var(--transition);
     flex-shrink: 0;
@@ -340,6 +340,17 @@ footer a:hover { color: var(--primary); }
 
 /* Particle Canvas */
 #particleCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+/* Scroll reveal */
+.scroll-hidden {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.scroll-hidden.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
 
 /* Layout Utilities */
 .container {

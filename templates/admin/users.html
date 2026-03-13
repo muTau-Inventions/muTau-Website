@@ -1,48 +1,67 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Nutzer{% endblock %}
+{% block title %}Nutzerverwaltung{% endblock %}
 {% block admin_content %}
+
 <div class="admin-header">
-  <h1>Nutzer</h1>
+    <h1>Nutzerverwaltung</h1>
+    <span style="color:var(--text-muted);font-size:0.85rem">{{ users|length }} Nutzer insgesamt</span>
 </div>
 
 <div class="admin-card" style="padding:0">
-  {% for u in users %}
-  <div style="display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid var(--surface-3)">
-    <div style="flex:1;min-width:0">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <strong>{{ u.name or '—' }}</strong>
-        {% if u.is_admin %}<span class="badge badge-answered">Admin</span>{% endif %}
-        {% if u.is_verified %}
-          <span class="badge badge-answered" style="opacity:0.7">Verifiziert</span>
-        {% else %}
-          <span class="badge badge-new">Unverifiziert</span>
-        {% endif %}
-        {% if u.newsletter %}<span class="badge badge-read">Newsletter</span>{% endif %}
-      </div>
-      <div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px">
-        {{ u.email }} · Registriert {{ u.created_at.strftime('%d.%m.%Y') }}
-      </div>
+    {% for u in users %}
+    <div style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border)">
+        <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <strong>{{ u.name }}</strong>
+                {% if u.is_admin %}
+                    <span class="badge badge-purple">Admin</span>
+                {% endif %}
+                {% if not u.email_verified %}
+                    <span class="badge badge-yellow">Unverifiziert</span>
+                {% endif %}
+                {% if u.newsletter %}
+                    <span class="badge badge-green">Newsletter</span>
+                {% endif %}
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px">
+                {{ u.email }} &middot; seit {{ u.created_at.strftime('%d.%m.%Y') }}
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
+            {% if not u.email_verified %}
+            <form method="POST" action="{{ url_for('admin.resend_verification', user_id=u.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-ghost btn-sm">Verifizierung senden</button>
+            </form>
+            {% endif %}
+            {% if not u.is_admin %}
+            <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}"
+                  class="delete-user-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-danger btn-sm"
+                        data-name="{{ u.name }}"
+                        type="button"
+                        onclick="confirmDeleteUser(this)">Löschen</button>
+            </form>
+            {% endif %}
+        </div>
     </div>
-    <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
-      {% if not u.is_verified %}
-      <form method="POST" action="{{ url_for('admin.resend_verification', user_id=u.id) }}">
-        <button class="btn btn-ghost btn-sm">Mail erneut senden</button>
-      </form>
-      {% endif %}
-      {% if u.id != current_user.id %}
-      <form method="POST" action="{{ url_for('admin.toggle_admin', user_id=u.id) }}">
-        <button class="btn btn-ghost btn-sm">{{ 'Admin entfernen' if u.is_admin else 'Zum Admin machen' }}</button>
-      </form>
-      <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}" onsubmit="return confirm('Nutzer {{ u.name or u.email }} wirklich löschen?')">
-        <button class="btn btn-danger btn-sm">Löschen</button>
-      </form>
-      {% else %}
-      <span style="font-size:0.78rem;color:var(--text-muted);padding:6px 0">Du</span>
-      {% endif %}
-    </div>
-  </div>
-  {% else %}
-  <div style="padding:48px;text-align:center;color:var(--text-muted)">Keine Nutzer gefunden.</div>
-  {% endfor %}
+    {% else %}
+    <div style="padding:48px;text-align:center;color:var(--text-muted)">Keine Nutzer gefunden.</div>
+    {% endfor %}
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Avoids stored XSS by never interpolating user-controlled data into JS strings.
+// The name is read from a data-* attribute (HTML-escaped by Jinja2) instead.
+function confirmDeleteUser(btn) {
+    var name = btn.getAttribute('data-name') || 'diesen Nutzer';
+    if (window.confirm('Nutzer "' + name + '" wirklich löschen? Diese Aktion ist unwiderruflich.')) {
+        btn.closest('form').submit();
+    }
+}
+</script>
 {% endblock %}

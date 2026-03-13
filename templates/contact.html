@@ -5,16 +5,17 @@
 <div class="container">
     <div class="section-header">
         <h2>Kontakt</h2>
-        <p>Wir freuen uns von Ihnen zu hören</p>
+        <p>Wir freuen uns von Ihnen zu hoeren</p>
     </div>
 
     <div class="contact-grid">
         <div>
             <form method="POST" action="{{ url_for('main.contact') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="form-group">
                     <label>Name</label>
                     <input type="text" name="name" required placeholder="Ihr Name"
-                           value="{{ current_user.name if current_user.is_authenticated else '' }}">
+                           value="{{ prefill_name }}">
                 </div>
                 <div class="form-group">
                     <label>Email</label>
@@ -23,10 +24,10 @@
                 </div>
                 <div class="form-group">
                     <label>Betreff</label>
-                    <input type="text" name="subject" required placeholder="Wie können wir helfen?">
+                    <input type="text" name="subject" placeholder="Wie koennen wir helfen?">
                 </div>
                 <div class="form-group">
-                    <label>Nachricht</label>
+                    <label>Nachricht *</label>
                     <textarea name="message" rows="6" required placeholder="Ihre Nachricht..."></textarea>
                 </div>
                 <button type="submit" class="btn" style="width:100%">Nachricht senden</button>
@@ -35,28 +36,28 @@
 
         <div class="contact-block">
             <div class="contact-item">
-                <div class="contact-icon">📍</div>
+                <div class="contact-icon">Adr</div>
                 <div>
                     <h3>Adresse</h3>
                     <p>muTau-Inventions GmbH<br>Innovation Campus 42<br>04109 Leipzig, Deutschland</p>
                 </div>
             </div>
             <div class="contact-item">
-                <div class="contact-icon">📧</div>
+                <div class="contact-icon">Mail</div>
                 <div>
                     <h3>Email</h3>
                     <p>info@mutau-inventions.com<br>support@mutau-inventions.com</p>
                 </div>
             </div>
             <div class="contact-item">
-                <div class="contact-icon">📞</div>
+                <div class="contact-icon">Tel</div>
                 <div>
                     <h3>Telefon</h3>
                     <p>+49 341 123 4567</p>
                 </div>
             </div>
             <div class="contact-item">
-                <div class="contact-icon">🕐</div>
+                <div class="contact-icon">Zeit</div>
                 <div>
                     <h3>Öffnungszeiten</h3>
                     <p>Mo–Fr: 9:00–18:00 Uhr<br>Sa–So: Geschlossen</p>
