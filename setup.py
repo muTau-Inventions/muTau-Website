@@ -1,25 +1,25 @@
 from setuptools import setup, find_packages
-import subprocess
 import os
+import re
 
 
 def get_version():
-    if not os.path.exists('.git'):
+    tags_dir = '.git/refs/tags/'
+    
+    if not os.path.exists(tags_dir):
         return "0.0.0"
     
-    try:
-        result = subprocess.run(
-            ['git', 'describe', '--tags', '--abbrev=0'],
-            capture_output=True, text=True, check=True
-        )
-        return result.stdout.strip().lstrip('v')
-    except subprocess.CalledProcessError:
-        result = subprocess.run(
-            ['git', 'tag', '--list', '--sort=-v:refname'],
-            capture_output=True, text=True, check=True
-        )
-        tags = [tag.strip().lstrip('v') for tag in result.stdout.splitlines()]
-        return tags[0] if tags else "0.0.0"
+    tag_names = []
+    for tag_file in os.listdir(tags_dir):
+        if re.match(r'^v?\d+\.\d+\.\d+', tag_file):
+            clean_version = tag_file.lstrip('v')
+            tag_names.append(clean_version)
+    
+    if not tag_names:
+        return "0.0.0"
+    
+    tag_names.sort(key=lambda v: tuple(map(int, v.split('.'))), reverse=True)
+    return tag_names[0]
 
 setup(
     name="mutau-website",

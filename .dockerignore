@@ -1,5 +1,5 @@
 # Git
-.git
+!.git/refs/tags/ # Keep git refs for setup.py
 .gitignore
 .gitattributes
 .github
