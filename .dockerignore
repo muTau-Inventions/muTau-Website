@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+.gitattributes
+.github
+
+# Dev tooling
+Makefile
+README.md
+*.md
+
+# Dev compose files
+docker-compose.yml
+docker-compose.dev.yml
+
+# Config (Volume mount)
+config.yml
+config_template.yml
+
+# Runtime content (Volunme nount)
+docs/
+research/
+
+# Editor
+.vscode/
+.idea/
+*.swp

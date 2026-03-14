@@ -23,6 +23,29 @@ def _configure_logging(app: Flask) -> None:
     app.logger.setLevel(level)
 
 
+def _seed_admin(logger: logging.Logger) -> None:
+    """Create the first admin account from env vars if no admin exists yet."""
+    email    = os.environ.get("ADMIN_EMAIL", "").strip()
+    name     = os.environ.get("ADMIN_NAME", "Admin").strip()
+    password = os.environ.get("ADMIN_PASSWORD", "").strip()
+
+    if not email or not password:
+        return  # env vars not set — skip silently
+
+    if User.query.filter_by(is_admin=True).first():
+        return  # admin already exists — skip
+
+    if User.query.filter_by(email=email).first():
+        logger.warning("ADMIN_EMAIL '%s' already registered but is not admin.", email)
+        return
+
+    admin = User(email=email, name=name, is_admin=True, is_verified=True)
+    admin.set_password(password)
+    db.session.add(admin)
+    db.session.commit()
+    logger.info("First admin account created: %s", email)
+
+
 def create_app() -> Flask:
     app = Flask(
         __name__,
@@ -30,12 +53,11 @@ def create_app() -> Flask:
         static_folder=os.path.join(os.path.dirname(__file__), "..", "..", "static"),
     )
 
-    # LOGGING (needs config loaded first)
+    # LOGGING
     _configure_logging(app)
     logger = logging.getLogger(__name__)
 
-    # SECRET KEY — must be set via the SECRET_KEY environment variable.
-    # Set it in docker-compose.yml under web.environment.
+    # SECRET KEY
     secret_key = os.environ.get("SECRET_KEY", "").strip()
     if not secret_key:
         raise RuntimeError(
@@ -44,8 +66,7 @@ def create_app() -> Flask:
         )
     app.secret_key = secret_key
 
-    # DATABASE — always from the DATABASE_URL environment variable.
-    # Docker Compose sets this automatically from the db service definition.
+    # DATABASE
     database_url = os.environ.get("DATABASE_URL", "").strip()
     if not database_url:
         raise RuntimeError(
@@ -55,22 +76,18 @@ def create_app() -> Flask:
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    # SESSION COOKIE — secure defaults that work on localhost and behind a proxy
+    # SESSION COOKIE
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     if os.environ.get("COOKIE_SECURE", "").strip() == "1":
         app.config["SESSION_COOKIE_SECURE"] = True
 
     # BASE URL — used by url_for(_external=True) in emails.
-    # Set app.base_url in config.yml (e.g. "https://mutau.erikdonath.de").
-    # Without this, _external=True falls back to the request's Host header,
-    # which is "localhost" when running inside Docker.
     from .config import get_base_url
-    _base_url = get_base_url()  # e.g. "https://mutau.erikdonath.de"
+    _base_url = get_base_url()
     if _base_url and _base_url != "http://localhost":
         from urllib.parse import urlparse
         _parsed = urlparse(_base_url)
-        # SERVER_NAME must be host[:port] only — no scheme or path.
         app.config["SERVER_NAME"] = _parsed.netloc
         app.config["PREFERRED_URL_SCHEME"] = _parsed.scheme or "https"
 
@@ -83,14 +100,12 @@ def create_app() -> Flask:
     app.jinja_env.globals["csrf_token"] = generate_csrf_token
 
     # CSRF PROTECTION
-    # Applied to every state-changing request except static files and unrouted 404s.
     _CSRF_EXEMPT_ENDPOINTS: set = set()
 
     @app.before_request
     def enforce_csrf():
         if request.method not in ("POST", "PUT", "PATCH", "DELETE"):
             return
-        # Static files and unmatched routes don't need CSRF protection.
         if request.endpoint is None or request.endpoint == "static":
             return
         if request.endpoint in _CSRF_EXEMPT_ENDPOINTS:
@@ -125,6 +140,7 @@ def create_app() -> Flask:
         logger.info("Database tables verified / created.")
         from .seed import seed_products
         seed_products()
+        _seed_admin(logger)
 
     # ERROR HANDLERS
     @app.errorhandler(403)

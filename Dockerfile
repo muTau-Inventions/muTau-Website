@@ -2,10 +2,17 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Install dependencies first (layer cached unless requirements.txt changes)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Copy source code, static assets, and templates into the image.
+# docs/ research/ and config.yml are NOT copied — they are mounted at runtime.
+COPY src/       ./src/
+COPY static/    ./static/
+COPY templates/ ./templates/
+COPY setup.py   .
+
 RUN pip install --no-cache-dir -e .
 
 ENV PYTHONPATH=/app/src
@@ -13,8 +20,6 @@ ENV FLASK_APP=mutau_website
 
 EXPOSE 5000
 
-# --preload: app factory (and db.create_all) runs once in the master process
-# before workers are forked — no race condition, no entrypoint.sh needed.
 CMD ["gunicorn", \
      "--bind", "0.0.0.0:5000", \
      "--workers", "4", \

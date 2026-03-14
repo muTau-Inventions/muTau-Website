@@ -2,98 +2,119 @@
 
 Company website for **muTau-Inventions** — AI Models to FPGA, Made Simple.
 
-Built with Flask, PostgreSQL, and Docker. Features a public-facing marketing site, product catalogue, research papers, documentation, a contact/offer form, user authentication, and an admin panel.
-
----
-
-## Quick Start
-
-```bash
-git clone https://github.com/muTau-Inventions/muTau-Website.git
-cd muTau-Website
-```
-
-Copy and edit the environment file:
-
-```bash
-cp docker-compose.yml docker-compose.override.yml
-# Set SECRET_KEY and DATABASE_URL in docker-compose.override.yml
-```
-
-Then build and run:
-
-```bash
-make build
-make up
-```
-
-The app is available at `http://localhost`.
-
----
-
-## Environment Variables
-
-| Variable       | Description                         | Required |
-|----------------|-------------------------------------|----------|
-| `DATABASE_URL` | PostgreSQL connection string        | ✅ Yes   |
-| `SECRET_KEY`   | Flask session secret (strong, random) | ✅ Yes |
-
-> **Note:** The app will refuse to start if `SECRET_KEY` is missing or still set to `change_this_in_production`.
-
----
-
-## First Admin Account
-
-```bash
-make create-admin EMAIL=admin@example.com NAME="Max Mueller" PASSWORD=yourpassword
-```
-
----
-
-## Adding Research Papers
-
-Use the `make` target to add a paper. The PDF must already be in the `research/` directory:
-
-```bash
-make create-paper \
-  PDF_PATH="main.pdf" \
-  TITLE="My Paper Title" \
-  AUTHORS="Max Mueller, Sarah Schmidt" \
-  DATE="2026-01-15" \
-  DESCRIPTION="Short abstract here."
-```
-
-Or insert directly via SQL:
-
-```sql
-INSERT INTO papers (pdf_path, title, authors, date, description)
-VALUES ('main.pdf', 'Paper Title', 'Author Name', '2026-01-15', 'Abstract...');
-```
-
----
-
-## Documentation
-
-Place `.md` files in the `docs/` directory. They are automatically rendered on the `/docs` page. Files are displayed in alphabetical order.
-
-```
-docs/
-├── 01-getting-started.md
-├── 02-installation.md
-└── 03-api-reference.md
-```
-
-> **Note:** Docs are cached per worker process. Restart the container after adding or editing files (`make restart`).
+Built with Flask, PostgreSQL, and Docker.
 
 ---
 
 ## Development
 
 ```bash
-make logs      # follow web container logs
-make shell     # open bash inside the web container
-make restart   # restart web container without a rebuild
-make down      # stop all containers
+git clone https://github.com/muTau-Inventions/muTau-Website.git
+cd muTau-Website
+cp config_template.yml config.yml   # then edit config.yml
+```
+
+Adjust the env vars in `docker-compose.dev.yml` (SECRET_KEY, ADMIN_* credentials), then:
+
+```bash
+make build
+make up
+```
+
+Site: `http://localhost` · pgAdmin: `http://localhost:5050`
+
+All make commands use `docker-compose.dev.yml`. Run `make help` for a full list.
+
+### Live editing
+
+`templates/` and `static/` are bind-mounted in dev, so changes are visible after
+`make restart` — no rebuild needed.
+
+### First admin account
+
+Set these env vars in `docker-compose.dev.yml` before the first `make up`:
+
+```yaml
+ADMIN_EMAIL: admin@example.com
+ADMIN_NAME: Admin
+ADMIN_PASSWORD: yourpassword
+```
+
+The account is created automatically on first startup if no admin exists yet.
+
+---
+
+## Configuration (`config.yml`)
+
+`config.yml` is never committed (it's in `.gitignore`). Copy from the template:
+
+```bash
+cp config_template.yml config.yml
+```
+
+| Key                   | Description                                               |
+|-----------------------|-----------------------------------------------------------|
+| `app.base_url`        | Public URL — used in email links, e.g. `https://example.com` |
+| `app.log_level`       | `DEBUG` / `INFO` / `WARNING` / `ERROR`                    |
+| `mail.smtp_host`      | SMTP server                                               |
+| `mail.smtp_port`      | SMTP port (default `587`)                                 |
+| `mail.smtp_use_tls`   | `true` / `false`                                          |
+| `mail.smtp_user`      | SMTP login                                                |
+| `mail.smtp_password`  | SMTP password                                             |
+| `mail.from_address`   | Sender, e.g. `muTau <noreply@example.com>`               |
+
+---
+
+## Content
+
+### Documentation
+
+Place `.md` files in `docs/`. They render at `/docs` in alphabetical order.
+
+```
+docs/
+├── 01-getting-started.md
+└── 02-api-reference.md
+```
+
+### Research Papers
+
+Drop PDFs into `research/` and add them via the admin panel at `/admin/papers`.
+
+---
+
+## Production Deployment
+
+Deployments are triggered automatically by publishing a GitHub Release.
+The CI workflow (`.github/workflows/release.yml`) builds and pushes a Docker image
+to `ghcr.io/mutau-inventions/mutau-website:latest`, then deploys via SSH.
+
+**Required repository secrets:**
+
+| Secret           | Value                                          |
+|------------------|------------------------------------------------|
+| `DEPLOY_HOST`    | Server hostname or IP                          |
+| `DEPLOY_USER`    | SSH user                                       |
+| `DEPLOY_SSH_KEY` | Private SSH key (add public key to the server) |
+| `DEPLOY_PATH`    | Absolute path to the project on the server     |
+
+**On the server**, only three files are needed:
+
+```
+/your/deploy/path/
+├── config.yml        ← your live config (not in repo)
+├── docs/             ← bind-mounted into container
+├── research/         ← bind-mounted into container
+└── docker-compose.yml
+```
+
+`templates/` and `static/` are baked into the image — no volume mounts needed.
+
+To deploy manually:
+
+```bash
+docker compose pull
+docker compose up -d --no-deps web
 ```
 
 ---
@@ -102,38 +123,26 @@ make down      # stop all containers
 
 ```
 .
-├── docs/                        # Markdown documentation (served at /docs)
-├── research/                    # Research PDFs (served at /research/pdf/<path>)
-├── static/
-│   ├── css/                     # Per-page and base stylesheets
-│   ├── js/                      # Particles, nav, theme, tabs, docs, scroll
-│   └── img/
-├── templates/
-│   ├── admin/                   # Admin panel pages
-│   ├── auth/                    # Login, register, account, forgot-password
-│   ├── errors/                  # 403, 404, 500
-│   └── legal/                   # Impressum, Datenschutz, AGB
-└── src/mutau_website/
-    ├── __init__.py              # App factory + init_db()
-    ├── extensions.py            # db, bcrypt, login_manager, admin_required
-    ├── models.py                # User, PasswordResetToken, Product, Paper, Offer
-    ├── mail.py                  # Mail stubs (ready for SMTP)
-    ├── seed.py                  # Initial product seed data
-    └── routes/
-        ├── main.py              # /, /about, /contact, /offer
-        ├── auth.py              # /login, /logout, /register, /forgot-password, /account
-        ├── content.py           # /docs, /research, /research/pdf/<path>
-        ├── products.py          # /products, /products/<slug>
-        ├── legal.py             # /impressum, /datenschutz, /agb
-        └── admin.py             # /admin — dashboard, products, papers, offers, users
+├── docs/                      # Markdown docs (runtime mount)
+├── research/                  # Research PDFs (runtime mount, gitignored)
+├── static/                    # CSS, JS, images (baked into image)
+├── templates/                 # Jinja2 templates (baked into image)
+│   ├── admin/
+│   ├── auth/
+│   ├── email/
+│   ├── errors/
+│   └── legal/
+├── src/mutau_website/
+│   ├── __init__.py            # App factory, admin seed
+│   ├── models.py              # Database models
+│   ├── mail.py                # Email sending (threaded)
+│   ├── seed.py                # Initial product data
+│   └── routes/                # Flask blueprints
+├── .github/workflows/
+│   └── release.yml            # CI/CD pipeline
+├── config_template.yml        # Copy to config.yml and fill in values
+├── docker-compose.yml         # Production
+├── docker-compose.dev.yml     # Development (local build + pgAdmin)
+├── Dockerfile
+└── Makefile                   # Dev shortcuts (make help)
 ```
-
----
-
-## Known TODOs / FIXMEs
-
-- **E-mail verification** — `is_verified` is hardcoded to `True` in `auth.py`. Flip to `False` and implement the verification flow when SMTP is configured.
-- **Password reset** — token generation is in place; the `send_password_reset_email()` call just needs to be uncommented once SMTP is set up.
-- **Contact form** — currently flashes a success message but does not persist or forward the message. Hook up to SMTP or save to DB.
-- **Admin paper/product management** — CRUD UI marked as coming soon in the admin panel.
-- **SMTP / mail.py** — all three stubs (`send_verification_email`, `send_password_reset_email`, `send_newsletter`) are no-ops. Implement with Flask-Mail or similar.

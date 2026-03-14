@@ -6,63 +6,62 @@ Built with Flask, PostgreSQL, and Docker.
 
 ---
 
-## Setup
+## Development
 
 ```bash
 git clone https://github.com/muTau-Inventions/muTau-Website.git
 cd muTau-Website
+cp config_template.yml config.yml   # then edit config.yml
 ```
 
-Copy the config template and fill in your values:
+Adjust the env vars in `docker-compose.dev.yml` (SECRET_KEY, ADMIN_* credentials), then:
 
-```bash
-cp config_template.yml config.yml
-```
-
-Set the required environment variables in `docker-compose.yml` under `web.environment`:
-
-| Variable       | Description                            |
-|----------------|----------------------------------------|
-| `SECRET_KEY`   | Long random string for session signing |
-| `DATABASE_URL` | Set automatically by Docker Compose    |
-
-Generate a secret key:
-```bash
-python3 -c "import secrets; print(secrets.token_hex(32))"
-```
-
-Build and start:
 ```bash
 make build
 make up
 ```
 
-The site is available at `http://localhost`.
+Site: `http://localhost` · pgAdmin: `http://localhost:5050`
 
----
+All make commands use `docker-compose.dev.yml`. Run `make help` for a full list.
 
-## First Admin Account
+### Live editing
 
-```bash
-make create-admin EMAIL=admin@example.com NAME="Max Mueller" PASSWORD=yourpassword
+`templates/` and `static/` are bind-mounted in dev, so changes are visible after
+`make restart` — no rebuild needed.
+
+### First admin account
+
+Set these env vars in `docker-compose.dev.yml` before the first `make up`:
+
+```yaml
+ADMIN_EMAIL: admin@example.com
+ADMIN_NAME: Admin
+ADMIN_PASSWORD: yourpassword
 ```
+
+The account is created automatically on first startup if no admin exists yet.
 
 ---
 
 ## Configuration (`config.yml`)
 
-| Key                  | Description                                          |
-|----------------------|------------------------------------------------------|
-| `app.base_url`       | Public URL — used in emails, e.g. `https://example.com` |
-| `app.docs_folder`    | Absolute path to Markdown docs (default `/app/docs`) |
-| `app.research_folder`| Absolute path to research PDFs (default `/app/research`) |
-| `app.log_level`      | `DEBUG` / `INFO` / `WARNING` / `ERROR`               |
-| `mail.smtp_host`     | SMTP server hostname                                 |
-| `mail.smtp_port`     | SMTP port (default `587`)                            |
-| `mail.smtp_use_tls`  | `true` / `false`                                     |
-| `mail.smtp_user`     | SMTP login                                           |
-| `mail.smtp_password` | SMTP password                                        |
-| `mail.from_address`  | Sender address, e.g. `muTau <noreply@example.com>`  |
+`config.yml` is never committed (it's in `.gitignore`). Copy from the template:
+
+```bash
+cp config_template.yml config.yml
+```
+
+| Key                   | Description                                               |
+|-----------------------|-----------------------------------------------------------|
+| `app.base_url`        | Public URL — used in email links, e.g. `https://example.com` |
+| `app.log_level`       | `DEBUG` / `INFO` / `WARNING` / `ERROR`                    |
+| `mail.smtp_host`      | SMTP server                                               |
+| `mail.smtp_port`      | SMTP port (default `587`)                                 |
+| `mail.smtp_use_tls`   | `true` / `false`                                          |
+| `mail.smtp_user`      | SMTP login                                                |
+| `mail.smtp_password`  | SMTP password                                             |
+| `mail.from_address`   | Sender, e.g. `muTau <noreply@example.com>`               |
 
 ---
 
@@ -70,7 +69,7 @@ make create-admin EMAIL=admin@example.com NAME="Max Mueller" PASSWORD=yourpasswo
 
 ### Documentation
 
-Place `.md` files in `docs/`. They render automatically at `/docs` in alphabetical order.
+Place `.md` files in `docs/`. They render at `/docs` in alphabetical order.
 
 ```
 docs/
@@ -80,22 +79,15 @@ docs/
 
 ### Research Papers
 
-Copy the PDF into `research/`, then add it via the admin panel or:
-
-```bash
-make create-paper \
-  PDF_PATH="paper.pdf" \
-  TITLE="My Paper Title" \
-  AUTHORS="Max Mueller, Sarah Schmidt" \
-  DATE="2026-01-15" \
-  DESCRIPTION="Short abstract."
-```
+Drop PDFs into `research/` and add them via the admin panel at `/admin/papers`.
 
 ---
 
-## Deployment
+## Production Deployment
 
-The CI/CD pipeline builds a Docker image on every GitHub Release and deploys it to the server via SSH.
+Deployments are triggered automatically by publishing a GitHub Release.
+The CI workflow (`.github/workflows/release.yml`) builds and pushes a Docker image
+to `ghcr.io/mutau-inventions/mutau-website:latest`, then deploys via SSH.
 
 **Required repository secrets:**
 
@@ -106,41 +98,51 @@ The CI/CD pipeline builds a Docker image on every GitHub Release and deploys it 
 | `DEPLOY_SSH_KEY` | Private SSH key (add public key to the server) |
 | `DEPLOY_PATH`    | Absolute path to the project on the server     |
 
-To publish a release: create a tag and release on GitHub. The workflow in `.github/workflows/release.yml` handles the rest.
+**On the server**, only three files are needed:
 
-On the server, `docker-compose.yml` must reference the image from `ghcr.io` (already set up). The deploy step pulls the new image and restarts only the web container without touching the database.
+```
+/your/deploy/path/
+├── config.yml        ← your live config (not in repo)
+├── docs/             ← bind-mounted into container
+├── research/         ← bind-mounted into container
+└── docker-compose.yml
+```
+
+`templates/` and `static/` are baked into the image — no volume mounts needed.
+
+To deploy manually:
+
+```bash
+docker compose pull
+docker compose up -d --no-deps web
+```
 
 ---
 
-## Make Commands
-
-```
-make help
-```
-
----
-
-## Structure
+## Project Structure
 
 ```
 .
-├── docs/                    # Markdown files served at /docs
-├── research/                # PDFs served at /research/pdf/<filename>
-├── static/                  # CSS, JS, images
-├── templates/               # Jinja2 templates
+├── docs/                      # Markdown docs (runtime mount)
+├── research/                  # Research PDFs (runtime mount, gitignored)
+├── static/                    # CSS, JS, images (baked into image)
+├── templates/                 # Jinja2 templates (baked into image)
 │   ├── admin/
 │   ├── auth/
 │   ├── email/
 │   ├── errors/
 │   └── legal/
 ├── src/mutau_website/
-│   ├── __init__.py          # App factory
-│   ├── models.py            # Database models
-│   ├── mail.py              # Email sending
-│   ├── seed.py              # Initial product data
-│   └── routes/              # Blueprints
-├── config_template.yml      # Config template — copy to config.yml
-├── docker-compose.yml
+│   ├── __init__.py            # App factory, admin seed
+│   ├── models.py              # Database models
+│   ├── mail.py                # Email sending (threaded)
+│   ├── seed.py                # Initial product data
+│   └── routes/                # Flask blueprints
+├── .github/workflows/
+│   └── release.yml            # CI/CD pipeline
+├── config_template.yml        # Copy to config.yml and fill in values
+├── docker-compose.yml         # Production
+├── docker-compose.dev.yml     # Development (local build + pgAdmin)
 ├── Dockerfile
-└── Makefile
+└── Makefile                   # Dev shortcuts (make help)
 ```

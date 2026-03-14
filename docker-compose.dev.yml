@@ -1,4 +1,4 @@
-# Production compose file.
+# Development compose file.
 
 services:
   db:
@@ -10,6 +10,8 @@ services:
       POSTGRES_DB: mutau
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U mutau -d mutau"]
       interval: 5s
@@ -17,7 +19,7 @@ services:
       retries: 5
 
   web:
-    image: ghcr.io/mutau-inventions/mutau-website:latest
+    build: .
     restart: always
     ports:
       - "80:5000"
@@ -26,14 +28,32 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://mutau:strongpassword123@db:5432/mutau
-      SECRET_KEY: CHANGE_ME_TO_A_LONG_RANDOM_STRING
-      ADMIN_EMAIL: admin@mutau.erikdonath.de
+      SECRET_KEY: pi ist ungefähr 3.14159265358...
+      ADMIN_EMAIL: admin@erikdonath.de
       ADMIN_NAME: Admin Admin
-      ADMIN_PASSWORD: CHANGE_ME
+      ADMIN_PASSWORD: admin
     volumes:
+      # Source mounts
+      - ./templates:/app/templates
+      - ./static:/app/static
+      # Runtime content
       - ./docs:/app/docs
       - ./research:/app/research
       - ./config.yml:/app/config.yml:ro
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@erikdonath.de
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - db
+
 volumes:
   postgres-data:
+  pgadmin-data:
