@@ -1,4 +1,29 @@
-.PHONY: build up down logs shell restart
+.PHONY: help build up down logs shell restart create-admin create-paper
+
+# Default target — show help
+help:
+	@echo ""
+	@echo "  muTau-Website"
+	@echo ""
+	@echo "  Usage: make <target> [OPTIONS]"
+	@echo ""
+	@echo "  Container"
+	@echo "    build           Build or rebuild the Docker image"
+	@echo "    up              Start all containers in the background"
+	@echo "    down            Stop and remove all containers"
+	@echo "    restart         Restart only the web container (no rebuild)"
+	@echo "    logs            Follow live container logs  (Ctrl+C to exit)"
+	@echo "    shell           Open a bash shell inside the web container"
+	@echo ""
+	@echo "  Admin"
+	@echo "    create-admin    Create an admin user"
+	@echo "                    EMAIL=  NAME=  PASSWORD="
+	@echo ""
+	@echo "  Content"
+	@echo "    create-paper    Add a research paper to the database"
+	@echo "                    PDF_PATH=  TITLE=  AUTHORS=  DATE=  DESCRIPTION="
+	@echo "                    (PDF must already be in research/ folder)"
+	@echo ""
 
 build:
 	docker compose build
@@ -18,7 +43,7 @@ shell:
 restart:
 	docker compose restart web
 
-# Usage: make create-admin EMAIL=admin@example.com NAME="Admin" PASSWORD=secret
+# Usage: make create-admin EMAIL=admin@example.com NAME="Max Mueller" PASSWORD=secret
 create-admin:
 	docker compose exec web python -c "\
 import os, sys; sys.path.insert(0, '/app/src'); \
@@ -36,6 +61,7 @@ db.session.add(u); \
 db.session.commit(); \
 print('Admin created:', email)"
 
+# Usage: make create-paper PDF_PATH="paper.pdf" TITLE="..." AUTHORS="..." DATE="2026-01-15" DESCRIPTION="..."
 create-paper:
 	docker compose exec web python -c "\
 import os, sys; sys.path.insert(0, '/app/src'); \

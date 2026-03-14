@@ -2,43 +2,42 @@
 
 Company website for **muTau-Inventions** — AI Models to FPGA, Made Simple.
 
-Built with Flask, PostgreSQL, and Docker. Features a public-facing marketing site, product catalogue, research papers, documentation, a contact/offer form, user authentication, and an admin panel.
+Built with Flask, PostgreSQL, and Docker.
 
 ---
 
-## Quick Start
+## Setup
 
 ```bash
 git clone https://github.com/muTau-Inventions/muTau-Website.git
 cd muTau-Website
 ```
 
-Copy and edit the environment file:
+Copy the config template and fill in your values:
 
 ```bash
-cp docker-compose.yml docker-compose.override.yml
-# Set SECRET_KEY and DATABASE_URL in docker-compose.override.yml
+cp config_template.yml config.yml
 ```
 
-Then build and run:
+Set the required environment variables in `docker-compose.yml` under `web.environment`:
 
+| Variable       | Description                            |
+|----------------|----------------------------------------|
+| `SECRET_KEY`   | Long random string for session signing |
+| `DATABASE_URL` | Set automatically by Docker Compose    |
+
+Generate a secret key:
+```bash
+python3 -c "import secrets; print(secrets.token_hex(32))"
+```
+
+Build and start:
 ```bash
 make build
 make up
 ```
 
-The app is available at `http://localhost`.
-
----
-
-## Environment Variables
-
-| Variable       | Description                         | Required |
-|----------------|-------------------------------------|----------|
-| `DATABASE_URL` | PostgreSQL connection string        | ✅ Yes   |
-| `SECRET_KEY`   | Flask session secret (strong, random) | ✅ Yes |
-
-> **Note:** The app will refuse to start if `SECRET_KEY` is missing or still set to `change_this_in_production`.
+The site is available at `http://localhost`.
 
 ---
 
@@ -50,90 +49,98 @@ make create-admin EMAIL=admin@example.com NAME="Max Mueller" PASSWORD=yourpasswo
 
 ---
 
-## Adding Research Papers
+## Configuration (`config.yml`)
 
-Use the `make` target to add a paper. The PDF must already be in the `research/` directory:
-
-```bash
-make create-paper \
-  PDF_PATH="main.pdf" \
-  TITLE="My Paper Title" \
-  AUTHORS="Max Mueller, Sarah Schmidt" \
-  DATE="2026-01-15" \
-  DESCRIPTION="Short abstract here."
-```
-
-Or insert directly via SQL:
-
-```sql
-INSERT INTO papers (pdf_path, title, authors, date, description)
-VALUES ('main.pdf', 'Paper Title', 'Author Name', '2026-01-15', 'Abstract...');
-```
+| Key                  | Description                                          |
+|----------------------|------------------------------------------------------|
+| `app.base_url`       | Public URL — used in emails, e.g. `https://example.com` |
+| `app.docs_folder`    | Absolute path to Markdown docs (default `/app/docs`) |
+| `app.research_folder`| Absolute path to research PDFs (default `/app/research`) |
+| `app.log_level`      | `DEBUG` / `INFO` / `WARNING` / `ERROR`               |
+| `mail.smtp_host`     | SMTP server hostname                                 |
+| `mail.smtp_port`     | SMTP port (default `587`)                            |
+| `mail.smtp_use_tls`  | `true` / `false`                                     |
+| `mail.smtp_user`     | SMTP login                                           |
+| `mail.smtp_password` | SMTP password                                        |
+| `mail.from_address`  | Sender address, e.g. `muTau <noreply@example.com>`  |
 
 ---
 
-## Documentation
+## Content
 
-Place `.md` files in the `docs/` directory. They are automatically rendered on the `/docs` page. Files are displayed in alphabetical order.
+### Documentation
+
+Place `.md` files in `docs/`. They render automatically at `/docs` in alphabetical order.
 
 ```
 docs/
 ├── 01-getting-started.md
-├── 02-installation.md
-└── 03-api-reference.md
+└── 02-api-reference.md
 ```
 
-> **Note:** Docs are cached per worker process. Restart the container after adding or editing files (`make restart`).
+### Research Papers
 
----
-
-## Development
+Copy the PDF into `research/`, then add it via the admin panel or:
 
 ```bash
-make logs      # follow web container logs
-make shell     # open bash inside the web container
-make restart   # restart web container without a rebuild
-make down      # stop all containers
+make create-paper \
+  PDF_PATH="paper.pdf" \
+  TITLE="My Paper Title" \
+  AUTHORS="Max Mueller, Sarah Schmidt" \
+  DATE="2026-01-15" \
+  DESCRIPTION="Short abstract."
 ```
 
 ---
 
-## Project Structure
+## Deployment
+
+The CI/CD pipeline builds a Docker image on every GitHub Release and deploys it to the server via SSH.
+
+**Required repository secrets:**
+
+| Secret           | Value                                          |
+|------------------|------------------------------------------------|
+| `DEPLOY_HOST`    | Server hostname or IP                          |
+| `DEPLOY_USER`    | SSH user                                       |
+| `DEPLOY_SSH_KEY` | Private SSH key (add public key to the server) |
+| `DEPLOY_PATH`    | Absolute path to the project on the server     |
+
+To publish a release: create a tag and release on GitHub. The workflow in `.github/workflows/release.yml` handles the rest.
+
+On the server, `docker-compose.yml` must reference the image from `ghcr.io` (already set up). The deploy step pulls the new image and restarts only the web container without touching the database.
+
+---
+
+## Make Commands
+
+```
+make help
+```
+
+---
+
+## Structure
 
 ```
 .
-├── docs/                        # Markdown documentation (served at /docs)
-├── research/                    # Research PDFs (served at /research/pdf/<path>)
-├── static/
-│   ├── css/                     # Per-page and base stylesheets
-│   ├── js/                      # Particles, nav, theme, tabs, docs, scroll
-│   └── img/
-├── templates/
-│   ├── admin/                   # Admin panel pages
-│   ├── auth/                    # Login, register, account, forgot-password
-│   ├── errors/                  # 403, 404, 500
-│   └── legal/                   # Impressum, Datenschutz, AGB
-└── src/mutau_website/
-    ├── __init__.py              # App factory + init_db()
-    ├── extensions.py            # db, bcrypt, login_manager, admin_required
-    ├── models.py                # User, PasswordResetToken, Product, Paper, Offer
-    ├── mail.py                  # Mail stubs (ready for SMTP)
-    ├── seed.py                  # Initial product seed data
-    └── routes/
-        ├── main.py              # /, /about, /contact, /offer
-        ├── auth.py              # /login, /logout, /register, /forgot-password, /account
-        ├── content.py           # /docs, /research, /research/pdf/<path>
-        ├── products.py          # /products, /products/<slug>
-        ├── legal.py             # /impressum, /datenschutz, /agb
-        └── admin.py             # /admin — dashboard, products, papers, offers, users
+├── docs/                    # Markdown files served at /docs
+├── research/                # PDFs served at /research/pdf/<filename>
+├── static/                  # CSS, JS, images
+├── templates/               # Jinja2 templates
+│   ├── admin/
+│   ├── auth/
+│   ├── email/
+│   ├── errors/
+│   └── legal/
+├── src/mutau_website/
+│   ├── __init__.py          # App factory
+│   ├── models.py            # Database models
+│   ├── mail.py              # Email sending
+│   ├── seed.py              # Initial product data
+│   └── routes/              # Blueprints
+├── config_template.yml      # Config template — copy to config.yml
+├── docker-compose.yml
+├── Dockerfile
+└── Makefile
 ```
-
----
-
-## Known TODOs / FIXMEs
-
-- **E-mail verification** — `is_verified` is hardcoded to `True` in `auth.py`. Flip to `False` and implement the verification flow when SMTP is configured.
-- **Password reset** — token generation is in place; the `send_password_reset_email()` call just needs to be uncommented once SMTP is set up.
-- **Contact form** — currently flashes a success message but does not persist or forward the message. Hook up to SMTP or save to DB.
-- **Admin paper/product management** — CRUD UI marked as coming soon in the admin panel.
-- **SMTP / mail.py** — all three stubs (`send_verification_email`, `send_password_reset_email`, `send_newsletter`) are no-ops. Implement with Flask-Mail or similar.

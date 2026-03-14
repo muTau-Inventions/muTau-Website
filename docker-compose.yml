@@ -25,7 +25,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://mutau:strongpassword123@db:5432/mutau
-      SECRET_KEY: fdhfhjjhkfrhjknfdjhknfdsjhknfdsjhkfdsjhkfdshjknfdsjhkdfsjhkdfsjhkfdsjhk
+      SECRET_KEY: to_be_fair
     volumes:
       - ./templates:/app/templates
       - ./static:/app/static
@@ -37,8 +37,8 @@ services:
     image: dpage/pgadmin4:latest
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: supersecret
+      PGADMIN_DEFAULT_EMAIL: admin@erikdonath.de
+      PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
     volumes:

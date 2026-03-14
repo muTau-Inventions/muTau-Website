@@ -58,10 +58,21 @@ def create_app() -> Flask:
     # SESSION COOKIE — secure defaults that work on localhost and behind a proxy
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-    # SESSION_COOKIE_SECURE is deliberately left at default (False).
-    # Enable it in production by setting the env var COOKIE_SECURE=1.
     if os.environ.get("COOKIE_SECURE", "").strip() == "1":
         app.config["SESSION_COOKIE_SECURE"] = True
+
+    # BASE URL — used by url_for(_external=True) in emails.
+    # Set app.base_url in config.yml (e.g. "https://mutau.erikdonath.de").
+    # Without this, _external=True falls back to the request's Host header,
+    # which is "localhost" when running inside Docker.
+    from .config import get_base_url
+    _base_url = get_base_url()  # e.g. "https://mutau.erikdonath.de"
+    if _base_url and _base_url != "http://localhost":
+        from urllib.parse import urlparse
+        _parsed = urlparse(_base_url)
+        # SERVER_NAME must be host[:port] only — no scheme or path.
+        app.config["SERVER_NAME"] = _parsed.netloc
+        app.config["PREFERRED_URL_SCHEME"] = _parsed.scheme or "https"
 
     # EXTENSIONS
     db.init_app(app)

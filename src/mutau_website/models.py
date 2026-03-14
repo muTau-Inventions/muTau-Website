@@ -47,8 +47,9 @@ class EmailVerificationToken(db.Model):
     user_id    = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
     used       = db.Column(db.Boolean, default=False, nullable=False)
+    mail_sent  = db.Column(db.Boolean, default=False, nullable=False)
 
-    user = db.relationship("User", backref="verification_tokens")
+    user = db.relationship("User", backref=db.backref("verification_tokens", cascade="all, delete-orphan", passive_deletes=True))
 
 
 class PasswordResetToken(db.Model):
@@ -60,7 +61,7 @@ class PasswordResetToken(db.Model):
     expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
     used       = db.Column(db.Boolean, default=False, nullable=False)
 
-    user = db.relationship("User", backref="reset_tokens")
+    user = db.relationship("User", backref=db.backref("reset_tokens", cascade="all, delete-orphan", passive_deletes=True))
 
 
 class Product(db.Model):
