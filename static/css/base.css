@@ -275,6 +275,12 @@ body::after {
     flex-wrap: wrap;
 }
 
+.nav-drawer .drawer-theme {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+}
+
 /* Flash Messages */
 .flash-container {
     position: fixed;

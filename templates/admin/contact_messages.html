@@ -27,10 +27,12 @@
       <a href="mailto:{{ msg.email }}?subject=Re: Ihre Nachricht an muTau-Inventions" class="btn btn-ghost btn-sm">Antworten</a>
       {% if not msg.read %}
       <form method="POST" action="{{ url_for('admin.mark_contact_read', msg_id=msg.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-ghost btn-sm">Als gelesen markieren</button>
       </form>
       {% endif %}
       <form method="POST" action="{{ url_for('admin.delete_contact', msg_id=msg.id) }}" onsubmit="return confirm('Nachricht löschen?')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-danger btn-sm">Löschen</button>
       </form>
     </div>

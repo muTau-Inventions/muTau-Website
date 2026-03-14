@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: strongpassword123
       POSTGRES_DB: mutau
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
@@ -33,5 +33,19 @@ services:
       - ./research:/app/research
       - ./config.yml:/app/config.yml:ro
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: supersecret
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - db
+
 volumes:
-  postgres_data:
+  postgres-data:
+  pgadmin-data:

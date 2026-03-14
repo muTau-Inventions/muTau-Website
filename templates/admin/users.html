@@ -16,7 +16,7 @@
                 {% if u.is_admin %}
                     <span class="badge badge-purple">Admin</span>
                 {% endif %}
-                {% if not u.email_verified %}
+                {% if not u.is_verified %}
                     <span class="badge badge-yellow">Unverifiziert</span>
                 {% endif %}
                 {% if u.newsletter %}
@@ -28,7 +28,7 @@
             </div>
         </div>
         <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
-            {% if not u.email_verified %}
+            {% if not u.is_verified %}
             <form method="POST" action="{{ url_for('admin.resend_verification', user_id=u.id) }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="btn btn-ghost btn-sm">Verifizierung senden</button>

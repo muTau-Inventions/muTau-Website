@@ -1,9 +1,8 @@
-import hashlib
 import hmac
 import secrets
 from functools import wraps
 
-from flask import abort, current_app, session
+from flask import abort, session
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, current_user
 from flask_sqlalchemy import SQLAlchemy
@@ -17,33 +16,26 @@ login_manager.login_message_category = "warning"
 
 
 # CSRF
-# Stateless HMAC approach: only a short random seed is stored in the session
-# cookie; the actual token is HMAC(secret_key, seed) — never stored server-side.
-# This avoids all session-persistence edge cases and works across all Gunicorn workers.
-
-def _csrf_key() -> bytes:
-    key = current_app.secret_key
-    return key.encode("utf-8") if isinstance(key, str) else key
-
+# The token is generated once per session and stored directly in the signed
+# Flask session cookie. No server-side state is needed. The session cookie is
+# signed with SECRET_KEY by Flask/itsdangerous, so the token cannot be forged.
+# hmac.compare_digest is used to prevent timing attacks.
 
 def generate_csrf_token() -> str:
-    """Return the CSRF token for this session, generating the seed if needed."""
-    if "_cs" not in session:
-        session["_cs"] = secrets.token_hex(16)
-    session.modified = True  # ensure the session cookie is always written
-    seed = session["_cs"]
-    return hmac.new(_csrf_key(), seed.encode("utf-8"), hashlib.sha256).hexdigest()
+    """Return the session CSRF token, creating it if it doesn't exist yet."""
+    if "csrf_token" not in session:
+        session["csrf_token"] = secrets.token_hex(32)
+    return session["csrf_token"]
 
 
-def validate_csrf_token(token: str) -> bool:
-    """Return True iff token matches the expected HMAC for this session."""
-    if not token:
+def validate_csrf_token(submitted: str) -> bool:
+    """Return True iff the submitted token matches the one stored in the session."""
+    if not submitted:
         return False
-    seed = session.get("_cs")
-    if not seed:
+    stored = session.get("csrf_token")
+    if not stored:
         return False
-    expected = hmac.new(_csrf_key(), seed.encode("utf-8"), hashlib.sha256).hexdigest()
-    return hmac.compare_digest(expected, token)
+    return hmac.compare_digest(stored, submitted)
 
 
 # Decorators

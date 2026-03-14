@@ -30,25 +30,38 @@ def create_app() -> Flask:
         static_folder=os.path.join(os.path.dirname(__file__), "..", "..", "static"),
     )
 
-    # LOGGING
+    # LOGGING (needs config loaded first)
     _configure_logging(app)
     logger = logging.getLogger(__name__)
 
-    # SECRET KEY
-    secret_key = os.environ.get("SECRET_KEY", "")
-    if not secret_key or secret_key == "change_this_in_production":
+    # SECRET KEY — must be set via the SECRET_KEY environment variable.
+    # Set it in docker-compose.yml under web.environment.
+    secret_key = os.environ.get("SECRET_KEY", "").strip()
+    if not secret_key:
         raise RuntimeError(
-            "SECRET_KEY environment variable is not set or still uses the default value. "
-            "Set a strong random key before running."
+            "Die Umgebungsvariable SECRET_KEY ist nicht gesetzt. "
+            "Bitte in docker-compose.yml unter web.environment eintragen."
         )
     app.secret_key = secret_key
 
-    # DATABASE
-    database_url = os.environ.get("DATABASE_URL")
+    # DATABASE — always from the DATABASE_URL environment variable.
+    # Docker Compose sets this automatically from the db service definition.
+    database_url = os.environ.get("DATABASE_URL", "").strip()
     if not database_url:
-        raise RuntimeError("DATABASE_URL environment variable is not set.")
+        raise RuntimeError(
+            "Die Umgebungsvariable DATABASE_URL ist nicht gesetzt. "
+            "Sie wird von Docker Compose automatisch aus dem db-Service uebernommen."
+        )
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    # SESSION COOKIE — secure defaults that work on localhost and behind a proxy
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    # SESSION_COOKIE_SECURE is deliberately left at default (False).
+    # Enable it in production by setting the env var COOKIE_SECURE=1.
+    if os.environ.get("COOKIE_SECURE", "").strip() == "1":
+        app.config["SESSION_COOKIE_SECURE"] = True
 
     # EXTENSIONS
     db.init_app(app)
@@ -59,18 +72,28 @@ def create_app() -> Flask:
     app.jinja_env.globals["csrf_token"] = generate_csrf_token
 
     # CSRF PROTECTION
-    _CSRF_EXEMPT = {
-        # Add any webhook endpoints here if needed in future
-    }
+    # Applied to every state-changing request except static files and unrouted 404s.
+    _CSRF_EXEMPT_ENDPOINTS: set = set()
 
     @app.before_request
     def enforce_csrf():
-        if request.method in ("POST", "PUT", "PATCH", "DELETE"):
-            if request.endpoint in _CSRF_EXEMPT:
-                return
-            token = request.form.get("csrf_token", "")
-            if not validate_csrf_token(token):
-                abort(403)
+        if request.method not in ("POST", "PUT", "PATCH", "DELETE"):
+            return
+        # Static files and unmatched routes don't need CSRF protection.
+        if request.endpoint is None or request.endpoint == "static":
+            return
+        if request.endpoint in _CSRF_EXEMPT_ENDPOINTS:
+            return
+        submitted = request.form.get("csrf_token", "")
+        if not validate_csrf_token(submitted):
+            logger.warning(
+                "CSRF validation failed | endpoint=%s | token_in_form=%s | "
+                "token_in_session=%s",
+                request.endpoint,
+                bool(submitted),
+                "csrf_token" in request.cookies or bool(submitted),
+            )
+            abort(403)
 
     # BLUEPRINTS
     from .routes import main_bp, auth_bp, content_bp, products_bp, legal_bp, admin_bp
@@ -83,7 +106,10 @@ def create_app() -> Flask:
 
     # DB INIT
     with app.app_context():
-        from .models import EmailVerificationToken, PasswordResetToken, Product, Paper, Offer, ContactMessage  # noqa: F401
+        from .models import (  # noqa: F401
+            EmailVerificationToken, PasswordResetToken,
+            Product, Paper, Offer, ContactMessage,
+        )
         db.create_all()
         logger.info("Database tables verified / created.")
         from .seed import seed_products

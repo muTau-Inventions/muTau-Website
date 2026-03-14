@@ -1,7 +1,7 @@
 app:
   # Python logging level: DEBUG | INFO | WARNING | ERROR
   log_level: "INFO"
-  base_url: "https://solid-carnival-qxqxqwwjwgqf4qw7-80.app.github.dev"
+  base_url: "https://mutau.erikdonath.de"
 
   docs_folder: "/app/docs"
   research_folder: "/app/research"

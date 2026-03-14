@@ -88,6 +88,65 @@ def products():
     return render_template("admin/products.html", products=all_products)
 
 
+@admin_bp.route("/products/new", methods=["GET", "POST"])
+@login_required
+@admin_required
+def new_product():
+    if request.method == "POST":
+        name        = request.form.get("name", "").strip()
+        description = request.form.get("description", "").strip()
+        icon        = request.form.get("icon", "").strip()
+        features    = _lines_to_json(request.form.get("features", ""))
+        specs       = _lines_to_json(request.form.get("specs", ""))
+        support     = _lines_to_json(request.form.get("support", ""))
+
+        if not name:
+            flash("Name darf nicht leer sein.", "danger")
+            return render_template(
+                "admin/product_form.html",
+                product=None,
+                features_text=request.form.get("features", ""),
+                specs_text=request.form.get("specs", ""),
+                support_text=request.form.get("support", ""),
+            )
+
+        import re as _re
+        slug = _re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+        if Product.query.filter_by(slug=slug).first():
+            flash(f"Ein Produkt mit dem Slug \"{slug}\" existiert bereits.", "danger")
+            return render_template(
+                "admin/product_form.html",
+                product=None,
+                features_text=request.form.get("features", ""),
+                specs_text=request.form.get("specs", ""),
+                support_text=request.form.get("support", ""),
+            )
+
+        product = Product(
+            name=name,
+            slug=slug,
+            description=description,
+            icon=icon or None,
+            features=features,
+            specs=specs,
+            support=support,
+            is_active=True,
+        )
+        db.session.add(product)
+        db.session.commit()
+        logger.info("Admin %s created product %d (%s)", current_user.email, product.id, product.slug)
+        flash(f"Produkt \"{product.name}\" wurde erstellt.", "success")
+        return redirect(url_for("admin.products"))
+
+    return render_template(
+        "admin/product_form.html",
+        product=None,
+        features_text="",
+        specs_text="",
+        support_text="",
+    )
+
+
 @admin_bp.route("/products/<int:product_id>/toggle", methods=["POST"])
 @login_required
 @admin_required
@@ -204,7 +263,7 @@ def new_paper():
         db.session.commit()
 
         logger.info("Admin %s created paper %d ('%s')", current_user.email, paper.id, paper.title)
-        flash(f"Publikation \"{paper.title}\" wurde hinzugefuegt.", "success")
+        flash(f"Publikation \"{paper.title}\" wurde hinzugef\u00fcgt.", "success")
         return redirect(url_for("admin.papers"))
 
     return render_template("admin/paper_form.html", paper=None)
@@ -238,7 +297,6 @@ def edit_paper(paper_id):
 
             new_filename = secure_filename(pdf_file.filename)
 
-            # Check for duplicate only when the filename actually changes
             if new_filename != paper.pdf_path and Paper.query.filter_by(pdf_path=new_filename).first():
                 flash(f"Eine Publikation mit der Datei \"{new_filename}\" existiert bereits.", "danger")
                 return render_template("admin/paper_form.html", paper=paper)
@@ -285,7 +343,7 @@ def delete_paper(paper_id):
     db.session.delete(paper)
     db.session.commit()
     logger.info("Admin %s deleted paper %d ('%s')", current_user.email, paper_id, title)
-    flash(f"Publikation \"{title}\" wurde geloescht.", "success")
+    flash(f"Publikation \"{title}\" wurde gel\u00f6scht.", "success")
     return redirect(url_for("admin.papers"))
 
 
@@ -300,7 +358,7 @@ def send_newsletter(paper_id):
         abort(404)
 
     if paper.notified:
-        flash("Newsletter fuer diese Publikation wurde bereits gesendet.", "warning")
+        flash("Newsletter f\u00fcr diese Publikation wurde bereits gesendet.", "warning")
         return redirect(url_for("admin.papers"))
 
     subscribers = User.query.filter_by(newsletter=True, is_verified=True).all()
@@ -348,7 +406,7 @@ def offer_detail(offer_id):
     return render_template("admin/offer_detail.html", offer=offer)
 
 
-@admin_bp.route("/offers/<int:offer_id>/mark-answered", methods=["POST"])
+@admin_bp.route("/offers/<int:offer_id>/answered", methods=["POST"])
 @login_required
 @admin_required
 def mark_offer_answered(offer_id):
@@ -357,6 +415,21 @@ def mark_offer_answered(offer_id):
         abort(404)
     offer.status = "answered"
     db.session.commit()
+    return redirect(request.referrer or url_for("admin.offers"))
+
+
+@admin_bp.route("/offers/<int:offer_id>/update-status", methods=["POST"])
+@login_required
+@admin_required
+def update_offer_status(offer_id):
+    """Update offer status — called from offer_detail dropdown."""
+    offer = db.session.get(Offer, offer_id)
+    if not offer:
+        abort(404)
+    new_status = request.form.get("status", "")
+    if new_status in ("new", "read", "answered"):
+        offer.status = new_status
+        db.session.commit()
     return redirect(request.referrer or url_for("admin.offers"))
 
 
@@ -369,7 +442,7 @@ def delete_offer(offer_id):
         abort(404)
     db.session.delete(offer)
     db.session.commit()
-    flash("Anfrage wurde geloescht.", "success")
+    flash("Anfrage wurde gel\u00f6scht.", "success")
     return redirect(url_for("admin.offers"))
 
 
@@ -379,12 +452,17 @@ def delete_offer(offer_id):
 @login_required
 @admin_required
 def contact_messages():
+    # show_all=1 shows all messages; default shows only unread
     show_all = request.args.get("all") == "1"
     q = ContactMessage.query.order_by(ContactMessage.created_at.desc())
     if not show_all:
         q = q.filter_by(read=False)
     messages = q.all()
-    return render_template("admin/contact_messages.html", messages=messages, show_all=show_all)
+    return render_template(
+        "admin/contact_messages.html",
+        messages=messages,
+        show_all=show_all,
+    )
 
 
 @admin_bp.route("/contact/<int:msg_id>/read", methods=["POST"])
@@ -408,7 +486,7 @@ def delete_contact(msg_id):
         abort(404)
     db.session.delete(msg)
     db.session.commit()
-    flash("Nachricht geloescht.", "success")
+    flash("Nachricht gel\u00f6scht.", "success")
     return redirect(url_for("admin.contact_messages"))
 
 
@@ -430,7 +508,7 @@ def toggle_admin(user_id):
     if not user:
         abort(404)
     if user.id == current_user.id:
-        flash("Du kannst deinen eigenen Admin-Status nicht aendern.", "warning")
+        flash("Du kannst deinen eigenen Admin-Status nicht \u00e4ndern.", "warning")
         return redirect(url_for("admin.users"))
     user.is_admin = not user.is_admin
     db.session.commit()
@@ -466,7 +544,7 @@ def resend_verification(user_id):
     verify_url = url_for("auth.verify_email", token=token_str, _external=True)
     send_verification_email(user, verify_url)
 
-    flash(f"Bestaetigungsmail an {user.email} gesendet.", "success")
+    flash(f"Best\u00e4tigungsmail an {user.email} gesendet.", "success")
     return redirect(url_for("admin.users"))
 
 
@@ -478,10 +556,11 @@ def delete_user(user_id):
     if not user:
         abort(404)
     if user.id == current_user.id:
-        flash("Du kannst deinen eigenen Account hier nicht loeschen.", "warning")
+        flash("Du kannst deinen eigenen Account hier nicht l\u00f6schen.", "warning")
         return redirect(url_for("admin.users"))
+    name = user.name
     db.session.delete(user)
     db.session.commit()
     logger.info("Admin %s deleted user %d (%s)", current_user.email, user_id, user.email)
-    flash(f"Nutzer {user.name} wurde geloescht.", "success")
+    flash(f"Nutzer {name} wurde gel\u00f6scht.", "success")
     return redirect(url_for("admin.users"))

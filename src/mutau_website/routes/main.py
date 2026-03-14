@@ -26,7 +26,7 @@ def contact():
         message = request.form.get("message", "").strip()
 
         if not name or not email or not message:
-            flash("Bitte fuelle alle Pflichtfelder aus.", "danger")
+            flash("Bitte fülle alle Pflichtfelder aus.", "danger")
         else:
             try:
                 msg = ContactMessage(
@@ -37,7 +37,7 @@ def contact():
                 )
                 db.session.add(msg)
                 db.session.commit()
-                flash("Vielen Dank! Wir melden uns schnellstmoeglichst.", "success")
+                flash("Vielen Dank! Wir melden uns schnellstmöglich.", "success")
                 return redirect(url_for("main.contact"))
             except Exception:
                 db.session.rollback()
@@ -60,7 +60,7 @@ def offer():
         message          = request.form.get("message", "").strip()
 
         if not message:
-            flash("Bitte fuelle alle Pflichtfelder aus.", "danger")
+            flash("Bitte fülle alle Pflichtfelder aus.", "danger")
             return render_template("offer.html", products=products, preselected=preselected)
 
         try:
@@ -74,7 +74,7 @@ def offer():
             )
             db.session.add(o)
             db.session.commit()
-            flash("Ihre Anfrage wurde gesendet. Wir melden uns in Kuerze.", "success")
+            flash("Ihre Anfrage wurde gesendet. Wir melden uns in Kürze.", "success")
             return redirect(url_for("main.offer"))
         except Exception:
             db.session.rollback()

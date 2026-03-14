@@ -30,10 +30,12 @@
       <a href="{{ url_for('admin.offer_detail', offer_id=o.id) }}" class="btn btn-ghost btn-sm">Ansehen</a>
       {% if o.status != 'answered' %}
       <form method="POST" action="{{ url_for('admin.mark_offer_answered', offer_id=o.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-ghost btn-sm">Beantwortet</button>
       </form>
       {% endif %}
       <form method="POST" action="{{ url_for('admin.delete_offer', offer_id=o.id) }}" onsubmit="return confirm('Anfrage löschen?')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-danger btn-sm">Löschen</button>
       </form>
     </div>

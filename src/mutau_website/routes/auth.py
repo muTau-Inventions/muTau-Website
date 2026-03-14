@@ -33,7 +33,7 @@ def register():
             flash("Bitte akzeptiere die AGB.", "danger")
             return render_template("auth/register.html")
         if password != confirm:
-            flash("Die Passwoerter stimmen nicht ueberein.", "danger")
+            flash("Die Passw\u00f6rter stimmen nicht \u00fcberein.", "danger")
             return render_template("auth/register.html")
         if len(password) < 8:
             flash("Das Passwort muss mindestens 8 Zeichen lang sein.", "danger")
@@ -54,19 +54,33 @@ def register():
             db.session.add(user)
             db.session.flush()
 
-            token_str = secrets.token_urlsafe(48)
-            token = EmailVerificationToken(
-                token=token_str,
-                user_id=user.id,
-                expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
-            )
-            db.session.add(token)
-            db.session.commit()
+            # Deduplication: if an unused token with >23h55m remaining already
+            # exists, a mail was just sent (within the last ~5 minutes).
+            # Skip creating a new token to prevent duplicate sends when the
+            # browser retries a slow POST or the user clicks submit twice.
+            dedup_threshold = datetime.now(timezone.utc) + timedelta(hours=23, minutes=55)
+            existing = EmailVerificationToken.query.filter(
+                EmailVerificationToken.user_id == user.id,
+                EmailVerificationToken.used == False,  # noqa: E712
+                EmailVerificationToken.expires_at >= dedup_threshold,
+            ).first()
 
-            verify_url = url_for("auth.verify_email", token=token_str, _external=True)
-            send_verification_email(user, verify_url)
+            if not existing:
+                token_str = secrets.token_urlsafe(48)
+                token = EmailVerificationToken(
+                    token=token_str,
+                    user_id=user.id,
+                    expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
+                )
+                db.session.add(token)
+                db.session.commit()
 
-            flash("Registrierung erfolgreich. Bitte bestatige deine E-Mail-Adresse.", "success")
+                verify_url = url_for("auth.verify_email", token=token_str, _external=True)
+                send_verification_email(user, verify_url)
+            else:
+                db.session.commit()
+
+            flash("Registrierung erfolgreich. Bitte best\u00e4tige deine E-Mail-Adresse.", "success")
             return redirect(url_for("auth.login"))
         except Exception:
             db.session.rollback()
@@ -83,11 +97,11 @@ def verify_email(token):
     record = EmailVerificationToken.query.filter_by(token=token, used=False).first()
 
     if not record:
-        flash("Ungueltiger oder bereits verwendeter Bestaetigungslink.", "danger")
+        flash("Ung\u00fcltiger oder bereits verwendeter Best\u00e4tigungslink.", "danger")
         return redirect(url_for("auth.login"))
 
     if datetime.now(timezone.utc) > record.expires_at:
-        flash("Der Bestaetigungslink ist abgelaufen. Bitte registriere dich erneut.", "danger")
+        flash("Der Best\u00e4tigungslink ist abgelaufen. Bitte registriere dich erneut.", "danger")
         return redirect(url_for("auth.register"))
 
     record.used             = True
@@ -95,7 +109,7 @@ def verify_email(token):
     db.session.commit()
 
     logger.info("E-mail verified for user %s", record.user.email)
-    flash("E-Mail-Adresse erfolgreich bestaetigt. Du kannst dich jetzt anmelden.", "success")
+    flash("E-Mail-Adresse erfolgreich best\u00e4tigt. Du kannst dich jetzt anmelden.", "success")
     return redirect(url_for("auth.login"))
 
 
@@ -118,7 +132,7 @@ def login():
             return render_template("auth/login.html")
 
         if not user.is_verified:
-            flash("Bitte bestatige zuerst deine E-Mail-Adresse.", "warning")
+            flash("Bitte best\u00e4tige zuerst deine E-Mail-Adresse.", "warning")
             return render_template("auth/login.html")
 
         login_user(user, remember=remember)
@@ -149,19 +163,29 @@ def forgot_password():
         flash("Falls diese E-Mail registriert ist, wurde ein Reset-Link gesendet.", "info")
 
         if user:
-            PasswordResetToken.query.filter_by(user_id=user.id, used=False).update({"used": True})
+            # Deduplication: skip if a fresh reset token (issued in the last 5 min)
+            # already exists. Prevents multiple mails from browser retries.
+            dedup_threshold = datetime.now(timezone.utc) + timedelta(minutes=55)
+            existing = PasswordResetToken.query.filter(
+                PasswordResetToken.user_id == user.id,
+                PasswordResetToken.used == False,  # noqa: E712
+                PasswordResetToken.expires_at >= dedup_threshold,
+            ).first()
 
-            token_str = secrets.token_urlsafe(48)
-            token = PasswordResetToken(
-                token=token_str,
-                user_id=user.id,
-                expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
-            )
-            db.session.add(token)
-            db.session.commit()
+            if not existing:
+                PasswordResetToken.query.filter_by(user_id=user.id, used=False).update({"used": True})
 
-            reset_url = url_for("auth.reset_password", token=token_str, _external=True)
-            send_password_reset_email(user, reset_url)
+                token_str = secrets.token_urlsafe(48)
+                token = PasswordResetToken(
+                    token=token_str,
+                    user_id=user.id,
+                    expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
+                )
+                db.session.add(token)
+                db.session.commit()
+
+                reset_url = url_for("auth.reset_password", token=token_str, _external=True)
+                send_password_reset_email(user, reset_url)
 
         return redirect(url_for("auth.login"))
 
@@ -175,7 +199,7 @@ def reset_password(token):
     record = PasswordResetToken.query.filter_by(token=token, used=False).first()
 
     if not record:
-        flash("Ungueltiger oder bereits verwendeter Reset-Link.", "danger")
+        flash("Ung\u00fcltiger oder bereits verwendeter Reset-Link.", "danger")
         return redirect(url_for("auth.forgot_password"))
 
     if datetime.now(timezone.utc) > record.expires_at:
@@ -191,7 +215,7 @@ def reset_password(token):
             return render_template("auth/reset_password.html", token=token)
 
         if password != confirm:
-            flash("Die Passwoerter stimmen nicht ueberein.", "danger")
+            flash("Die Passw\u00f6rter stimmen nicht \u00fcberein.", "danger")
             return render_template("auth/reset_password.html", token=token)
 
         record.used = True
@@ -199,7 +223,7 @@ def reset_password(token):
         db.session.commit()
 
         logger.info("Password reset completed for user %s", record.user.email)
-        flash("Passwort erfolgreich geaendert. Du kannst dich jetzt anmelden.", "success")
+        flash("Passwort erfolgreich ge\u00e4ndert. Du kannst dich jetzt anmelden.", "success")
         return redirect(url_for("auth.login"))
 
     return render_template("auth/reset_password.html", token=token)
@@ -211,7 +235,7 @@ def reset_password(token):
 def unsubscribe(token):
     user = User.query.filter_by(unsubscribe_token=token).first()
     if not user:
-        flash("Ungueltiger Abmeldelink.", "danger")
+        flash("Ung\u00fcltiger Abmeldelink.", "danger")
         return redirect(url_for("main.index"))
 
     if not user.newsletter:
@@ -246,14 +270,14 @@ def toggle_newsletter():
 @login_required
 def delete_account():
     confirm = request.form.get("confirm", "")
-    if confirm != "LOESCHEN":
-        flash("Bitte gib LOESCHEN ein, um deinen Account zu loeschen.", "danger")
+    # Must match the string in the template exactly (with umlaut)
+    if confirm != "L\u00d6SCHEN":
+        flash("Bitte gib L\u00d6SCHEN ein, um deinen Account zu l\u00f6schen.", "danger")
         return redirect(url_for("auth.account"))
 
-    # Capture the user object before clearing the session proxy
     user = current_user._get_current_object()
     logout_user()
     db.session.delete(user)
     db.session.commit()
-    flash("Dein Account wurde geloescht.", "info")
+    flash("Dein Account wurde gel\u00f6scht.", "info")
     return redirect(url_for("main.index"))

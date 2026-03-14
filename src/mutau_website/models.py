@@ -135,4 +135,5 @@ class ContactMessage(db.Model):
     subject    = db.Column(db.String(200))
     message    = db.Column(db.Text, nullable=False)
     read       = db.Column(db.Boolean, default=False, nullable=False)
+    answered   = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), default=_now)

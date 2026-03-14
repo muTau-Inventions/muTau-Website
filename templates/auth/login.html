@@ -6,13 +6,16 @@
     <div class="auth-box">
         <h2>Anmelden</h2>
         <form method="POST" action="{{ url_for('auth.login') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
                 <label>E-Mail</label>
-                <input type="email" name="email" required placeholder="you@example.com" autocomplete="email">
+                <input type="email" name="email" required autofocus
+                       placeholder="you@example.com" autocomplete="email">
             </div>
             <div class="form-group">
                 <label>Passwort</label>
-                <input type="password" name="password" required placeholder="••••••••" autocomplete="current-password">
+                <input type="password" name="password" required
+                       placeholder="••••••••" autocomplete="current-password">
             </div>
             <div class="auth-row">
                 <label class="form-check" style="margin:0">

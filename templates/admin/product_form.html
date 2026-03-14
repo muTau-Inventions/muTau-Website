@@ -1,31 +1,31 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Produkt bearbeiten{% endblock %}
+{% block title %}{% if product %}Produkt bearbeiten{% else %}Neues Produkt{% endif %}{% endblock %}
 {% block admin_content %}
 <div class="admin-header">
-    <h1>Produkt bearbeiten: {{ product.name }}</h1>
+    <h1>{% if product %}Produkt bearbeiten: {{ product.name }}{% else %}Neues Produkt{% endif %}</h1>
     <a href="{{ url_for('admin.products') }}" class="btn btn-ghost">&larr; Zurück</a>
 </div>
 
 <div class="admin-card" style="max-width:680px">
-    <form method="POST">
+    <form method="POST" action="{% if product %}{{ url_for('admin.edit_product', product_id=product.id) }}{% else %}{{ url_for('admin.new_product') }}{% endif %}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-row">
             <div class="form-group" style="flex:2">
                 <label>Name <span style="color:var(--primary)">*</span></label>
-                <input type="text" name="name" required value="{{ product.name }}">
+                <input type="text" name="name" required value="{{ product.name if product else '' }}">
             </div>
             <div class="form-group" style="flex:0 0 120px">
-                <label>Icon / Kuerzel</label>
-                <input type="text" name="icon" value="{{ product.icon or '' }}" placeholder="CNV" maxlength="4">
+                <label>Icon / Kürzel</label>
+                <input type="text" name="icon" value="{{ product.icon or '' if product else '' }}" placeholder="CNV" maxlength="4">
             </div>
         </div>
         <div class="form-group">
             <label>Beschreibung</label>
-            <textarea name="description" rows="4">{{ product.description or '' }}</textarea>
+            <textarea name="description" rows="4">{{ product.description or '' if product else '' }}</textarea>
         </div>
         <div class="form-group">
             <label>Features <span style="color:var(--text-muted);font-size:0.78rem">(eine Zeile pro Eintrag)</span></label>
-            <textarea name="features" rows="5" placeholder="ONNX-Modelle unterstuetzt&#10;Automatische Optimierung">{{ features_text }}</textarea>
+            <textarea name="features" rows="5" placeholder="ONNX-Modelle unterstützt&#10;Automatische Optimierung">{{ features_text }}</textarea>
         </div>
         <div class="form-group">
             <label>Specs <span style="color:var(--text-muted);font-size:0.78rem">(eine Zeile pro Eintrag)</span></label>
@@ -36,7 +36,7 @@
             <textarea name="support" rows="4" placeholder="Dokumentation verfügbar&#10;E-Mail-Support inklusive">{{ support_text }}</textarea>
         </div>
         <div style="display:flex;gap:12px;margin-top:8px">
-            <button type="submit" class="btn">Speichern</button>
+            <button type="submit" class="btn">{% if product %}Speichern{% else %}Erstellen{% endif %}</button>
             <a href="{{ url_for('admin.products') }}" class="btn btn-ghost">Abbrechen</a>
         </div>
     </form>

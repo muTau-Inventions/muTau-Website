@@ -10,11 +10,18 @@
         <aside class="admin-sidebar">
             <h4>Admin</h4>
             <ul>
-                <li><a href="{{ url_for('admin.dashboard') }}" {% if request.endpoint == 'admin.dashboard' %}class="active"{% endif %}>Dashboard</a></li>
-                <li><a href="{{ url_for('admin.products') }}"  {% if request.endpoint == 'admin.products'  %}class="active"{% endif %}>Produkte</a></li>
-                <li><a href="{{ url_for('admin.papers') }}"    {% if request.endpoint == 'admin.papers'    %}class="active"{% endif %}>Forschung</a></li>
-                <li><a href="{{ url_for('admin.offers') }}"    {% if request.endpoint == 'admin.offers'    %}class="active"{% endif %}>Anfragen</a></li>
-                <li><a href="{{ url_for('admin.users') }}"     {% if request.endpoint == 'admin.users'     %}class="active"{% endif %}>Nutzer</a></li>
+                <li><a href="{{ url_for('admin.dashboard') }}"
+                       {% if request.endpoint == 'admin.dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+                <li><a href="{{ url_for('admin.products') }}"
+                       {% if request.endpoint in ('admin.products', 'admin.edit_product') %}class="active"{% endif %}>Produkte</a></li>
+                <li><a href="{{ url_for('admin.papers') }}"
+                       {% if request.endpoint in ('admin.papers', 'admin.new_paper', 'admin.edit_paper') %}class="active"{% endif %}>Forschung</a></li>
+                <li><a href="{{ url_for('admin.offers') }}"
+                       {% if request.endpoint in ('admin.offers', 'admin.offer_detail') %}class="active"{% endif %}>Anfragen</a></li>
+                <li><a href="{{ url_for('admin.contact_messages') }}"
+                       {% if request.endpoint == 'admin.contact_messages' %}class="active"{% endif %}>Nachrichten</a></li>
+                <li><a href="{{ url_for('admin.users') }}"
+                       {% if request.endpoint == 'admin.users' %}class="active"{% endif %}>Nutzer</a></li>
             </ul>
         </aside>
         <div class="admin-content">
