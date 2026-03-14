@@ -1,5 +1,6 @@
 # Runtime config
 config.yml
+.env
 
 # Runtime content
 /research/
