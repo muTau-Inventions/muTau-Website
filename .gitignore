@@ -1,22 +1,8 @@
-# Runtime config — contains secrets, never commit
+# Runtime config
 config.yml
 
-# Runtime content — managed outside the repo
+# Runtime content
 /research/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.egg-info/
-dist/
-build/
-
-# Editor
-.vscode/
-.idea/
-*.swp
-.DS_Store
 
 # Docker override files
 docker-compose.override.yml
