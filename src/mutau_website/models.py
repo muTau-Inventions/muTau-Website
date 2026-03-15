@@ -127,7 +127,6 @@ class Offer(db.Model):
 
 
 class ContactMessage(db.Model):
-    """Stores contact form submissions for admin review."""
     __tablename__ = "contact_messages"
 
     id         = db.Column(db.Integer, primary_key=True)

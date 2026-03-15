@@ -19,6 +19,5 @@
         if (activeContent) activeContent.classList.add('active');
     }
 
-    // Expose globally so onclick attributes in templates can call it
     window.showTab = showTab;
 }());

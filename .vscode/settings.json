@@ -1,4 +1,25 @@
 {
-    "python-envs.defaultEnvManager": "ms-python.python:system",
-    "python-envs.pythonProjects": []
+  "python.defaultInterpreterPath": "/usr/bin/python3",
+  "python.terminal.activateEnvironment": false,
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.formatting.provider": "black",
+  "python.formatting.blackPath": "/usr/bin/black",
+  "files.associations": {
+    "*.html": "html-jinja",
+    "docker-compose*.yml": "yaml",
+    "config*.yml": "yaml"
+  },
+  "yaml.schemas": {
+    "https://json.schemastore.org/docker-compose.json": ["docker-compose*.yml"]
+  },
+  "emmet.includeLanguages": {
+    "jinja-html": "html"
+  },
+  "docker.containers.include": {
+    "mutau-website-*": true
+  },
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook"
+  }
 }

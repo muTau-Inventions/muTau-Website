@@ -270,7 +270,7 @@ def toggle_newsletter():
 @login_required
 def delete_account():
     confirm = request.form.get("confirm", "")
-    # Must match the string in the template exactly (with umlaut)
+    # Must match the string in the template exactly. \u00f6 = Ö (Python macht komische Sachen wenn man auf Ö überprüft daher die UTF-16 schreibweise um den Compiler/Interpreter nicht zu verwüren lol)
     if confirm != "L\u00d6SCHEN":
         flash("Bitte gib L\u00d6SCHEN ein, um deinen Account zu l\u00f6schen.", "danger")
         return redirect(url_for("auth.account"))

@@ -30,7 +30,7 @@ services:
       ADMIN_NAME: ${WEB_ADMIN_NAME}
       ADMIN_PASSWORD: ${WEB_ADMIN_PASSWORD}
     volumes:
-      - ./docs:/app/docs
+      - ./docs:/app/docs:ro
       - ./research:/app/research
       - ./config.yml:/app/config.yml:ro
 

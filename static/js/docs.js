@@ -35,7 +35,6 @@
             });
         });
 
-        // Deep-link support
         const hash = window.location.hash.replace('#', '');
         if (hash) {
             showSection(hash, false);

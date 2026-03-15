@@ -1,15 +1,6 @@
-# muTau-Inventions — Konfiguration
-#
-# Kopiere diese Datei nach config.yml und passe die Werte an.
-# SECRET_KEY und DATABASE_URL werden ausschliesslich ueber Umgebungsvariablen
-# gesetzt (siehe docker-compose.yml unter web.environment).
-
 app:
-  # Basis-URL fuer absolute Links in E-Mails.
-  base_url: "https://mutau-inventions.com"
+  base_url: "https://example.com"
 
-  # Absolute Pfade zu den Content-Ordnern (bind-gemountete Volumes in Docker).
-  # Fuer lokale Entwicklung absolute Pfade auf dem Host angeben.
   docs_folder: "/app/docs"
   research_folder: "/app/research"
 
@@ -19,15 +10,13 @@ mail:
   smtp_host:     "smtp.example.com"
   smtp_port:     587
   smtp_use_tls:  true
-  smtp_user:     "noreply@mutau-inventions.com"
+  smtp_user:     "noreply@example.com"
   smtp_password: "CHANGE_ME"
 
-  # Absender-Adresse in den E-Mails.
-  # Leer lassen um smtp_user zu verwenden.
-  from_address:  "muTau-Inventions <noreply@mutau-inventions.com>"
+  # smtp_user is used when from_adress is not provided
+  from_address:  "muTau-Inventions <noreply@example.com>"
 
-  # Optional: E-Mail-Betreffzeilen anpassen.
   # subjects:
-  #   verification:   "Bitte bestätige deine E-Mail-Adresse — muTau-Inventions"
-  #   password_reset: "Passwort zurücksetzen — muTau-Inventions"
+  #   verification:   "Bitte bestätige deine E-Mail-Adresse"
+  #   password_reset: "Passwort zurücksetzen"
   #   newsletter:     "Neue Forschungspublikation: {title}"

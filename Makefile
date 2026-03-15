@@ -1,4 +1,4 @@
-.PHONY: help build up down logs shell restart
+.PHONY: help build up down reset logs shell restart
 
 # Default target
 help:

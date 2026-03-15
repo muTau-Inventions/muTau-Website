@@ -1,7 +1,3 @@
-"""
-Config loader — reads config.yml from CONFIG_PATH env var or project root.
-DATABASE_URL and SECRET_KEY intentionally stay as env vars (Docker secrets).
-"""
 import os
 import logging
 

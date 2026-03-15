@@ -7,7 +7,7 @@
     <!-- Anti-FOUC: apply saved theme before CSS renders -->
     <script>
       (function(){
-        try {
+        try { // Ja, das muss hier inline sein, da sonst Browser das JS später ladt was zu grafik Bugs führt.
           var t = localStorage.getItem('mt_theme');
           if (t === 'light' || t === 'dark') {
             document.documentElement.setAttribute('data-theme', t);

@@ -11,7 +11,6 @@
             entries.forEach(function (entry) {
                 if (entry.isIntersecting) {
                     var el = entry.target;
-                    // Remove inline styles so CSS transitions (including hover) take over cleanly
                     el.style.opacity   = '';
                     el.style.transform = '';
                     el.style.transition = '';

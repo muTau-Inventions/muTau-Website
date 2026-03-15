@@ -55,8 +55,6 @@
 
 {% block scripts %}
 <script>
-// Avoids stored XSS by never interpolating user-controlled data into JS strings.
-// The name is read from a data-* attribute (HTML-escaped by Jinja2) instead.
 function confirmDeleteUser(btn) {
     var name = btn.getAttribute('data-name') || 'diesen Nutzer';
     if (window.confirm('Nutzer "' + name + '" wirklich löschen? Diese Aktion ist unwiderruflich.')) {

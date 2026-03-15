@@ -5,9 +5,8 @@
     var DARK  = 'dark';
     var LIGHT = 'light';
 
-    // Plain Unicode symbols — not emojis, no variation selectors needed
-    var SYMBOL_DARK  = '\u2600';  // ☀  BLACK SUN WITH RAYS  (shown when currently dark → click for light)
-    var SYMBOL_LIGHT = '\u263D';  // ☽  CRESCENT MOON        (shown when currently light → click for dark)
+    var SYMBOL_DARK  = '\u2600';
+    var SYMBOL_LIGHT = '\u263D';
 
     function current() {
         return document.documentElement.getAttribute('data-theme') || DARK;
@@ -33,8 +32,6 @@
         apply(current() === DARK ? LIGHT : DARK);
     }
 
-    // The inline script in base.html already applies the saved theme before
-    // the CSS renders (anti-FOUC). This block only needs to sync the button labels.
     document.addEventListener('DOMContentLoaded', function () {
         updateButtons(current());
         document.querySelectorAll('.theme-toggle').forEach(function (btn) {

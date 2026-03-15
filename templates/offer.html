@@ -4,7 +4,7 @@
 <div class="container">
     <div class="section-header">
         <h2>Angebot anfragen</h2>
-        <p>Beschreiben Sie Ihr Projekt — wir melden uns innerhalb von 24 Stunden</p>
+        <p>Beschreiben Sie Ihr Projekt und wir melden uns bei Ihnen</p>
     </div>
 
     <div style="max-width:680px;margin:0 auto;padding-bottom:4rem">
@@ -24,7 +24,10 @@
                 <div class="form-group">
                     <label>Produkt / Interesse</label>
                     <select name="product_interest">
-                        <option value="">— Kein spezifisches Produkt —</option>
+                        <option value="other"
+                            {% if request.form.get('product_interest') == 'other' %}selected{% endif %}>
+                            Sonstiges / Noch unklar
+                        </option>
                         {% for product in products %}
                         <option value="{{ product.slug }}"
                             {% if preselected == product.slug or request.form.get('product_interest') == product.slug %}
@@ -33,10 +36,6 @@
                             {{ product.name }}
                         </option>
                         {% endfor %}
-                        <option value="other"
-                            {% if request.form.get('product_interest') == 'other' %}selected{% endif %}>
-                            Sonstiges / Noch unklar
-                        </option>
                     </select>
                 </div>
 

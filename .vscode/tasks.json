@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build App",
+      "type": "shell",
+      "command": "make",
+      "args": ["build"],
+      "group": "build",
+      "presentation": { "echo": true, "reveal": "silent", "focus": false }
+    },
+    {
+      "label": "Start App",
+      "type": "shell",
+      "command": "make",
+      "args": ["up"],
+      "group": "build",
+      "dependsOrder": "sequence",
+      "dependsOn": ["docker: build"],
+      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "new" }
+    },
+    {
+      "label": "Logs App",
+      "type": "shell",
+      "command": "make",
+      "args": ["logs"],
+      "group": "test",
+      "presentation": { "echo": true, "reveal": "always", "focus": true }
+    },
+    {
+      "label": "Restart App",
+      "type": "shell",
+      "command": "make",
+      "args": ["restart"],
+      "group": "build",
+      "presentation": { "echo": true, "reveal": "silent" }
+    }
+  ]
+}

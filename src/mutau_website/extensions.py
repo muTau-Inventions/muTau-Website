@@ -15,21 +15,13 @@ login_manager.login_message = "Bitte melde dich an."
 login_manager.login_message_category = "warning"
 
 
-# CSRF
-# The token is generated once per session and stored directly in the signed
-# Flask session cookie. No server-side state is needed. The session cookie is
-# signed with SECRET_KEY by Flask/itsdangerous, so the token cannot be forged.
-# hmac.compare_digest is used to prevent timing attacks.
-
 def generate_csrf_token() -> str:
-    """Return the session CSRF token, creating it if it doesn't exist yet."""
     if "csrf_token" not in session:
         session["csrf_token"] = secrets.token_hex(32)
     return session["csrf_token"]
 
 
 def validate_csrf_token(submitted: str) -> bool:
-    """Return True iff the submitted token matches the one stored in the session."""
     if not submitted:
         return False
     stored = session.get("csrf_token")

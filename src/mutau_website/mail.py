@@ -1,11 +1,3 @@
-"""
-Mail helpers.
-Each send runs in a daemon thread so the HTTP response returns immediately
-and a slow SMTP server (e.g. ProtonMail Bridge) never blocks a gunicorn worker
-or causes a worker timeout that would trigger a retry and duplicate delivery.
-
-SMTP settings come from config.yml (mail section).
-"""
 import logging
 import smtplib
 import threading
@@ -18,12 +10,8 @@ from .config import get_mail_cfg
 
 logger = logging.getLogger(__name__)
 
-# One global semaphore so at most one SMTP connection is open at a time.
-# ProtonMail Bridge only supports one concurrent connection.
 _smtp_lock = threading.Semaphore(1)
 
-
-# INTERNAL HELPERS
 
 def _smtp_cfg() -> dict:
     mc = get_mail_cfg()
@@ -38,7 +26,6 @@ def _smtp_cfg() -> dict:
 
 
 def _envelope_from(sender: str) -> str:
-    """Extract the bare email address from a named sender string."""
     _, addr = parseaddr(sender)
     return addr or sender
 
@@ -55,16 +42,6 @@ def _subject(key: str, **fmt) -> str:
 
 
 def _send_now(to_addresses: list, subject: str, body_html: str) -> None:
-    """
-    Send one HTML e-mail synchronously (called from a thread).
-
-    Uses plain MIMEText — no MIMEMultipart wrapper needed for html-only mail.
-    MIMEMultipart('alternative') with a single part confuses some MTAs and can
-    cause duplicate delivery.
-
-    Explicit EHLO before and after STARTTLS is required by some servers
-    (including ProtonMail Bridge) to negotiate capabilities correctly.
-    """
     cfg = _smtp_cfg()
     if not cfg["host"]:
         raise RuntimeError("mail.smtp_host is not configured in config.yml")
@@ -76,13 +53,11 @@ def _send_now(to_addresses: list, subject: str, body_html: str) -> None:
 
     envelope_from = _envelope_from(cfg["sender"])
 
-    # 30 s timeout — long enough for ProtonMail Bridge, short enough to not
-    # block the thread forever if the bridge is down.
     with smtplib.SMTP(cfg["host"], cfg["port"], timeout=30) as smtp:
         smtp.ehlo()
         if cfg["use_tls"]:
             smtp.starttls()
-            smtp.ehlo()                        # re-identify after STARTTLS
+            smtp.ehlo()
         if cfg["user"] and cfg["password"]:
             smtp.login(cfg["user"], cfg["password"])
         smtp.sendmail(envelope_from, to_addresses, msg.as_string())
@@ -91,13 +66,6 @@ def _send_now(to_addresses: list, subject: str, body_html: str) -> None:
 
 
 def _send_async(to_addresses: list, subject: str, body_html: str) -> None:
-    """
-    Fire-and-forget: send in a daemon thread.
-
-    The semaphore ensures only one SMTP connection is open at a time, which
-    is required by ProtonMail Bridge and also prevents duplicate sends if two
-    threads race (e.g. from a browser double-submit).
-    """
     def _worker():
         acquired = _smtp_lock.acquire(timeout=60)
         if not acquired:
@@ -112,9 +80,6 @@ def _send_async(to_addresses: list, subject: str, body_html: str) -> None:
 
     t = threading.Thread(target=_worker, daemon=True, name=f"mail-{to_addresses[0]}")
     t.start()
-
-
-# PUBLIC API
 
 def send_verification_email(user, verify_url: str) -> None:
     try:

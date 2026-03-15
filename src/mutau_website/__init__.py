@@ -1,10 +1,9 @@
-"""Application factory."""
 import logging
 import os
 
 from flask import Flask, render_template, request, abort
 from .extensions import db, bcrypt, login_manager, generate_csrf_token, validate_csrf_token
-from .models import User  # noqa: F401
+from .models import User
 
 
 def _configure_logging(app: Flask) -> None:
@@ -24,16 +23,15 @@ def _configure_logging(app: Flask) -> None:
 
 
 def _seed_admin(logger: logging.Logger) -> None:
-    """Create the first admin account from env vars if no admin exists yet."""
     email    = os.environ.get("ADMIN_EMAIL", "").strip()
     name     = os.environ.get("ADMIN_NAME", "Admin").strip()
     password = os.environ.get("ADMIN_PASSWORD", "").strip()
 
     if not email or not password:
-        return  # env vars not set — skip silently
+        return
 
     if User.query.filter_by(is_admin=True).first():
-        return  # admin already exists — skip
+        return
 
     if User.query.filter_by(email=email).first():
         logger.warning("ADMIN_EMAIL '%s' already registered but is not admin.", email)
@@ -82,7 +80,7 @@ def create_app() -> Flask:
     if os.environ.get("COOKIE_SECURE", "").strip() == "1":
         app.config["SESSION_COOKIE_SECURE"] = True
 
-    # BASE URL — used by url_for(_external=True) in emails.
+    # BASE URL
     from .config import get_base_url
     _base_url = get_base_url()
     if _base_url and _base_url != "http://localhost":
@@ -132,7 +130,7 @@ def create_app() -> Flask:
 
     # DB INIT
     with app.app_context():
-        from .models import (  # noqa: F401
+        from .models import (
             EmailVerificationToken, PasswordResetToken,
             Product, Paper, Offer, ContactMessage,
         )

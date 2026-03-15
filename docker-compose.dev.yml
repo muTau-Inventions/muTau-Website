@@ -31,14 +31,13 @@ services:
       ADMIN_PASSWORD: ${WEB_ADMIN_PASSWORD}
     volumes:
       # Source mounts
-      - ./templates:/app/templates
-      - ./static:/app/static
+      - ./templates:/app/templates:ro
+      - ./static:/app/static:ro
       # Runtime content
-      - ./docs:/app/docs
+      - ./docs:/app/docs:ro
       - ./research:/app/research
       - ./config.yml:/app/config.yml:ro
 
-  # PGWeb
   pgweb:
     image: sosedoff/pgweb:latest
     ports:
