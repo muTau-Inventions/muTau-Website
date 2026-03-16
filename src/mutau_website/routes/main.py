@@ -1,5 +1,7 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for,jsonify
 from flask_login import login_required, current_user
+import requests
+import os
 
 from ..extensions import db
 from ..models import Product, Offer
@@ -10,6 +12,39 @@ main_bp = Blueprint("main", __name__)
 @main_bp.route("/")
 def index():
     return render_template("index.html")
+
+# ai features test
+@main_bp.route("/ai/chat", methods=["POST"])
+def ai_chat_api():
+    try:
+        data = request.get_json()
+        prompt = data.get("message", "").strip()
+        
+        if not prompt:
+            return jsonify({"error": "Keine Nachricht"}), 400
+        
+        # ✅ Linux Docker Gateway IP (100% funktioniert)
+        ollama_url = "http://172.17.0.1:11434/api/chat"  # ← STATT host.docker.internal!
+        
+        payload = {
+            "model": "qwen3.5:0.8b",
+            "messages": [{"role": "user", "content": prompt}],
+            "stream": False
+        }
+        
+        print(f"🟢 Verbinde mit Ollama: {ollama_url}")
+        response = requests.post(ollama_url, json=payload, timeout=30)
+        response.raise_for_status()
+        
+        result = response.json()
+        ai_message = result.get("message", {}).get("content", "Keine Antwort")
+        
+        return jsonify({"response": ai_message})
+        
+    except Exception as e:
+        print(f"❌ AI Error: {str(e)}")
+        return jsonify({"error": f"AI-Service Fehler: {str(e)}"}), 500
+
 
 
 @main_bp.route("/about")

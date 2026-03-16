@@ -25,6 +25,31 @@
 
 <canvas id="particleCanvas"></canvas>
 
+<!-- AI Chat Button - Fixed bottom right -->
+<button class="ai-chat-toggle" id="aiChatToggle" title="AI Chat" aria-label="AI Chat öffnen">
+    AI
+</button>
+
+<!-- AI Chat Overlay -->
+<div class="ai-chat-overlay" id="aiChatOverlay">
+    <div class="ai-chat-container">
+        <div class="ai-chat-header">
+            <h3>muTau AI Assistant</h3>
+            <button class="ai-chat-close" id="aiChatClose" aria-label="Chat schließen">×</button>
+        </div>
+        <div class="ai-chat-messages" id="aiChatMessages">
+            <div class="message ai-message">
+                <div>Hello! I'm the muTau AI Assistant. how can i help you</div>
+            </div>
+        </div>
+        <div class="ai-chat-input">
+            <input type="text" id="aiChatInput" placeholder="Deine Frage an die AI..." maxlength="1000">
+            <button id="aiChatSend">Senden</button>
+        </div>
+        <div class="ai-chat-status" id="aiChatStatus"></div>
+    </div>
+</div>
+
 <nav class="site-nav">
     <div class="nav-inner">
         <a href="{{ url_for('main.index') }}" class="logo">muTau</a>
@@ -111,6 +136,7 @@
 <script src="{{ url_for('static', filename='js/scroll.js') }}"></script>
 <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 <script src="{{ url_for('static', filename='js/nav.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ai-chat.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
